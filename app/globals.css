@@ -1,26 +1,133 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  --color-tertiary: #ffcf96;
+  --color-primary-container: #00d4aa;
+  --color-surface-container-highest: #2e334f;
+  --color-surface: #0b112b;
+  --color-secondary-fixed: #e1e0ff;
+  --color-secondary-container: #3131c0;
+  --color-surface-variant: #2e334f;
+  --color-on-error: #690005;
+  --color-outline: #85948d;
+  --color-on-tertiary-container: #6b4200;
+  --color-secondary: #c0c1ff;
+  --color-surface-container: #181e38;
+  --color-tertiary-fixed: #ffddb8;
+  --color-surface-dim: #0b112b;
+  --color-on-tertiary-fixed: #2a1700;
+  --color-background: #0b112b;
+  --color-tertiary-container: #ffa929;
+  --color-on-primary-container: #005643;
+  --color-outline-variant: #3b4a44;
+  --color-inverse-primary: #006b55;
+  --color-on-tertiary: #472a00;
+  --color-on-secondary-container: #b0b2ff;
+  --color-on-tertiary-fixed-variant: #653e00;
+  --color-on-secondary-fixed-variant: #2f2ebe;
+  --color-surface-container-high: #232843;
+  --color-on-surface: #dde1ff;
+  --color-on-primary: #00382b;
+  --color-surface-tint: #28dfb5;
+  --color-surface-bright: #323853;
+  --color-on-error-container: #ffdad6;
+  --color-primary: #46f1c5;
+  --color-primary-fixed-dim: #28dfb5;
+  --color-on-primary-fixed-variant: #00513f;
+  --color-tertiary-fixed-dim: #ffb95f;
+  --color-inverse-surface: #dde1ff;
+  --color-error: #ffb4ab;
+  --color-error-container: #93000a;
+  --color-on-background: #dde1ff;
+  --color-on-secondary: #1000a9;
+  --color-primary-fixed: #55fcd0;
+  --color-on-surface-variant: #bacac2;
+  --color-on-primary-fixed: #002118;
+  --color-on-secondary-fixed: #07006c;
+  --color-secondary-fixed-dim: #c0c1ff;
+  --color-surface-container-low: #141a34;
+  --color-inverse-on-surface: #292f4a;
+  --color-surface-container-lowest: #060c26;
+
+  --font-headline: "Sora", "Space Grotesk", sans-serif;
+  --font-body: "DM Sans", "Inter", sans-serif;
+  --font-label: "JetBrains Mono", "Manrope", monospace;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+/* Base Styles */
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-background);
+  color: var(--color-on-background);
 }
+
+/* User's custom CSS classes */
+/* Material Icons */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  display: inline-block;
+  line-height: 1;
+  text-transform: none;
+  letter-spacing: normal;
+  word-wrap: normal;
+  white-space: nowrap;
+  direction: ltr;
+  vertical-align: middle;
+}
+
+.glass-panel {
+  background: rgba(46, 51, 79, 0.4);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.vital-glimmer {
+  position: relative;
+}
+.vital-glimmer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: -8px;
+  width: 6px;
+  height: 6px;
+  background-color: var(--color-primary);
+  border-radius: 50%;
+  box-shadow: 0 0 10px var(--color-primary);
+}
+
+.vital-pulse {
+  box-shadow: 0 0 0 0 rgba(70, 241, 197, 0.7);
+  animation: vital-pulse 2s infinite;
+}
+@keyframes vital-pulse {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(70, 241, 197, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(70, 241, 197, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(70, 241, 197, 0); }
+}
+
+.sos-pulse {
+  animation: sos-flash 1.5s infinite;
+}
+@keyframes sos-flash {
+  0%, 100% { background-color: var(--color-error-container); }
+  50% { background-color: var(--color-error); color: var(--color-on-error); }
+}
+
+.custom-scrollbar::-webkit-scrollbar { width: 4px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: var(--color-outline-variant); border-radius: 10px; }
+
+/* Existing Animations from previous version that might be needed */
+@keyframes ecg-scroll {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 20px rgba(239, 68, 68, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+.animate-ecg { animation: ecg-scroll 8s linear infinite; }
+.animate-pulse-ring { animation: pulse-ring 2s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite; }
