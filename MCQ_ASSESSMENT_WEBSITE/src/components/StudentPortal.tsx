@@ -751,7 +751,7 @@ Content-Type: text/html; charset=UTF-8
 
           {/* Profile Card */}
           <div className="sidebar-profile">
-            <img className="sidebar-profile-avatar" src={studentAvatar} alt="Student Avatar" />
+            <img className="sidebar-profile-avatar" src={studentAvatar as string} alt="Student Avatar" />
             <div className="sidebar-profile-info">
               <span className="sidebar-profile-name" title={studentDisplayName}>{studentDisplayName}</span>
               <span className="sidebar-profile-role">Student Portal</span>
@@ -810,7 +810,7 @@ Content-Type: text/html; charset=UTF-8
             </span>
           </div>
           <div className="header-actions">
-            <img className="header-avatar" src={studentAvatar} alt="Student Avatar" />
+            <img className="header-avatar" src={studentAvatar as string} alt="Student Avatar" />
           </div>
         </header>
 
@@ -1207,7 +1207,7 @@ Content-Type: text/html; charset=UTF-8
                                 </td>
                                 <td style={{ fontWeight: isUser ? '700' : '500' }}>
                                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <img src={isUser ? studentAvatar : "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=80"} style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover' }} alt="" />
+                                    <img src={isUser ? (studentAvatar as string) : "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=80"} style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover' }} alt="" />
                                     <span>{displayEmail}</span>
                                   </div>
                                 </td>
