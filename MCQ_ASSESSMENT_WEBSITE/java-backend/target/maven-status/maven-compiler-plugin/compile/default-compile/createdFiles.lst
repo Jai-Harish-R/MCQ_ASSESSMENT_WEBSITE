@@ -1,0 +1,5 @@
+com\assessment\model\QuestionResult.class
+com\assessment\service\EmailService.class
+com\assessment\controller\AssessmentController.class
+com\assessment\McqAssessmentApplication.class
+com\assessment\model\AssessmentPayload.class
