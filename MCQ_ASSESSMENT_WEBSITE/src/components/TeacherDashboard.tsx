@@ -490,7 +490,7 @@ export default function TeacherDashboard({ user, isDemo, onLogout }: TeacherDash
 
           {/* Profile Card */}
           <div className="sidebar-profile">
-            <img className="sidebar-profile-avatar" src={animeAvatar as string} alt="Teacher Avatar" />
+            <img className="sidebar-profile-avatar" src={animeAvatar as any} alt="Teacher Avatar" />
             <div className="sidebar-profile-info">
               <span className="sidebar-profile-name">{teacherDisplayName}</span>
               <span className="sidebar-profile-role">Educator Portal</span>
@@ -566,7 +566,7 @@ export default function TeacherDashboard({ user, isDemo, onLogout }: TeacherDash
             <button onClick={loadData} className="header-icon-btn" title="Sync database data">
               <RefreshCwShim size={16} spinning={loading} />
             </button>
-            <img className="header-avatar" src={animeAvatar as string} alt="Teacher Avatar" />
+            <img className="header-avatar" src={animeAvatar as any} alt="Teacher Avatar" />
           </div>
         </header>
 
