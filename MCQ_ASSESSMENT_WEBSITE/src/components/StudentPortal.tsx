@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '../utils/supabase';
 import { Bell, ChevronDown, Clock3,
   Clock, ArrowLeft, ArrowRight, Flag, CheckCircle2, 
@@ -241,6 +241,8 @@ export default function StudentPortal({ user, isDemo, onLogout }: StudentPortalP
   const [myAttempts, setMyAttempts] = useState<Attempt[]>([]);
   const [availableTests, setAvailableTests] = useState<Test[]>([]);
 
+  const [isLoadingData, setIsLoadingData] = useState(true);
+
   // Interactive Calendar and Popover states
   const [selectedDate, setSelectedDate] = useState<Date>(new Date(2025, 5, 7)); // Default to June 7, 2025
 
@@ -286,8 +288,9 @@ export default function StudentPortal({ user, isDemo, onLogout }: StudentPortalP
     ? 'Harish' 
     : (user.user_metadata?.full_name || user.email.split('@')[0]);
 
-  // Load student statistics & available tests
-  const loadPortalData = async () => {
+  // Load student statistics & available tests (memoized for stable realtime subscription)
+  const loadPortalData = useCallback(async () => {
+    setIsLoadingData(true);
     try {
       if (isDemo) {
         // Load tests & attempts from localStorage
@@ -348,38 +351,45 @@ export default function StudentPortal({ user, isDemo, onLogout }: StudentPortalP
     } catch (err) {
       console.error("Failed to load student dashboard stats:", err);
     } finally {
+      setIsLoadingData(false);
     }
-  };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user.id, user.email, isDemo]);
 
   
-  // Supabase Realtime Subscription for Dashboard
+  // Supabase Realtime Subscription for Dashboard (fixed with stable callback)
   useEffect(() => {
+    // Always do an initial load
+    loadPortalData();
+
     if (isDemo) return;
 
     const channel = supabase
-      .channel('student-dashboard-realtime')
+      .channel(`student-realtime-${user.id}`)
       .on(
         'postgres_changes',
-        { event: '*', schema: 'public', table: 'test_attempts', filter: `student_email=eq.${user.email}` },
-        () => {
-          console.log("Realtime update: test_attempts changed");
+        { event: '*', schema: 'public', table: 'test_attempts' },
+        (payload) => {
+          console.log("Realtime: test_attempts changed", payload);
           loadPortalData();
         }
       )
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'tests' },
-        () => {
-          console.log("Realtime update: tests changed");
+        (payload) => {
+          console.log("Realtime: tests changed", payload);
           loadPortalData();
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log("Realtime subscription status:", status);
+      });
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [isDemo, user.email]);
+  }, [loadPortalData, isDemo, user.id]);
   
   // Trigger seeding of demo data
   useEffect(() => {
@@ -419,11 +429,12 @@ export default function StudentPortal({ user, isDemo, onLogout }: StudentPortalP
     setViewState('result');
   };
 
+  // Reload portal data on tab navigation to lobby/attempts (not dashboard - already handled by realtime)
   useEffect(() => {
-    if (activeTab === 'dashboard' || activeTab === 'lobby' || activeTab === 'review_attempts') {
+    if (activeTab === 'lobby' || activeTab === 'review_attempts') {
       loadPortalData();
     }
-  }, [activeTab, user.id, isDemo]);
+  }, [activeTab, loadPortalData]);
 
   // Start timer during exam
   useEffect(() => {
@@ -1161,13 +1172,22 @@ Content-Type: text/html; charset=UTF-8
             <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
               
               {/* Welcome Section */}
-              <div>
-                <h1 style={{ fontSize: '32px', fontWeight: '800', color: '#0f172a', letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  Welcome back, {studentDisplayName || 'jhgno.official'}! 👋
-                </h1>
-                <p style={{ color: '#64748b', fontSize: '15px', marginTop: '6px', fontWeight: '500' }}>
-                  Track your progress, learn consistently, and achieve your goals.
-                </p>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div>
+                  <h1 style={{ fontSize: '32px', fontWeight: '800', color: '#0f172a', letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    Welcome back, {studentDisplayName || 'jhgno.official'}! 👋
+                  </h1>
+                  <p style={{ color: '#64748b', fontSize: '15px', marginTop: '6px', fontWeight: '500' }}>
+                    Track your progress, learn consistently, and achieve your goals.
+                  </p>
+                </div>
+                {/* Live data indicator */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px', borderRadius: '20px', backgroundColor: isLoadingData ? '#f1f5f9' : '#dcfce7', border: `1px solid ${isLoadingData ? '#e2e8f0' : '#86efac'}`, transition: 'all 0.3s' }}>
+                  <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: isLoadingData ? '#94a3b8' : '#16a34a', animation: isLoadingData ? 'none' : 'pulse 2s infinite' }} />
+                  <span style={{ fontSize: '12px', fontWeight: '700', color: isLoadingData ? '#64748b' : '#16a34a' }}>
+                    {isLoadingData ? 'Syncing...' : 'Live Data'}
+                  </span>
+                </div>
               </div>
 
               {/* 4 Stat Cards Row */}
@@ -1178,7 +1198,7 @@ Content-Type: text/html; charset=UTF-8
                   </div>
                   <div>
                     <div style={{ fontSize: '13px', fontWeight: '600', color: '#64748b', marginBottom: '4px' }}>Tests Taken</div>
-                    <div style={{ fontSize: '28px', fontWeight: '800', color: '#0f172a', lineHeight: '1.2' }}>{myAttempts.length || 24}</div>
+                    <div style={{ fontSize: '28px', fontWeight: '800', color: '#0f172a', lineHeight: '1.2' }}>{myAttempts.length}</div>
                     <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}><span style={{ color: '#ea580c', fontWeight: '600' }}>+{Math.min(myAttempts.length, 5)}</span> this month</div>
                   </div>
                 </div>
@@ -1200,7 +1220,7 @@ Content-Type: text/html; charset=UTF-8
                   </div>
                   <div>
                     <div style={{ fontSize: '13px', fontWeight: '600', color: '#64748b', marginBottom: '4px' }}>Tests Completed</div>
-                    <div style={{ fontSize: '28px', fontWeight: '800', color: '#0f172a', lineHeight: '1.2' }}>{myAttempts.length > 0 ? myAttempts.length : 18}</div>
+                    <div style={{ fontSize: '28px', fontWeight: '800', color: '#0f172a', lineHeight: '1.2' }}>{myAttempts.length}</div>
                     <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}><span style={{ color: '#a855f7', fontWeight: '600' }}>+4</span> this month</div>
                   </div>
                 </div>
