@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS public.tests (
   title TEXT NOT NULL,
   access_code TEXT NOT NULL,
   questions JSONB NOT NULL, -- Array of questions: [{id: string, text: string, options: string[]}]
+  type TEXT DEFAULT 'quiz' CHECK (type IN ('test', 'assignment', 'quiz', 'live_exam')) NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
@@ -32,11 +33,12 @@ CREATE TABLE IF NOT EXISTS public.test_answers (
 CREATE TABLE IF NOT EXISTS public.test_attempts (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   test_id UUID REFERENCES public.tests(id) ON DELETE CASCADE NOT NULL,
-  student_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  student_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
   student_email TEXT NOT NULL,
   answers JSONB NOT NULL, -- Object mapping question ID to student's answer index: {"q1": 0, "q2": 1}
   score INT NOT NULL,
   total_questions INT NOT NULL,
+  time_taken_seconds INT,
   completed_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
   allowed_retry BOOLEAN DEFAULT FALSE NOT NULL
 );

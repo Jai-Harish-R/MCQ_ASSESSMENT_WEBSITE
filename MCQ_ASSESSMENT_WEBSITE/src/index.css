@@ -1,12 +1,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 
 :root {
-  /* EduVerify Pro Color Scheme */
-  --color-background: #f4f6fa;
-  --color-on-background: #171c25;
+  /* CodersFun Orange Color Scheme */
+  --color-background: #f8fafc;
+  --color-on-background: #0f172a;
   
   --color-surface: #ffffff;
-  --color-on-surface: #1e293b;
+  --color-on-surface: #0f172a;
   --color-on-surface-variant: #64748b;
   
   --color-surface-container-low: #f8fafc;
@@ -15,12 +15,12 @@
   --color-outline: #94a3b8;
   --color-outline-variant: #e2e8f0;
   
-  --color-primary: #003875; /* EduVerify Deep Blue */
+  --color-primary: #ea580c; /* CodersFun Brand Orange */
   --color-on-primary: #ffffff;
-  --color-primary-container: #e0f2fe;
-  --color-on-primary-container: #0369a1;
+  --color-primary-container: #ffedd5;
+  --color-on-primary-container: #c2410c;
   
-  --color-secondary: #0284c7; /* Sky Blue */
+  --color-secondary: #f97316; /* Secondary Orange */
   --color-on-secondary: #ffffff;
   
   --color-error: #ef4444;
@@ -41,11 +41,12 @@
   --font-body: 'Atkinson Hyperlegible', sans-serif;
 
   /* Geometry & Border Radii */
-  --radius-sm: 4px;
-  --radius-default: 6px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-xl: 16px;
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-default: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
   --radius-full: 9999px;
 
   /* Spacing */
@@ -154,8 +155,11 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .sidebar-item-btn.active {
-  background-color: #1c4e80; /* Blue active tab background from image */
-  color: #ffffff;
+  background-color: #fff7ed;
+  color: #ea580c;
+  border-left: 4px solid #ea580c;
+  border-radius: 0 var(--radius-default) var(--radius-default) 0;
+  font-weight: 600;
 }
 
 .sidebar-profile {
@@ -307,22 +311,22 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .btn-primary {
-  background-color: #003875;
+  background-color: #ea580c;
   color: #ffffff;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background-color: #002550;
+  background-color: #c2410c;
 }
 
 .btn-secondary {
   background-color: transparent;
-  border: 1px solid #003875;
-  color: #003875;
+  border: 1px solid #ea580c;
+  color: #ea580c;
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background-color: #f1f5f9;
+  background-color: #fff7ed;
 }
 
 .btn-success {
@@ -657,4 +661,333 @@ h1, h2, h3, h4, h5, h6 {
   border-radius: var(--radius-full);
   object-fit: cover;
   border: 1px solid var(--color-outline-variant);
+}
+
+/* ==========================================
+   CodersFun Redesigned Split Login Layout
+   ========================================== */
+.login-split-container {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  min-height: 100vh;
+  background-color: #f8fafc;
+}
+
+@media (max-width: 1024px) {
+  .login-split-container {
+    grid-template-columns: 1fr;
+  }
+  .login-left-panel {
+    display: none !important;
+  }
+}
+
+.login-left-panel {
+  background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 48px;
+  border-right: 1px solid #fed7aa;
+}
+
+.login-left-content {
+  margin: auto 0;
+  max-width: 520px;
+}
+
+.login-benefit-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  background: #ffffff;
+  border: 1px solid #fed7aa;
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.login-benefit-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #ffedd5;
+  color: #ea580c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-right-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+}
+
+/* Navbar styles */
+.login-navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 48px;
+  background: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+}
+
+.nav-links {
+  display: flex;
+  gap: 24px;
+  list-style: none;
+}
+
+.nav-link-item {
+  color: #475569;
+  text-decoration: none;
+  font-family: var(--font-headlines);
+  font-size: 14px;
+  font-weight: 500;
+  transition: color 0.15s ease;
+}
+
+.nav-link-item:hover {
+  color: #ea580c;
+}
+
+/* ==========================================
+   Dashboard Widgets & Layouts
+   ========================================== */
+.stats-overview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 24px;
+}
+
+.stats-card {
+  background: #ffffff;
+  border: 1px solid var(--color-outline-variant);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.stats-card-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stats-card-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.stats-card-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1;
+  margin-top: 4px;
+}
+
+.stats-card-change {
+  font-size: 11px;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+/* Interactive Calendar Component */
+.calendar-card {
+  background: #ffffff;
+  border: 1px solid var(--color-outline-variant);
+  border-radius: var(--radius-md);
+  padding: 24px;
+}
+
+.calendar-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.calendar-days-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  text-align: center;
+}
+
+.calendar-weekday {
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  padding-bottom: 8px;
+}
+
+.calendar-day-cell {
+  aspect-ratio: 1.2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  cursor: pointer;
+  background-color: transparent;
+  transition: all 0.15s ease;
+}
+
+.calendar-day-cell:hover {
+  background-color: #f1f5f9;
+}
+
+.calendar-day-cell.selected {
+  background-color: #ffedd5;
+  border-color: #fed7aa;
+}
+
+.calendar-day-cell.today {
+  border-color: #ea580c;
+  font-weight: bold;
+}
+
+.calendar-day-cell.other-month {
+  color: #cbd5e1;
+}
+
+.calendar-day-num {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.calendar-dots-container {
+  display: flex;
+  justify-content: center;
+  gap: 3px;
+  height: 6px;
+  margin-top: 2px;
+}
+
+.calendar-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+}
+
+.calendar-dot-test { background-color: #3b82f6; }
+.calendar-dot-assignment { background-color: #f97316; }
+.calendar-dot-quiz { background-color: #a855f7; }
+.calendar-dot-result { background-color: #22c55e; }
+.calendar-dot-live { background-color: #ef4444; }
+
+/* Donut & Charts layout */
+.charts-split-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 24px;
+}
+
+@media (max-width: 768px) {
+  .charts-split-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Quick Actions Cards */
+.quick-action-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.quick-action-item {
+  background: #ffffff;
+  border: 1px solid var(--color-outline-variant);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 120px;
+  text-decoration: none;
+}
+
+.quick-action-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+  border-color: #fed7aa;
+}
+
+.quick-action-item-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.quick-action-item-desc {
+  font-size: 11px;
+  color: #64748b;
+  margin-top: 4px;
+}
+
+/* Upcoming Tests */
+.upcoming-test-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.upcoming-test-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border: 1px solid var(--color-outline-variant);
+  border-radius: var(--radius-default);
+  background: #ffffff;
+}
+
+.upcoming-test-info {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Leaderboard split design */
+.leaderboard-split-layout {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 32px;
+}
+
+@media (max-width: 1024px) {
+  .leaderboard-split-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Popover for Calendar day selection */
+.calendar-popover {
+  position: absolute;
+  background: #ffffff;
+  border: 1px solid #fed7aa;
+  border-radius: var(--radius-md);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  padding: 16px;
+  z-index: 100;
+  width: 280px;
 }

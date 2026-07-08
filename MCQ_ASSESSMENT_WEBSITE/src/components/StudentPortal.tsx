@@ -3,7 +3,7 @@ import { supabase } from '../utils/supabase';
 import { 
   Clock, ArrowLeft, ArrowRight, Flag, CheckCircle2, 
   AlertTriangle, LogOut, GraduationCap,
-  LayoutDashboard, BookOpen, ClipboardList, Award, Flame
+  LayoutDashboard, BookOpen, Award
 } from 'lucide-react';
 import studentAvatar from '../assets/student_avatar.png';
 
@@ -20,6 +20,7 @@ interface Test {
   access_code: string;
   teacher_email: string;
   questions: Question[];
+  type?: 'test' | 'assignment' | 'quiz' | 'live_exam';
 }
 
 interface Attempt {
@@ -31,6 +32,9 @@ interface Attempt {
   completed_at: string;
   allowed_retry: boolean;
   test_title?: string;
+  time_taken_seconds?: number;
+  student_name?: string;
+  answers?: Record<string, number>;
 }
 
 interface StudentPortalProps {
@@ -39,16 +43,201 @@ interface StudentPortalProps {
   onLogout: () => void;
 }
 
+// Demo Data Seeder to match the screenshots exactly
+const seedDemoData = () => {
+  const existingTests = localStorage.getItem('demo_tests');
+  if (!existingTests) {
+    const demoTests: Test[] = [
+      {
+        id: 'test-physics-101',
+        title: 'Physics Quiz',
+        access_code: '123456',
+        teacher_email: 'teacher.demo@codersfun.com',
+        type: 'quiz',
+        questions: [
+          { id: 'p1', text: 'What is the speed of light?', options: ['3e8 m/s', '1e8 m/s', '3e6 m/s', '3e10 m/s'] },
+          { id: 'p2', text: 'Which particle has a positive charge?', options: ['Electron', 'Neutron', 'Proton', 'Positron'] },
+          { id: 'p3', text: 'What is the unit of electric current?', options: ['Volt', 'Ampere', 'Ohm', 'Watt'] }
+        ]
+      },
+      {
+        id: 'test-chem-202',
+        title: 'Chemistry Test',
+        access_code: '88200',
+        teacher_email: 'teacher.demo@codersfun.com',
+        type: 'test',
+        questions: [
+          { id: 'c1', text: 'What is the atomic number of Hydrogen?', options: ['1', '2', '3', '4'] },
+          { id: 'c2', text: 'Which gas is commonly known as laughing gas?', options: ['Nitric oxide', 'Nitrous oxide', 'Nitrogen dioxide', 'Nitrogen pentoxide'] }
+        ]
+      },
+      {
+        id: 'test-math-303',
+        title: 'Math Assignment',
+        access_code: '654321',
+        teacher_email: 'teacher.demo@codersfun.com',
+        type: 'assignment',
+        questions: [
+          { id: 'm1', text: 'What is the derivative of sin(x)?', options: ['cos(x)', '-cos(x)', 'sin(x)', '-sin(x)'] }
+        ]
+      },
+      {
+        id: 'test-ai-404',
+        title: 'AI Concepts Live Exam',
+        access_code: '999999',
+        teacher_email: 'teacher.demo@codersfun.com',
+        type: 'live_exam',
+        questions: [
+          { id: 'a1', text: 'What does AI stand for?', options: ['Artificial Intelligence', 'Automated Integration', 'Active Information', 'Actual Input'] }
+        ]
+      }
+    ];
+    localStorage.setItem('demo_tests', JSON.stringify(demoTests));
+
+    const demoAnswers = {
+      'test-physics-101': { 'p1': 0, 'p2': 2, 'p3': 1 },
+      'test-chem-202': { 'c1': 0, 'c2': 1 },
+      'test-math-303': { 'm1': 0 },
+      'test-ai-404': { 'a1': 0 }
+    };
+    localStorage.setItem('demo_answers', JSON.stringify(demoAnswers));
+
+    const demoAttempts = [
+      // Current student attempts
+      {
+        id: 'att-harish-phys',
+        test_id: 'test-physics-101',
+        student_email: 'HARISH@SEC.EDU',
+        score: 2,
+        total_questions: 3,
+        completed_at: '2026-06-07T09:30:00Z',
+        allowed_retry: false,
+        time_taken_seconds: 1292, // 21m 32s
+        answers: { 'p1': 0, 'p2': 1, 'p3': 1 }
+      },
+      {
+        id: 'att-harish-chem',
+        test_id: 'test-chem-202',
+        student_email: 'HARISH@SEC.EDU',
+        score: 2,
+        total_questions: 2,
+        completed_at: '2026-06-07T14:58:30Z',
+        allowed_retry: false,
+        time_taken_seconds: 3510, // 58m 30s
+        answers: { 'c1': 0, 'c2': 1 }
+      },
+      {
+        id: 'att-harish-math',
+        test_id: 'test-math-303',
+        student_email: 'HARISH@SEC.EDU',
+        score: 1,
+        total_questions: 1,
+        completed_at: '2026-06-06T11:45:00Z',
+        allowed_retry: false,
+        time_taken_seconds: 1200, // 20m
+        answers: { 'm1': 0 }
+      },
+      // Other student attempts (for leaderboard)
+      {
+        id: 'att-aryan-phys',
+        test_id: 'test-physics-101',
+        student_email: 'aryan.sharma@demo.com',
+        score: 3,
+        total_questions: 3,
+        completed_at: '2026-06-07T09:18:24Z',
+        allowed_retry: false,
+        time_taken_seconds: 1104, // 18m 24s
+        student_name: 'Aryan Sharma',
+        answers: { 'p1': 0, 'p2': 2, 'p3': 1 }
+      },
+      {
+        id: 'att-diya-phys',
+        test_id: 'test-physics-101',
+        student_email: 'diya.patel@demo.com',
+        score: 3,
+        total_questions: 3,
+        completed_at: '2026-06-07T09:20:11Z',
+        allowed_retry: false,
+        time_taken_seconds: 1211, // 20m 11s
+        student_name: 'Diya Patel',
+        answers: { 'p1': 0, 'p2': 2, 'p3': 1 }
+      },
+      {
+        id: 'att-rohan-phys',
+        test_id: 'test-physics-101',
+        student_email: 'rohan.verma@demo.com',
+        score: 3,
+        total_questions: 3,
+        completed_at: '2026-06-07T09:15:45Z',
+        allowed_retry: false,
+        time_taken_seconds: 945, // 15m 45s
+        student_name: 'Rohan Verma',
+        answers: { 'p1': 0, 'p2': 2, 'p3': 1 }
+      },
+      {
+        id: 'att-ananya-phys',
+        test_id: 'test-physics-101',
+        student_email: 'ananya.singh@demo.com',
+        score: 2,
+        total_questions: 3,
+        completed_at: '2026-06-07T09:22:03Z',
+        allowed_retry: false,
+        time_taken_seconds: 1323, // 22m 03s
+        student_name: 'Ananya Singh',
+        answers: { 'p1': 0, 'p2': 1, 'p3': 1 }
+      },
+      {
+        id: 'att-ishaan-phys',
+        test_id: 'test-physics-101',
+        student_email: 'ishaan.mehta@demo.com',
+        score: 2,
+        total_questions: 3,
+        completed_at: '2026-06-07T09:19:17Z',
+        allowed_retry: false,
+        time_taken_seconds: 1157, // 19m 17s
+        student_name: 'Ishaan Mehta',
+        answers: { 'p1': 0, 'p2': 1, 'p3': 1 }
+      },
+      {
+        id: 'att-kartik-phys',
+        test_id: 'test-physics-101',
+        student_email: 'kartik.malhotra@demo.com',
+        score: 1,
+        total_questions: 3,
+        completed_at: '2026-06-07T09:23:10Z',
+        allowed_retry: false,
+        time_taken_seconds: 1390, // 23m 10s
+        student_name: 'Kartik Malhotra',
+        answers: { 'p1': 0, 'p2': 1, 'p3': 2 }
+      },
+      {
+        id: 'att-meera-phys',
+        test_id: 'test-physics-101',
+        student_email: 'meera.nair@demo.com',
+        score: 1,
+        total_questions: 3,
+        completed_at: '2026-06-07T09:24:05Z',
+        allowed_retry: false,
+        time_taken_seconds: 1445, // 24m 05s
+        student_name: 'Meera Nair',
+        answers: { 'p1': 0, 'p2': 1, 'p3': 2 }
+      }
+    ];
+    localStorage.setItem('demo_attempts', JSON.stringify(demoAttempts));
+  }
+};
+
 export default function StudentPortal({ user, isDemo, onLogout }: StudentPortalProps) {
-  // Navigation tabs: 'dashboard' | 'lobby' | 'leaderboard' | 'exam' | 'result'
-  // When 'exam' is active, we hide the sidebar for focus.
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'lobby' | 'leaderboard'>('dashboard');
+  // Navigation tabs: 'dashboard' | 'lobby' | 'review_attempts' | 'leaderboard'
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'lobby' | 'review_attempts' | 'leaderboard'>('dashboard');
   const [viewState, setViewState] = useState<'lobby' | 'exam' | 'result'>('lobby');
 
   // Attempts and tests states (for dashboard and leaderboard verification)
   const [myAttempts, setMyAttempts] = useState<Attempt[]>([]);
   const [availableTests, setAvailableTests] = useState<Test[]>([]);
 
+  // Interactive Calendar and Popover states
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date(2025, 5, 7)); // Default to June 7, 2025
 
   // Lobby Inputs
   const [teacherEmail, setTeacherEmail] = useState('');
@@ -57,8 +246,8 @@ export default function StudentPortal({ user, isDemo, onLogout }: StudentPortalP
   const [loading, setLoading] = useState(false);
 
   // Leaderboard Access Inputs & Verified Rank State
-  const [leaderboardTeacherEmail, setLeaderboardTeacherEmail] = useState('');
-  const [leaderboardAccessCode, setLeaderboardAccessCode] = useState('');
+  const [leaderboardTeacherEmail, setLeaderboardTeacherEmail] = useState('teacher.demo@codersfun.com');
+  const [leaderboardAccessCode, setLeaderboardAccessCode] = useState('123456');
   const [leaderboardError, setLeaderboardError] = useState('');
   const [verifiedLeaderboard, setVerifiedLeaderboard] = useState<{
     test: Test;
@@ -157,8 +346,46 @@ export default function StudentPortal({ user, isDemo, onLogout }: StudentPortalP
     }
   };
 
+  // Trigger seeding of demo data
   useEffect(() => {
-    if (activeTab === 'dashboard' || activeTab === 'lobby') {
+    if (isDemo) {
+      seedDemoData();
+    }
+  }, [isDemo]);
+
+  const handleReviewPastAttempt = (attempt: Attempt) => {
+    let test: Test | null = null;
+    if (isDemo) {
+      const localTests = JSON.parse(localStorage.getItem('demo_tests') || '[]');
+      test = localTests.find((t: any) => t.id === attempt.test_id) || null;
+    } else {
+      test = availableTests.find(t => t.id === attempt.test_id) || null;
+    }
+
+    if (!test) {
+      alert("Test data not found.");
+      return;
+    }
+
+    // Set exam state to display results review
+    setActiveTest(test);
+    setAnswers(attempt.answers as any || {});
+    setScore(attempt.score);
+    setTotalQuestions(attempt.total_questions);
+    
+    // Set correct answers key
+    if (isDemo) {
+      const localAnswers = JSON.parse(localStorage.getItem('demo_answers') || '{}');
+      setCorrectAnswers(localAnswers[test.id] || {});
+    } else {
+      setCorrectAnswers({});
+    }
+    
+    setViewState('result');
+  };
+
+  useEffect(() => {
+    if (activeTab === 'dashboard' || activeTab === 'lobby' || activeTab === 'review_attempts') {
       loadPortalData();
     }
   }, [activeTab, user.id, isDemo]);
@@ -744,9 +971,24 @@ Content-Type: text/html; charset=UTF-8
       <aside className="edu-sidebar">
         <div>
           {/* Logo Frame */}
-          <div className="sidebar-logo">
-            <GraduationCap size={28} />
-            <span>EduVerify Pro</span>
+          <div className="sidebar-logo" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '24px', paddingLeft: '12px' }}>
+            <div style={{
+              width: '28px',
+              height: '28px',
+              borderRadius: '6px',
+              backgroundColor: '#ea580c',
+              color: '#ffffff',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontWeight: '800',
+              fontSize: '15px'
+            }}>
+              C
+            </div>
+            <span style={{ fontSize: '18px', fontWeight: '700', color: '#0f172a' }}>
+              Coders<span style={{ color: '#ea580c' }}>Fun</span>
+            </span>
           </div>
 
           {/* Profile Card */}
@@ -780,10 +1022,19 @@ Content-Type: text/html; charset=UTF-8
             </li>
             <li>
               <button
+                onClick={() => { setActiveTab('review_attempts'); setVerifiedLeaderboard(null); }}
+                className={`sidebar-item-btn ${activeTab === 'review_attempts' ? 'active' : ''}`}
+              >
+                <Clock size={18} />
+                Review Attempts
+              </button>
+            </li>
+            <li>
+              <button
                 onClick={() => { setActiveTab('leaderboard'); setVerifiedLeaderboard(null); }}
                 className={`sidebar-item-btn ${activeTab === 'leaderboard' ? 'active' : ''}`}
               >
-                <ClipboardList size={18} />
+                <Award size={18} />
                 Leaderboard
               </button>
             </li>
@@ -806,7 +1057,7 @@ Content-Type: text/html; charset=UTF-8
         <header className="edu-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span style={{ fontSize: '13px', fontWeight: '500', color: 'var(--color-on-surface-variant)' }}>
-              EduVerify Pro Testing Center
+              CodersFun Secure Testing Center
             </span>
           </div>
           <div className="header-actions">
@@ -823,167 +1074,342 @@ Content-Type: text/html; charset=UTF-8
               
               {/* Welcome Header */}
               <div>
-                <h1 style={{ fontSize: '28px', fontWeight: '700' }}>Welcome back, {studentDisplayName}.</h1>
+                <h1 style={{ fontSize: '28px', fontWeight: '700' }}>Welcome back, {studentDisplayName}! 👋</h1>
                 <p style={{ color: 'var(--color-on-surface-variant)', fontSize: '14px', marginTop: '4px' }}>
-                  {totalCompleted > 0 
-                    ? `You have completed ${totalCompleted} assessments this semester. Keep up the momentum!` 
-                    : 'Get started by joining your first active class assessment!'}
+                  Ready to test your skills? Join a test using the details below.
                 </p>
               </div>
 
-              {/* Statistics & Overview Section */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 280px', gap: '32px' }}>
-                
-                {/* Performance overview Card */}
-                <div className="card performance-chart-card">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div>
-                      <h4 style={{ fontSize: '15px', fontWeight: '700' }}>Performance Overview</h4>
-                      <p style={{ fontSize: '12px', color: 'var(--color-on-surface-variant)' }}>Track score history percentage</p>
-                    </div>
-                    {totalCompleted > 0 && (
-                      <span className="chip chip-success" style={{ padding: '4px 10px', fontSize: '11px' }}>
-                        PERCENTILE: 94th
-                      </span>
-                    )}
+              {/* Stats Overview Grid */}
+              <div className="stats-overview-grid">
+                <div className="stats-card">
+                  <div className="stats-card-icon" style={{ backgroundColor: '#fff7ed', color: '#ea580c' }}>
+                    📝
                   </div>
-
-                  {/* Render Visual Bar Chart */}
-                  <div className="chart-bar-container">
-                    {totalCompleted === 0 ? (
-                      // Mock placeholder bars if no tests taken yet
-                      <>
-                        <div className="chart-bar-item">
-                          <div className="chart-bar-fill" style={{ height: '75%' }}><div className="chart-bar-tooltip">75%</div></div>
-                          <span className="chart-bar-label">Demo Exam 1</span>
-                        </div>
-                        <div className="chart-bar-item">
-                          <div className="chart-bar-fill" style={{ height: '82%' }}><div className="chart-bar-tooltip">82%</div></div>
-                          <span className="chart-bar-label">Demo Exam 2</span>
-                        </div>
-                        <div className="chart-bar-item">
-                          <div className="chart-bar-fill active" style={{ height: '94%' }}><div className="chart-bar-tooltip">94%</div></div>
-                          <span className="chart-bar-label">Target Level</span>
-                        </div>
-                      </>
-                    ) : (
-                      // Render actual attempts
-                      myAttempts.slice(-5).map((att, idx) => {
-                        const pct = Math.round((att.score / att.total_questions) * 100);
-                        return (
-                          <div key={att.id} className="chart-bar-item">
-                            <div className="chart-bar-fill active" style={{ height: `${pct}%` }}>
-                              <div className="chart-bar-tooltip">{pct}%</div>
-                            </div>
-                            <span className="chart-bar-label" title={att.test_title}>
-                              {att.test_title || `Exam #${idx + 1}`}
-                            </span>
-                          </div>
-                        );
-                      })
-                    )}
+                  <div className="stats-card-info">
+                    <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '600', textTransform: 'uppercase' }}>Tests Taken</span>
+                    <span className="stats-card-value">{myAttempts.length > 0 ? myAttempts.length : 24}</span>
+                    <span className="stats-card-change" style={{ color: 'var(--color-success)' }}>+5 this month</span>
                   </div>
                 </div>
 
-                {/* Right side stats widgets */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                <div className="stats-card">
+                  <div className="stats-card-icon" style={{ backgroundColor: '#dcfce7', color: 'var(--color-success)' }}>
+                    🎯
+                  </div>
+                  <div className="stats-card-info">
+                    <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '600', textTransform: 'uppercase' }}>Average Score</span>
+                    <span className="stats-card-value">{averageAccuracy > 0 ? `${averageAccuracy}%` : '78.6%'}</span>
+                    <span className="stats-card-change" style={{ color: 'var(--color-success)' }}>+12% from last month</span>
+                  </div>
+                </div>
+
+                <div className="stats-card">
+                  <div className="stats-card-icon" style={{ backgroundColor: '#e0f2fe', color: '#0284c7' }}>
+                    ✅
+                  </div>
+                  <div className="stats-card-info">
+                    <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '600', textTransform: 'uppercase' }}>Tests Completed</span>
+                    <span className="stats-card-value">{myAttempts.length > 0 ? myAttempts.length : 18}</span>
+                    <span className="stats-card-change" style={{ color: 'var(--color-success)' }}>+4 this month</span>
+                  </div>
+                </div>
+
+                <div className="stats-card">
+                  <div className="stats-card-icon" style={{ backgroundColor: '#f3e8ff', color: '#a855f7' }}>
+                    📈
+                  </div>
+                  <div className="stats-card-info">
+                    <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '600', textTransform: 'uppercase' }}>Average Performance</span>
+                    <span className="stats-card-value">Top 16%</span>
+                    <span className="stats-card-change" style={{ color: 'var(--color-success)' }}>Better than 84% of students</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Calendar & Upcoming Grid */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '32px' }}>
+                
+                {/* Left: June 2025 Calendar Card */}
+                <div className="calendar-card">
+                  <div className="calendar-header-row">
+                    <h3 style={{ fontSize: '16px', fontWeight: '700' }}>June 2025</h3>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button className="btn btn-secondary" style={{ padding: '4px 10px', fontSize: '12px' }}>Today</button>
+                      <button className="btn btn-secondary" style={{ padding: '4px 8px', fontSize: '12px' }}>&lt;</button>
+                      <button className="btn btn-secondary" style={{ padding: '4px 8px', fontSize: '12px' }}>&gt;</button>
+                    </div>
+                  </div>
+
+                  <div className="calendar-days-grid">
+                    <div className="calendar-weekday">Sun</div>
+                    <div className="calendar-weekday">Mon</div>
+                    <div className="calendar-weekday">Tue</div>
+                    <div className="calendar-weekday">Wed</div>
+                    <div className="calendar-weekday">Thu</div>
+                    <div className="calendar-weekday">Fri</div>
+                    <div className="calendar-weekday">Sat</div>
+
+                    {/* June 2025 Day Cells: Starts on Sunday June 1st */}
+                    {Array.from({ length: 30 }, (_, i) => {
+                      const dayNum = i + 1;
+                      const isSelected = selectedDate.getDate() === dayNum && selectedDate.getMonth() === 5;
+                      const isToday = dayNum === 7; // Mock today as June 7
+
+                      return (
+                        <div
+                          key={dayNum}
+                          onClick={() => {
+                            setSelectedDate(new Date(2025, 5, dayNum));
+                            setActiveTab('review_attempts');
+                          }}
+                          className={`calendar-day-cell ${isSelected ? 'selected' : ''} ${isToday ? 'today' : ''}`}
+                        >
+                          <span className="calendar-day-num">{dayNum}</span>
+                          <div className="calendar-dots-container">
+                            {dayNum === 7 && (
+                              <>
+                                <span className="calendar-dot calendar-dot-quiz" title="Physics Quiz"></span>
+                                <span className="calendar-dot calendar-dot-assignment" title="Math Assignment"></span>
+                                <span className="calendar-dot calendar-dot-result" title="Chemistry Test"></span>
+                              </>
+                            )}
+                            {dayNum === 6 && (
+                              <span className="calendar-dot calendar-dot-assignment" title="Math Assignment"></span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Calendar type guide footer */}
+                  <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', marginTop: '16px', fontSize: '11px', color: '#64748b' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <span className="calendar-dot calendar-dot-test"></span> Test
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <span className="calendar-dot calendar-dot-assignment"></span> Assignment
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <span className="calendar-dot calendar-dot-quiz"></span> Quiz
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <span className="calendar-dot calendar-dot-result"></span> Result
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <span className="calendar-dot calendar-dot-live"></span> Live Exam
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right: Upcoming & Activity Panels */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
                   
-                  {/* Focus Time Card */}
-                  <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '16px', backgroundColor: '#1c4e80', color: 'white' }}>
-                    <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: 'rgba(255, 255, 255, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <Clock size={20} />
+                  {/* Upcoming card */}
+                  <div className="card">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                      <h3 style={{ fontSize: '15px', fontWeight: '700' }}>Upcoming Tests</h3>
+                      <button onClick={() => setActiveTab('lobby')} style={{ border: 'none', background: 'none', color: '#ea580c', fontSize: '12px', cursor: 'pointer', fontWeight: '600' }}>View All</button>
                     </div>
-                    <div>
-                      <span style={{ fontSize: '10px', textTransform: 'uppercase', opacity: 0.8, fontWeight: '600' }}>Focus Time</span>
-                      <h4 style={{ fontSize: '20px', fontWeight: '700', color: '#ffffff' }}>124h <span style={{ fontSize: '12px', fontWeight: 'normal', opacity: 0.8 }}>this semester</span></h4>
+
+                    <div className="upcoming-test-feed">
+                      <div className="upcoming-test-row">
+                        <div className="upcoming-test-info">
+                          <span style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a' }}>Physics Quiz</span>
+                          <span style={{ fontSize: '11px', color: '#64748b', marginTop: '2px' }}>09:00 AM - 10:00 AM</span>
+                        </div>
+                        <span className="chip chip-neutral" style={{ fontSize: '9px', padding: '2px 8px' }}>Quiz</span>
+                      </div>
+
+                      <div className="upcoming-test-row">
+                        <div className="upcoming-test-info">
+                          <span style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a' }}>Math Assignment</span>
+                          <span style={{ fontSize: '11px', color: '#64748b', marginTop: '2px' }}>11:00 AM - 12:30 PM</span>
+                        </div>
+                        <span className="chip chip-neutral" style={{ fontSize: '9px', padding: '2px 8px', backgroundColor: '#ffe4e6', color: '#be123c' }}>Assignment</span>
+                      </div>
+
+                      <div className="upcoming-test-row">
+                        <div className="upcoming-test-info">
+                          <span style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a' }}>Chemistry Test</span>
+                          <span style={{ fontSize: '11px', color: '#64748b', marginTop: '2px' }}>02:00 PM - 03:00 PM</span>
+                        </div>
+                        <span className="chip chip-neutral" style={{ fontSize: '9px', padding: '2px 8px', backgroundColor: '#e0f2fe', color: '#0369a1' }}>Test</span>
+                      </div>
+                    </div>
+
+                    <button className="btn btn-secondary" style={{ width: '100%', marginTop: '16px', padding: '8px', fontSize: '12px', borderRadius: 'var(--radius-sm)' }}>
+                      📅 Add to Calendar
+                    </button>
+                  </div>
+
+                  {/* Recent Activity card */}
+                  <div className="card">
+                    <h3 style={{ fontSize: '15px', fontWeight: '700', marginBottom: '16px' }}>Recent Activity</h3>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '12px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <span style={{ color: '#475569' }}>✅ Physics Quiz submitted</span>
+                        <span style={{ color: '#94a3b8' }}>2h ago</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <span style={{ color: '#475569' }}>📝 Math Assignment due Nov 8</span>
+                        <span style={{ color: '#94a3b8' }}>5h ago</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <span style={{ color: '#475569' }}>🏆 AI Concepts Live Exam completed</span>
+                        <span style={{ color: '#94a3b8' }}>1d ago</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <span style={{ color: '#475569' }}>📅 Chemistry Test scheduled</span>
+                        <span style={{ color: '#94a3b8' }}>2d ago</span>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Accuracy Stats Card */}
-                  <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                    <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: 'var(--color-success-container)', color: 'var(--color-success)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <Award size={20} />
-                    </div>
-                    <div>
-                      <span style={{ fontSize: '10px', textTransform: 'uppercase', color: 'var(--color-on-surface-variant)', fontWeight: '600' }}>Accuracy Score</span>
-                      <h4 style={{ fontSize: '20px', fontWeight: '700' }}>{totalCompleted > 0 ? `${averageAccuracy}%` : '91.2%'}</h4>
-                    </div>
+                </div>
+              </div>
+
+              {/* Charts Display Grid */}
+              <div className="charts-split-grid">
+                
+                {/* Donut Chart: Assessments Overview */}
+                <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <div>
+                    <h4 style={{ fontSize: '15px', fontWeight: '700' }}>Assessments Overview</h4>
+                    <span style={{ fontSize: '11px', color: '#64748b' }}>Your overall activity this month</span>
                   </div>
 
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-around', gap: '16px', marginTop: '12px' }}>
+                    {/* CSS Donut Chart */}
+                    <div style={{
+                      position: 'relative',
+                      width: '140px',
+                      height: '140px',
+                      borderRadius: '50%',
+                      background: 'conic-gradient(#ea580c 0% 33%, #a855f7 33% 58%, #f97316 58% 83%, #ef4444 83% 95%, #22c55e 95% 100%)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
+                      <div style={{
+                        width: '94px',
+                        height: '94px',
+                        borderRadius: '50%',
+                        backgroundColor: '#ffffff',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}>
+                        <span style={{ fontSize: '24px', fontWeight: '800', color: '#0f172a' }}>24</span>
+                        <span style={{ fontSize: '9px', color: '#94a3b8', textTransform: 'uppercase', fontWeight: '700' }}>Total</span>
+                      </div>
+                    </div>
+
+                    {/* Chart Legend */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '12px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#ea580c' }}></span>
+                        <span>Tests (8, 33%)</span>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#a855f7' }}></span>
+                        <span>Quizzes (6, 25%)</span>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#f97316' }}></span>
+                        <span>Assignments (6, 25%)</span>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#ef4444' }}></span>
+                        <span>Live Exams (3, 12%)</span>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#22c55e' }}></span>
+                        <span>Results (1, 5%)</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* SVG Performance Line Chart */}
+                <div className="card">
+                  <div>
+                    <h4 style={{ fontSize: '15px', fontWeight: '700' }}>Performance Trend</h4>
+                    <span style={{ fontSize: '11px', color: '#64748b' }}>Your average score over time</span>
+                  </div>
+
+                  <div style={{ marginTop: '20px' }}>
+                    <svg viewBox="0 0 400 130" style={{ width: '100%', height: '120px' }}>
+                      {/* Grid Lines */}
+                      <line x1="50" y1="20" x2="350" y2="20" stroke="#f1f5f9" strokeWidth="1" />
+                      <line x1="50" y1="50" x2="350" y2="50" stroke="#f1f5f9" strokeWidth="1" />
+                      <line x1="50" y1="80" x2="350" y2="80" stroke="#f1f5f9" strokeWidth="1" />
+                      <line x1="50" y1="110" x2="350" y2="110" stroke="#f1f5f9" strokeWidth="1" />
+
+                      {/* Connection Path */}
+                      <path d="M 50 100 L 150 75 L 250 25 L 350 45" fill="none" stroke="#ea580c" strokeWidth="3.5" strokeLinecap="round" />
+                      
+                      {/* Chart Points */}
+                      <circle cx="50" cy="100" r="5" fill="#ea580c" stroke="#ffffff" strokeWidth="1.5" />
+                      <circle cx="150" cy="75" r="5" fill="#ea580c" stroke="#ffffff" strokeWidth="1.5" />
+                      <circle cx="250" cy="25" r="5" fill="#ea580c" stroke="#ffffff" strokeWidth="1.5" />
+                      <circle cx="350" cy="45" r="5" fill="#ea580c" stroke="#ffffff" strokeWidth="1.5" />
+
+                      {/* Text Values */}
+                      <text x="50" y="86" fontSize="9" fontWeight="700" textAnchor="middle" fill="#ea580c">48%</text>
+                      <text x="150" y="61" fontSize="9" fontWeight="700" textAnchor="middle" fill="#ea580c">62%</text>
+                      <text x="250" y="14" fontSize="9" fontWeight="700" textAnchor="middle" fill="#ea580c">81%</text>
+                      <text x="350" y="32" fontSize="9" fontWeight="700" textAnchor="middle" fill="#ea580c">72%</text>
+
+                      {/* Horizontal Labels */}
+                      <text x="50" y="125" fontSize="10" fontWeight="500" textAnchor="middle" fill="#64748b">Week 1</text>
+                      <text x="150" y="125" fontSize="10" fontWeight="500" textAnchor="middle" fill="#64748b">Week 2</text>
+                      <text x="250" y="125" fontSize="10" fontWeight="500" textAnchor="middle" fill="#64748b">Week 3</text>
+                      <text x="350" y="125" fontSize="10" fontWeight="500" textAnchor="middle" fill="#64748b">Week 4</text>
+                    </svg>
+                  </div>
                 </div>
 
               </div>
 
-              {/* Leaderboard and Available Tests */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px' }}>
-                
-                {/* Available Tests / Upcoming challenges */}
-                <div className="card">
-                  <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <Flame size={18} style={{ color: 'var(--color-warning)' }} />
-                    Active Assessments Lobby
-                  </h3>
-                  
-                  {availableTests.length === 0 ? (
-                    <div style={{ textAlign: 'center', padding: '24px', color: 'var(--color-on-surface-variant)', fontSize: '13px' }}>
-                      No active tests found in system. All caught up!
+              {/* Quick Access panel links */}
+              <div>
+                <h3 style={{ fontSize: '15px', fontWeight: '700', marginBottom: '16px' }}>Quick Access</h3>
+                <div className="quick-action-card-grid">
+                  <div onClick={() => setActiveTab('review_attempts')} className="quick-action-item">
+                    <span style={{ fontSize: '20px' }}>📁</span>
+                    <div>
+                      <div className="quick-action-item-title">My Submissions</div>
+                      <div className="quick-action-item-desc">View your attempts</div>
                     </div>
-                  ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                      {availableTests.slice(0, 3).map(test => (
-                        <div key={test.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', border: '1px solid var(--color-outline-variant)', borderRadius: 'var(--radius-default)' }}>
-                          <div>
-                            <h4 style={{ fontSize: '13px', fontWeight: '600' }}>{test.title}</h4>
-                            <span style={{ fontSize: '11px', color: 'var(--color-on-surface-variant)' }}>PIN Code: {test.access_code}</span>
-                          </div>
-                          <button
-                            onClick={() => {
-                              setTeacherEmail(test.teacher_email);
-                              setAccessCode(test.access_code);
-                              setActiveTab('lobby');
-                            }}
-                            className="btn btn-primary"
-                            style={{ padding: '6px 12px', fontSize: '12px' }}
-                          >
-                            Join Exam
-                          </button>
-                        </div>
-                      ))}
+                  </div>
+
+                  <div onClick={() => setActiveTab('review_attempts')} className="quick-action-item">
+                    <span style={{ fontSize: '20px' }}>📊</span>
+                    <div>
+                      <div className="quick-action-item-title">Results History</div>
+                      <div className="quick-action-item-desc">Check your scores</div>
                     </div>
-                  )}
-                </div>
+                  </div>
 
-                {/* Leaderboard Mini preview card */}
-                <div className="card">
-                  <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '16px' }}>Class Leaderboard Top Ranks</h3>
-                  <ul style={{ display: 'flex', flexDirection: 'column', gap: '10px', listStyle: 'none' }}>
-                    <li style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 0', borderBottom: '1px solid var(--color-outline-variant)' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span className="medal-badge medal-gold">1</span>
-                        <span style={{ fontSize: '13px', fontWeight: '500' }}>Elena Rodriguez</span>
-                      </div>
-                      <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--color-primary)' }}>99.2%</span>
-                    </li>
-                    <li style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 0', borderBottom: '1px solid var(--color-outline-variant)' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span className="medal-badge medal-silver">2</span>
-                        <span style={{ fontSize: '13px', fontWeight: '500' }}>Chen Wei</span>
-                      </div>
-                      <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--color-primary)' }}>98.5%</span>
-                    </li>
-                    <li style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 0' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span className="medal-badge medal-bronze">3</span>
-                        <span style={{ fontSize: '13px', fontWeight: '500' }}>Amina Okafor</span>
-                      </div>
-                      <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--color-primary)' }}>97.8%</span>
-                    </li>
-                  </ul>
-                  <button onClick={() => setActiveTab('leaderboard')} className="btn btn-secondary" style={{ width: '100%', padding: '6px', fontSize: '12px', marginTop: '16px' }}>
-                    View Full Rankings
-                  </button>
-                </div>
+                  <a href="#" className="quick-action-item">
+                    <span style={{ fontSize: '20px' }}>📚</span>
+                    <div>
+                      <div className="quick-action-item-title">Study Materials</div>
+                      <div className="quick-action-item-desc">Access resources</div>
+                    </div>
+                  </a>
 
+                  <a href="#" className="quick-action-item">
+                    <span style={{ fontSize: '20px' }}>📥</span>
+                    <div>
+                      <div className="quick-action-item-title">Download Reports</div>
+                      <div className="quick-action-item-desc">Export your data</div>
+                    </div>
+                  </a>
+                </div>
               </div>
 
             </div>
@@ -991,90 +1417,420 @@ Content-Type: text/html; charset=UTF-8
 
           {/* TAB 2: TAKE TEST ENTRY LOBBY */}
           {activeTab === 'lobby' && (
-            <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }}>
-              <div className="card" style={{ width: '100%', maxWidth: '500px', padding: '32px' }}>
-                <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-                  <h2 style={{ fontSize: '22px', fontWeight: '700' }}>Join Examination</h2>
-                  <p style={{ fontSize: '14px', color: 'var(--color-on-surface-variant)', marginTop: '4px' }}>
-                    Provide the teacher email and numeric access PIN to start taking the test.
-                  </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+              
+              {/* Header */}
+              <div>
+                <h1 style={{ fontSize: '28px', fontWeight: '700' }}>Join a Test</h1>
+                <p style={{ color: 'var(--color-on-surface-variant)', fontSize: '14px', marginTop: '4px' }}>
+                  Enter the details provided by your teacher to start your assessment.
+                </p>
+              </div>
+
+              {/* 3-Column Split Card */}
+              <div className="card" style={{ padding: '0', overflow: 'hidden', display: 'grid', gridTemplateColumns: '1.2fr 2fr 1.5fr', border: '1px solid var(--color-outline-variant)' }}>
+                
+                {/* Left Illustration block */}
+                <div style={{
+                  background: 'linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)',
+                  padding: '40px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderRight: '1px solid #fed7aa'
+                }}>
+                  <div style={{
+                    width: '120px',
+                    height: '150px',
+                    backgroundColor: '#ffffff',
+                    borderRadius: '12px',
+                    border: '2px solid #fed7aa',
+                    boxShadow: '0 10px 15px -3px rgba(0,0,0,0.05)',
+                    position: 'relative',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '12px'
+                  }}>
+                    {/* Clipboard clip */}
+                    <div style={{ width: '40px', height: '12px', backgroundColor: '#ea580c', borderTopLeftRadius: '4px', borderTopRightRadius: '4px', position: 'absolute', top: '-6px', left: '50%', transform: 'translateX(-50%)' }}></div>
+                    <span style={{ fontSize: '32px' }}>📋</span>
+                    {/* Checkmarks */}
+                    <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+                      <span style={{ color: 'var(--color-success)', fontWeight: 'bold' }}>✓</span>
+                      <span style={{ color: 'var(--color-success)', fontWeight: 'bold' }}>✓</span>
+                      <span style={{ color: 'var(--color-success)', fontWeight: 'bold' }}>✓</span>
+                    </div>
+                    {/* Lock */}
+                    <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: '#ffe4e6', color: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'absolute', bottom: '-10px', right: '-10px', border: '2px solid #fca5a5', fontSize: '12px' }}>🔒</div>
+                  </div>
                 </div>
 
-                {errorMsg && (
-                  <div className="chip chip-error" style={{ display: 'flex', width: '100%', borderRadius: 'var(--radius-sm)', padding: '12px', marginBottom: '16px', gap: '8px', fontSize: '13px', textTransform: 'none' }}>
-                    <AlertTriangle size={16} style={{ flexShrink: 0, marginTop: '2px' }} />
-                    <span>{errorMsg}</span>
-                  </div>
-                )}
+                {/* Center Form block */}
+                <div style={{ padding: '40px' }}>
+                  <h3 style={{ fontSize: '18px', fontWeight: '700', marginBottom: '8px' }}>Join a Test</h3>
+                  <p style={{ fontSize: '13px', color: '#64748b', marginBottom: '24px' }}>Enter details provided by your teacher to start.</p>
 
-                <form onSubmit={(e) => handleEnterTest(e)} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                  <div>
-                    <label className="input-label">Teacher Email Address</label>
-                    <input
-                      type="email"
-                      className="input-field"
-                      placeholder="teacher@school.edu"
-                      value={teacherEmail}
-                      onChange={(e) => setTeacherEmail(e.target.value)}
-                      required
-                    />
-                  </div>
+                  {errorMsg && (
+                    <div className="chip chip-error" style={{ display: 'flex', width: '100%', borderRadius: 'var(--radius-sm)', padding: '10px', marginBottom: '16px', gap: '8px', fontSize: '13px', textTransform: 'none' }}>
+                      <AlertTriangle size={16} style={{ flexShrink: 0 }} />
+                      <span>{errorMsg}</span>
+                    </div>
+                  )}
 
-                  <div>
-                    <label className="input-label">Test Access Code PIN</label>
-                    <input
-                      type="text"
-                      className="input-field"
-                      placeholder="e.g. 88200"
-                      value={accessCode}
-                      onChange={(e) => setAccessCode(e.target.value)}
-                      required
-                    />
-                  </div>
+                  <form onSubmit={(e) => handleEnterTest(e)} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    <div>
+                      <label className="input-label">Teacher Email Address</label>
+                      <input
+                        type="email"
+                        className="input-field"
+                        placeholder="teacher@school.edu"
+                        value={teacherEmail}
+                        onChange={(e) => setTeacherEmail(e.target.value)}
+                        required
+                      />
+                    </div>
 
-                  <button
-                    type="submit"
-                    className="btn btn-primary"
-                    style={{ width: '100%', height: '44px', marginTop: '8px' }}
-                    disabled={loading}
-                  >
-                    {loading ? 'Validating credentials...' : 'Start Assessment'}
-                    {!loading && <ArrowRight size={16} />}
-                  </button>
-                </form>
+                    <div>
+                      <label className="input-label">Test Access Code (6-digit PIN)</label>
+                      <input
+                        type="text"
+                        className="input-field"
+                        placeholder="Enter 6-digit PIN"
+                        value={accessCode}
+                        onChange={(e) => setAccessCode(e.target.value)}
+                        required
+                      />
+                    </div>
+
+                    <button
+                      type="submit"
+                      className="btn btn-primary"
+                      style={{ width: '100%', height: '44px', marginTop: '8px', borderRadius: 'var(--radius-sm)' }}
+                      disabled={loading}
+                    >
+                      {loading ? 'Validating...' : 'Start Test'}
+                      {!loading && <ArrowRight size={16} />}
+                    </button>
+                  </form>
+                </div>
+
+                {/* Right Guide panel */}
+                <div style={{ padding: '40px', backgroundColor: '#f8fafc', borderLeft: '1px solid var(--color-outline-variant)' }}>
+                  <h4 style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a', marginBottom: '16px' }}>How it works?</h4>
+                  
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', fontSize: '12px' }}>
+                    <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                      <div style={{ width: '24px', height: '24px', borderRadius: '6px', backgroundColor: '#e0f2fe', color: '#0284c7', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontWeight: '700' }}>1</div>
+                      <div>
+                        <span style={{ fontWeight: '700', display: 'block', color: '#0f172a' }}>Get teacher email</span>
+                        <span style={{ color: '#64748b' }}>Obtain the email from your teacher</span>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                      <div style={{ width: '24px', height: '24px', borderRadius: '6px', backgroundColor: '#dcfce7', color: 'var(--color-success)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontWeight: '700' }}>2</div>
+                      <div>
+                        <span style={{ fontWeight: '700', display: 'block', color: '#0f172a' }}>Enter 6-digit PIN</span>
+                        <span style={{ color: '#64748b' }}>Use the 6-digit access code provided by your teacher</span>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                      <div style={{ width: '24px', height: '24px', borderRadius: '6px', backgroundColor: '#ffedd5', color: '#ea580c', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontWeight: '700' }}>3</div>
+                      <div>
+                        <span style={{ fontWeight: '700', display: 'block', color: '#0f172a' }}>Start the test</span>
+                        <span style={{ color: '#64748b' }}>Read instructions and begin your assessment</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
               </div>
+
+              {/* Your Performance Overview */}
+              <div>
+                <h3 style={{ fontSize: '16px', fontWeight: '700', marginBottom: '16px' }}>Your Performance Overview</h3>
+                <div className="stats-overview-grid">
+                  <div className="stats-card">
+                    <div className="stats-card-icon" style={{ backgroundColor: '#fff7ed', color: '#ea580c' }}>📝</div>
+                    <div className="stats-card-info">
+                      <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '600' }}>Tests Taken</span>
+                      <span className="stats-card-value">24</span>
+                      <span style={{ fontSize: '10px', color: 'var(--color-success)', fontWeight: '600' }}>+5 this month</span>
+                    </div>
+                  </div>
+
+                  <div className="stats-card">
+                    <div className="stats-card-icon" style={{ backgroundColor: '#dcfce7', color: 'var(--color-success)' }}>🎯</div>
+                    <div className="stats-card-info">
+                      <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '600' }}>Average Score</span>
+                      <span className="stats-card-value">78.6%</span>
+                      <span style={{ fontSize: '10px', color: 'var(--color-success)', fontWeight: '600' }}>+12% from last month</span>
+                    </div>
+                  </div>
+
+                  <div className="stats-card">
+                    <div className="stats-card-icon" style={{ backgroundColor: '#e0f2fe', color: '#0284c7' }}>✅</div>
+                    <div className="stats-card-info">
+                      <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '600' }}>Tests Completed</span>
+                      <span className="stats-card-value">18</span>
+                      <span style={{ fontSize: '10px', color: 'var(--color-success)', fontWeight: '600' }}>+4 this month</span>
+                    </div>
+                  </div>
+
+                  <div className="stats-card">
+                    <div className="stats-card-icon" style={{ backgroundColor: '#f3e8ff', color: '#a855f7' }}>📈</div>
+                    <div className="stats-card-info">
+                      <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '600' }}>Average Improvement</span>
+                      <span className="stats-card-value">+12.4%</span>
+                      <span style={{ fontSize: '10px', color: '#64748b' }}>Compared to your previous scores</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Quick Actions Row */}
+              <div>
+                <h3 style={{ fontSize: '16px', fontWeight: '700', marginBottom: '16px' }}>Quick Actions</h3>
+                <div className="quick-action-card-grid">
+                  <div onClick={() => setActiveTab('lobby')} className="quick-action-item">
+                    <span style={{ fontSize: '20px' }}>📝</span>
+                    <div>
+                      <div className="quick-action-item-title">Practice Now</div>
+                      <div className="quick-action-item-desc">Take a quick test to sharpen your skills</div>
+                    </div>
+                  </div>
+
+                  <div onClick={() => setActiveTab('review_attempts')} className="quick-action-item">
+                    <span style={{ fontSize: '20px' }}>📊</span>
+                    <div>
+                      <div className="quick-action-item-title">View Results</div>
+                      <div className="quick-action-item-desc">Check your performance and score history</div>
+                    </div>
+                  </div>
+
+                  <div onClick={() => setActiveTab('review_attempts')} className="quick-action-item">
+                    <span style={{ fontSize: '20px' }}>📁</span>
+                    <div>
+                      <div className="quick-action-item-title">Review Attempts</div>
+                      <div className="quick-action-item-desc">Review all your previous attempts</div>
+                    </div>
+                  </div>
+
+                  <div onClick={() => setActiveTab('leaderboard')} className="quick-action-item">
+                    <span style={{ fontSize: '20px' }}>🏆</span>
+                    <div>
+                      <div className="quick-action-item-title">Leaderboard</div>
+                      <div className="quick-action-item-desc">See how you rank among others</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
             </div>
           )}
 
-          {/* TAB 3: LEADERBOARD VIEW AND VERIFICATION ACCESS GATE */}
+          {/* TAB 3: REVIEW ATTEMPTS (CALENDAR GRID INTEGRATION) */}
+          {activeTab === 'review_attempts' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+              
+              {/* Header */}
+              <div>
+                <h1 style={{ fontSize: '28px', fontWeight: '700' }}>Review Attempts</h1>
+                <p style={{ color: 'var(--color-on-surface-variant)', fontSize: '14px', marginTop: '4px' }}>
+                  Review your past attempts and analyze your performance.
+                </p>
+              </div>
+
+              {/* Two Column Layout */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '32px' }}>
+                
+                {/* Left side: Calendar with popovers & attempts on select */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                  
+                  <div className="calendar-card">
+                    <div className="calendar-header-row">
+                      <h3 style={{ fontSize: '16px', fontWeight: '700' }}>June 2025</h3>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <button onClick={() => setSelectedDate(new Date(2025, 5, 7))} className="btn btn-secondary" style={{ padding: '4px 10px', fontSize: '12px' }}>Today</button>
+                      </div>
+                    </div>
+
+                    <div className="calendar-days-grid">
+                      <div className="calendar-weekday">Sun</div>
+                      <div className="calendar-weekday">Mon</div>
+                      <div className="calendar-weekday">Tue</div>
+                      <div className="calendar-weekday">Wed</div>
+                      <div className="calendar-weekday">Thu</div>
+                      <div className="calendar-weekday">Fri</div>
+                      <div className="calendar-weekday">Sat</div>
+
+                      {/* June 2025 Day Cells */}
+                      {Array.from({ length: 30 }, (_, i) => {
+                        const dayNum = i + 1;
+                        const isSelected = selectedDate.getDate() === dayNum && selectedDate.getMonth() === 5;
+                        const isToday = dayNum === 7;
+                        
+                        return (
+                          <div
+                            key={dayNum}
+                            onClick={() => setSelectedDate(new Date(2025, 5, dayNum))}
+                            className={`calendar-day-cell ${isSelected ? 'selected' : ''} ${isToday ? 'today' : ''}`}
+                          >
+                            <span className="calendar-day-num">{dayNum}</span>
+                            <div className="calendar-dots-container">
+                              {dayNum === 7 && (
+                                <>
+                                  <span className="calendar-dot calendar-dot-quiz" title="Physics Quiz"></span>
+                                  <span className="calendar-dot calendar-dot-assignment" title="Math Assignment"></span>
+                                  <span className="calendar-dot calendar-dot-result" title="Chemistry Test"></span>
+                                </>
+                              )}
+                              {dayNum === 6 && (
+                                <span className="calendar-dot calendar-dot-assignment" title="Math Assignment"></span>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Day Detailed attempts list */}
+                  <div className="card">
+                    <h3 style={{ fontSize: '15px', fontWeight: '700', marginBottom: '16px' }}>
+                      Tests on {selectedDate.getDate()} June 2025
+                    </h3>
+
+                    {/* Filter attempts dynamically */}
+                    {(() => {
+                      const dayAttempts = myAttempts.filter(att => {
+                        const d = new Date(att.completed_at);
+                        return d.getDate() === selectedDate.getDate() && d.getMonth() === selectedDate.getMonth();
+                      });
+
+                      if (dayAttempts.length === 0) {
+                        return (
+                          <div style={{ textAlign: 'center', padding: '32px', color: '#64748b', fontSize: '13px' }}>
+                            No assessments completed on this day. Try selecting June 6 or June 7!
+                          </div>
+                        );
+                      }
+
+                      return (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                          {dayAttempts.map(att => {
+                            const pct = Math.round((att.score / att.total_questions) * 100);
+                            const durationText = att.time_taken_seconds
+                              ? `${Math.floor(att.time_taken_seconds / 60)}m ${att.time_taken_seconds % 60}s`
+                              : '21m 32s';
+
+                            return (
+                              <div key={att.id} style={{ border: '1px solid var(--color-outline-variant)', borderRadius: 'var(--radius-default)', padding: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                  <div>
+                                    <h4 style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>{att.test_title}</h4>
+                                    <span style={{ fontSize: '11px', color: '#64748b' }}>Submitted: {new Date(att.completed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                  </div>
+                                  <span className="chip chip-success" style={{ fontSize: '12px' }}>{pct}% Score</span>
+                                </div>
+
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#f8fafc', padding: '12px', borderRadius: '6px', fontSize: '12px', color: '#475569' }}>
+                                  <div><strong>Questions:</strong> {att.total_questions}</div>
+                                  <div><strong>Correct:</strong> {att.score}</div>
+                                  <div><strong>Incorrect:</strong> {att.total_questions - att.score}</div>
+                                  <div><strong>Time Taken:</strong> {durationText}</div>
+                                </div>
+
+                                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                                  <button onClick={() => handleReviewPastAttempt(att)} className="btn btn-primary" style={{ padding: '8px 20px', fontSize: '12px', borderRadius: '4px' }}>
+                                    Review Attempt
+                                  </button>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      );
+                    })()}
+                  </div>
+
+                </div>
+
+                {/* Right side: Recent Attempts quick review list */}
+                <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <h3 style={{ fontSize: '15px', fontWeight: '700' }}>Recent Attempts</h3>
+                  
+                  {myAttempts.length === 0 ? (
+                    <div style={{ textAlign: 'center', padding: '24px', color: '#64748b' }}>No attempts recorded yet.</div>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      {myAttempts.map(att => {
+                        const pct = Math.round((att.score / att.total_questions) * 100);
+                        return (
+                          <div key={att.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', border: '1px solid var(--color-outline-variant)', borderRadius: 'var(--radius-default)' }}>
+                            <div>
+                              <h4 style={{ fontSize: '13px', fontWeight: '700' }}>{att.test_title}</h4>
+                              <span style={{ fontSize: '11px', color: '#94a3b8' }}>{new Date(att.completed_at).toLocaleDateString()}</span>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                              <span style={{ fontWeight: '700', fontSize: '13px', color: pct >= 50 ? 'var(--color-success)' : 'var(--color-error)' }}>{pct}%</span>
+                              <button onClick={() => handleReviewPastAttempt(att)} className="btn btn-secondary" style={{ padding: '6px 12px', fontSize: '11px', borderRadius: '4px' }}>
+                                Review
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+
+              </div>
+
+            </div>
+          )}
+
+          {/* TAB 4: LEADERBOARD VIEW AND VERIFICATION ACCESS GATE */}
           {activeTab === 'leaderboard' && (
-            <div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+              
+              {/* Header */}
+              <div>
+                <h1 style={{ fontSize: '28px', fontWeight: '700' }}>Leaderboard</h1>
+                <p style={{ color: 'var(--color-on-surface-variant)', fontSize: '14px', marginTop: '4px' }}>
+                  Compete with others and climb the leaderboard!
+                </p>
+              </div>
+
               {!verifiedLeaderboard ? (
-                // Image 2 access rankings form
-                <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }}>
-                  <div className="card" style={{ width: '100%', maxWidth: '500px', padding: '32px', textAlign: 'center' }}>
-                    <div style={{ width: '48px', height: '48px', borderRadius: '50%', backgroundColor: '#e0f2fe', color: '#0284c7', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+                // Filter Access Gate (Screenshot 5 right panel style but full size)
+                <div style={{ display: 'flex', justifyContent: 'center', padding: '20px 0' }}>
+                  <div className="card" style={{ width: '100%', maxWidth: '500px', padding: '32px' }}>
+                    <div style={{ width: '48px', height: '48px', borderRadius: '50%', backgroundColor: '#fff7ed', color: '#ea580c', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
                       <Award size={24} />
                     </div>
-                    <h2 style={{ fontSize: '22px', fontWeight: '700', color: '#0f172a' }}>Access Class Rankings</h2>
-                    <p style={{ fontSize: '14px', color: 'var(--color-on-surface-variant)', marginTop: '4px', marginBottom: '24px' }}>
-                      Enter credentials to verify your eligibility for the leaderboard.
+                    <h2 style={{ fontSize: '20px', fontWeight: '700', textAlign: 'center', marginBottom: '8px' }}>Select Test to View Leaderboard</h2>
+                    <p style={{ fontSize: '13px', color: '#64748b', textAlign: 'center', marginBottom: '24px' }}>
+                      Input details to unlock rankings for your section.
                     </p>
 
                     {leaderboardError && (
-                      <div className="chip chip-error" style={{ display: 'flex', width: '100%', borderRadius: 'var(--radius-sm)', padding: '12px', marginBottom: '16px', gap: '8px', fontSize: '13px', textTransform: 'none', textAlign: 'left' }}>
-                        <AlertTriangle size={16} style={{ flexShrink: 0, marginTop: '2px' }} />
+                      <div className="chip chip-error" style={{ display: 'flex', width: '100%', borderRadius: 'var(--radius-sm)', padding: '12px', marginBottom: '16px', gap: '8px', fontSize: '13px', textTransform: 'none' }}>
+                        <AlertTriangle size={16} style={{ flexShrink: 0 }} />
                         <span>{leaderboardError}</span>
                       </div>
                     )}
 
-                    <form onSubmit={handleVerifyLeaderboard} style={{ display: 'flex', flexDirection: 'column', gap: '16px', textAlign: 'left' }}>
+                    <form onSubmit={handleVerifyLeaderboard} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                       <div>
                         <label className="input-label">Teacher Email</label>
                         <input
                           type="email"
                           className="input-field"
-                          placeholder="e.g. smith.prof@university.edu"
+                          placeholder="teacher.demo@codersfun.com"
                           value={leaderboardTeacherEmail}
                           onChange={(e) => setLeaderboardTeacherEmail(e.target.value)}
                           required
@@ -1082,11 +1838,11 @@ Content-Type: text/html; charset=UTF-8
                       </div>
 
                       <div>
-                        <label className="input-label">Test Password / Test Code PIN</label>
+                        <label className="input-label">Test Access Code (6-digit PIN)</label>
                         <input
                           type="text"
                           className="input-field"
-                          placeholder="XXXX-XXXX-XXXX"
+                          placeholder="123456"
                           value={leaderboardAccessCode}
                           onChange={(e) => setLeaderboardAccessCode(e.target.value)}
                           required
@@ -1096,85 +1852,31 @@ Content-Type: text/html; charset=UTF-8
                       <button
                         type="submit"
                         className="btn btn-primary"
-                        style={{ width: '100%', height: '44px', marginTop: '16px', backgroundColor: '#006875' }}
+                        style={{ width: '100%', height: '44px', marginTop: '12px', borderRadius: 'var(--radius-sm)' }}
                         disabled={loading}
                       >
-                        {loading ? 'Verifying eligibility...' : 'View My Rank & Leaderboard'}
+                        {loading ? 'Verifying...' : 'View Leaderboard'}
                         {!loading && <ArrowRight size={16} />}
                       </button>
                     </form>
-
-                    <div style={{ display: 'flex', justifyContent: 'center', gap: '24px', borderTop: '1px solid var(--color-outline-variant)', marginTop: '24px', paddingTop: '16px', fontSize: '12px', color: 'var(--color-on-surface-variant)' }}>
-                      <div>🔒 Secure Access</div>
-                      <div>• AES-256 Verified</div>
-                    </div>
                   </div>
                 </div>
               ) : (
-                // Image 3 class leaderboard view
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+                // Full Leaderboard layout (Screenshot 5 visual overhaul)
+                <div className="leaderboard-split-layout">
                   
-                  {/* Verification success banner */}
-                  <div className="card" style={{ borderLeft: '5px solid var(--color-success)', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                    <h3 style={{ fontSize: '18px', fontWeight: '700', color: 'var(--color-success)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <CheckCircle2 size={20} /> Verification Success!
-                    </h3>
-                    <p style={{ fontSize: '14px', color: 'var(--color-on-surface-variant)' }}>
-                      Your latest <strong>{verifiedLeaderboard.test.title}</strong> module was verified with academic rigor.
-                    </p>
-                  </div>
-
-                  {/* Top Stats Cards */}
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 280px', gap: '32px' }}>
-                    
-                    {/* Rank Indicator box */}
-                    <div className="card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', backgroundColor: '#e0f2fe', border: '1px solid #bae6fd' }}>
+                  {/* Left Column: Rankings list */}
+                  <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--color-outline-variant)', paddingBottom: '16px' }}>
                       <div>
-                        <span style={{ fontSize: '11px', fontWeight: '700', color: '#0369a1', textTransform: 'uppercase' }}>Your Current Rank</span>
-                        <h2 style={{ fontSize: '36px', fontWeight: '800', color: '#0369a1', marginTop: '4px' }}>
-                          #{verifiedLeaderboard.userRank}
-                          <span style={{ fontSize: '14px', fontWeight: '500', color: '#0284c7', marginLeft: '8px' }}>
-                            📈 Up from #7
-                          </span>
-                        </h2>
+                        <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#0f172a' }}>{verifiedLeaderboard.test.title}</h3>
+                        <span style={{ fontSize: '12px', color: '#64748b' }}>25 Questions • MCQ Test</span>
                       </div>
-                      <div style={{ display: 'flex', gap: '32px', borderTop: '1px solid #bae6fd', paddingTop: '12px', marginTop: '16px' }}>
-                        <div>
-                          <span style={{ fontSize: '10px', color: '#64748b', textTransform: 'uppercase' }}>Test Score</span>
-                          <p style={{ fontSize: '16px', fontWeight: '700', color: '#0f172a' }}>{verifiedLeaderboard.userScorePercent}%</p>
-                        </div>
-                        <div>
-                          <span style={{ fontSize: '10px', color: '#64748b', textTransform: 'uppercase' }}>Percentile</span>
-                          <p style={{ fontSize: '16px', fontWeight: '700', color: '#0f172a' }}>{verifiedLeaderboard.userPercentile}th</p>
-                        </div>
+                      <div style={{ textAlign: 'right' }}>
+                        <span style={{ fontSize: '12px', color: '#64748b', display: 'block' }}>Total Students</span>
+                        <strong style={{ fontSize: '16px', color: '#0f172a' }}>{verifiedLeaderboard.attempts.length}</strong>
                       </div>
                     </div>
-
-                    {/* Trend box card */}
-                    <div className="card">
-                      <h4 style={{ fontSize: '12px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase' }}>Recent Performance Trend</h4>
-                      
-                      <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'flex-end', height: '80px', marginTop: '16px', borderBottom: '1px solid #cbd5e1' }}>
-                        <div style={{ height: '60%', width: '12px', backgroundColor: '#e2e8f0', borderRadius: '2px' }} title="T1"><span style={{ display: 'block', fontSize: '9px', marginTop: '-15px', textAlign: 'center' }}>T1</span></div>
-                        <div style={{ height: '75%', width: '12px', backgroundColor: '#e2e8f0', borderRadius: '2px' }} title="T2"><span style={{ display: 'block', fontSize: '9px', marginTop: '-15px', textAlign: 'center' }}>T2</span></div>
-                        <div style={{ height: '94%', width: '12px', backgroundColor: '#1c4e80', borderRadius: '2px' }} title="T3"><span style={{ display: 'block', fontSize: '9px', marginTop: '-15px', textAlign: 'center' }}>T3</span></div>
-                      </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '12px' }}>
-                        <span style={{ fontSize: '12px', color: 'var(--color-success)', fontWeight: '600' }}>↑ 12% Growth</span>
-                        <button onClick={() => setVerifiedLeaderboard(null)} style={{ border: 'none', background: 'none', color: '#0284c7', fontSize: '12px', cursor: 'pointer', fontWeight: '500' }}>
-                          View History
-                        </button>
-                      </div>
-                    </div>
-
-                  </div>
-
-                  {/* Leaderboard Table card */}
-                  <div className="card">
-                    <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '4px' }}>Class Leaderboard</h3>
-                    <p style={{ fontSize: '12px', color: 'var(--color-on-surface-variant)', marginBottom: '16px' }}>
-                      {verifiedLeaderboard.test.title} - Section A (2024)
-                    </p>
 
                     <div className="table-container">
                       <table className="density-table">
@@ -1182,23 +1884,27 @@ Content-Type: text/html; charset=UTF-8
                           <tr>
                             <th>Rank</th>
                             <th>Student</th>
-                            <th>Verification</th>
-                            <th>Points</th>
-                            <th>Score</th>
+                            <th style={{ textAlign: 'center' }}>Marks</th>
+                            <th style={{ textAlign: 'center' }}>Percentage</th>
+                            <th style={{ textAlign: 'center' }}>Time Taken</th>
                           </tr>
                         </thead>
                         <tbody>
                           {verifiedLeaderboard.attempts.map((att, index) => {
                             const studentRank = index + 1;
                             const isUser = att.student_email === user.email;
-                            const displayEmail = isUser ? `${studentDisplayName} (You)` : att.student_email.split('@')[0];
-                            const studentPct = Math.round((att.score / att.total_questions) * 100);
                             
-                            // Mock points (e.g. percentage * 25)
-                            const points = Math.round((att.score / att.total_questions) * 2480);
+                            // Determine name to display
+                            let displayName = att.student_name || att.student_email.split('@')[0];
+                            if (isUser) displayName = `${studentDisplayName} (You)`;
+
+                            const studentPct = Math.round((att.score / att.total_questions) * 100);
+                            const durationText = att.time_taken_seconds
+                              ? `${Math.floor(att.time_taken_seconds / 60)}m ${att.time_taken_seconds % 60}s`
+                              : '18m 24s';
 
                             return (
-                              <tr key={att.id} style={{ backgroundColor: isUser ? '#e0f2fe' : 'transparent' }}>
+                              <tr key={att.id} style={{ backgroundColor: isUser ? '#ffedd5' : 'transparent' }}>
                                 <td>
                                   {studentRank === 1 && <span className="medal-badge medal-gold">1st</span>}
                                   {studentRank === 2 && <span className="medal-badge medal-silver">2nd</span>}
@@ -1208,16 +1914,12 @@ Content-Type: text/html; charset=UTF-8
                                 <td style={{ fontWeight: isUser ? '700' : '500' }}>
                                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                     <img src={isUser ? (studentAvatar as any) : "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=80"} style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover' }} alt="" />
-                                    <span>{displayEmail}</span>
+                                    <span>{displayName}</span>
                                   </div>
                                 </td>
-                                <td>
-                                  <span className="chip chip-success" style={{ fontSize: '10px', padding: '2px 8px' }}>
-                                    {isUser ? '✓ Secure' : '✓ Verified'}
-                                  </span>
-                                </td>
-                                <td style={{ fontFamily: 'monospace' }}>{points.toLocaleString()}</td>
-                                <td style={{ fontWeight: '700' }}>{studentPct}%</td>
+                                <td style={{ textAlign: 'center', fontWeight: '600' }}>{att.score} / {att.total_questions}</td>
+                                <td style={{ textAlign: 'center', fontWeight: '700', color: '#ea580c' }}>{studentPct}.0%</td>
+                                <td style={{ textAlign: 'center', fontFamily: 'monospace' }}>{durationText}</td>
                               </tr>
                             );
                           })}
@@ -1225,11 +1927,56 @@ Content-Type: text/html; charset=UTF-8
                       </table>
                     </div>
 
-                    <div style={{ display: 'flex', justifyContent: 'center', marginTop: '24px' }}>
-                      <button onClick={() => setVerifiedLeaderboard(null)} className="btn btn-primary" style={{ backgroundColor: '#005f73' }}>
-                        <ArrowLeft size={16} /> Search Another Class
-                      </button>
+                    <button onClick={() => setVerifiedLeaderboard(null)} className="btn btn-secondary" style={{ alignSelf: 'center', borderRadius: '4px', marginTop: '16px' }}>
+                      <ArrowLeft size={14} /> Back to Selection
+                    </button>
+                  </div>
+
+                  {/* Right Column: Filter & About */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                    
+                    {/* Dynamic Filters Form */}
+                    <div className="card">
+                      <h3 style={{ fontSize: '15px', fontWeight: '700', marginBottom: '16px' }}>Filter Leaderboard</h3>
+                      
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                        <div>
+                          <label className="input-label">Date</label>
+                          <input type="text" className="input-field" value="7 June 2025" readOnly />
+                        </div>
+
+                        <div>
+                          <label className="input-label">Time</label>
+                          <input type="text" className="input-field" value="09:00 AM - 10:00 AM" readOnly />
+                        </div>
+
+                        <div>
+                          <label className="input-label">Teacher Email</label>
+                          <input type="email" className="input-field" value={leaderboardTeacherEmail} readOnly />
+                        </div>
+
+                        <div>
+                          <label className="input-label">Test Access Code (6-digit PIN)</label>
+                          <input type="text" className="input-field" value={leaderboardAccessCode} readOnly />
+                        </div>
+
+                        <button className="btn btn-primary" style={{ width: '100%', borderRadius: 'var(--radius-sm)' }} disabled>
+                          View Leaderboard
+                        </button>
+                      </div>
                     </div>
+
+                    {/* About Card */}
+                    <div className="card">
+                      <h4 style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a', marginBottom: '12px' }}>About Leaderboard</h4>
+                      
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '12px', color: '#64748b' }}>
+                        <div>🏆 <strong>Rank is based on marks:</strong> Higher marks in the selected test gets a higher rank.</div>
+                        <div>📊 <strong>Ties are broken by time:</strong> If marks are same, a faster attempt gets a higher rank.</div>
+                        <div>🛡️ <strong>Fair and accurate:</strong> Results are calculated instantly and fairly for all students.</div>
+                      </div>
+                    </div>
+
                   </div>
 
                 </div>
@@ -1243,3 +1990,4 @@ Content-Type: text/html; charset=UTF-8
     </div>
   );
 }
+
