@@ -2,11 +2,11 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '../utils/supabase';
 import { Bell, ChevronDown, Clock3,
   Clock, ArrowLeft, ArrowRight, Flag, CheckCircle2, 
-  AlertTriangle, AlertCircle,  GraduationCap,
+  AlertTriangle, AlertCircle,  GraduationCap, LogOut,
   LayoutDashboard, BookOpen, Award,
-   ClipboardEdit, Target, CheckSquare, TrendingUp, CalendarDays,
+   ClipboardEdit, Target, TrendingUp, CalendarDays,
    BarChart3,  FileText, Trophy, ShieldCheck,
-  FileCheck2, ClipboardList, Lock, Calendar
+   ClipboardList, Lock, Calendar
 } from 'lucide-react';
 import studentAvatar from '../assets/student_avatar.png';
 
@@ -244,7 +244,8 @@ export default function StudentPortal({ user, isDemo, onLogout }: StudentPortalP
   const [, setIsLoadingData] = useState(true);
 
   // Interactive Calendar and Popover states
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date(2025, 5, 7)); // Default to June 7, 2025
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date(2025, 5, 7));
+  const [showPin, setShowPin] = useState(false); // Default to June 7, 2025
 
   // Lobby Inputs
   const [teacherEmail, setTeacherEmail] = useState('');
@@ -1078,7 +1079,7 @@ Content-Type: text/html; charset=UTF-8
       <aside className="edu-sidebar" style={{ backgroundColor: '#ffffff', borderRight: '1px solid #f1f5f9', padding: '24px 20px', display: 'flex', flexDirection: 'column', width: '260px' }}>
         
         {/* Brand Logo */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '40px', padding: '0 8px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '24px', padding: '0 8px' }}>
           <div style={{
             width: '32px', height: '32px', borderRadius: '8px', backgroundColor: '#ea580c',
             color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -1089,6 +1090,25 @@ Content-Type: text/html; charset=UTF-8
           <span style={{ fontSize: '20px', fontWeight: '800', color: '#0f172a', fontFamily: 'var(--font-headlines)' }}>
             Coders<span style={{ color: '#ea580c' }}>Fun</span>
           </span>
+        </div>
+
+        {/* Profile Card Widget at the Top */}
+        <div style={{ marginBottom: '32px', padding: '0 8px' }}>
+          <div 
+            style={{ 
+              display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', 
+              borderRadius: '12px', backgroundColor: '#ffffff',
+              boxShadow: '0 2px 10px rgba(0,0,0,0.05)', border: '1px solid #f1f5f9',
+              cursor: 'pointer'
+            }}
+          >
+            <img src={studentAvatar as any} alt="Student" style={{ width: '40px', height: '40px', borderRadius: '50%', border: '2px solid #e2e8f0' }} />
+            <div style={{ flex: 1, overflow: 'hidden' }}>
+              <div style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{studentDisplayName || 'jhgno.official'}</div>
+              <div style={{ fontSize: '12px', color: '#64748b', fontWeight: '500' }}>Student</div>
+            </div>
+            <ChevronDown size={16} color="#94a3b8" />
+          </div>
         </div>
 
         {/* Navigation Menu */}
@@ -1123,6 +1143,20 @@ Content-Type: text/html; charset=UTF-8
           </li>
           <li>
             <button
+              onClick={() => { setActiveTab('review_attempts'); setVerifiedLeaderboard(null); }}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '12px', width: '100%', padding: '12px 16px',
+                borderRadius: '12px', border: 'none', cursor: 'pointer', fontSize: '15px', fontWeight: '600',
+                backgroundColor: activeTab === 'review_attempts' ? '#fff7ed' : 'transparent',
+                color: activeTab === 'review_attempts' ? '#ea580c' : '#475569', transition: 'all 0.2s'
+              }}
+            >
+              <Clock size={20} />
+              Review Attempts
+            </button>
+          </li>
+          <li>
+            <button
               onClick={() => { setActiveTab('leaderboard'); setVerifiedLeaderboard(null); }}
               style={{
                 display: 'flex', alignItems: 'center', gap: '12px', width: '100%', padding: '12px 16px',
@@ -1137,23 +1171,19 @@ Content-Type: text/html; charset=UTF-8
           </li>
         </ul>
 
-        {/* Bottom Profile Widget */}
-        <div style={{ marginTop: 'auto', borderTop: '1px solid #f1f5f9', paddingTop: '20px' }}>
-          <div 
-            onClick={onLogout}
+        {/* Bottom Actions - Logout Button */}
+        <div style={{ marginTop: 'auto', paddingTop: '20px' }}>
+          <button 
+            onClick={onLogout} 
             style={{ 
-              display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', 
-              borderRadius: '12px', cursor: 'pointer', backgroundColor: '#ffffff',
-              boxShadow: '0 2px 10px rgba(0,0,0,0.05)', border: '1px solid #f1f5f9'
+              display: 'flex', alignItems: 'center', gap: '12px', width: '100%', padding: '12px 16px',
+              borderRadius: '12px', border: '1px solid #cbd5e1', cursor: 'pointer', fontSize: '15px', fontWeight: '600',
+              backgroundColor: '#ffffff', color: '#475569', transition: 'all 0.2s', justifyContent: 'center'
             }}
           >
-            <img src={studentAvatar as any} alt="Student" style={{ width: '40px', height: '40px', borderRadius: '50%', border: '2px solid #e2e8f0' }} />
-            <div style={{ flex: 1, overflow: 'hidden' }}>
-              <div style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{studentDisplayName || 'jhgno.official'}</div>
-              <div style={{ fontSize: '12px', color: '#64748b', fontWeight: '500' }}>Student</div>
-            </div>
-            <ChevronDown size={16} color="#94a3b8" />
-          </div>
+            <LogOut size={16} />
+            Logout
+          </button>
         </div>
       </aside>
 
@@ -1615,162 +1645,277 @@ Content-Type: text/html; charset=UTF-8
           {/* TAB 2: TAKE TEST ENTRY LOBBY */}
           {activeTab === 'lobby' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+              
+              {/* Header */}
               <div>
-                <h1 style={{ fontSize: '28px', fontWeight: '700' }}>Join a Test</h1>
-                <p style={{ color: 'var(--color-on-surface-variant)', fontSize: '14px', marginTop: '4px' }}>
-                  Enter your secure access code to begin your proctored examination.
+                <h1 style={{ fontSize: '32px', fontWeight: '800', color: '#0f172a', letterSpacing: '-0.02em' }}>
+                  Welcome back, {studentDisplayName || 'jhgno.official'}! 👋
+                </h1>
+                <p style={{ color: '#64748b', fontSize: '15px', marginTop: '6px', fontWeight: '500' }}>
+                  Ready to test your skills? Join a test using the details below.
                 </p>
               </div>
 
               {/* Main Join Layout */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '32px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr', gap: '24px', backgroundColor: '#ffffff', borderRadius: '16px', border: '1px solid #f1f5f9', boxShadow: '0 1px 3px rgba(0,0,0,0.02)', padding: '24px' }}>
                 
-                {/* Left Side: Illustration & Form */}
-                <div style={{ display: 'flex', gap: '24px' }}>
-                  {/* Illustration Card */}
-                  <div style={{ 
-                    backgroundColor: '#f8fafc', 
-                    borderRadius: '16px', 
-                    padding: '24px', 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    justifyContent: 'center',
-                    flex: '0 0 160px',
-                    position: 'relative',
-                    border: '1px solid #e2e8f0'
+                {/* Left Column: Form & Graphic */}
+                <div style={{ display: 'flex', gap: '32px', borderRight: '1px solid #f1f5f9', paddingRight: '24px' }}>
+                  {/* Clipboard graphic container */}
+                  <div style={{
+                    width: '180px', height: '180px', backgroundColor: '#eff6ff', borderRadius: '16px',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                    position: 'relative'
                   }}>
-                    <ClipboardList size={80} color="#94a3b8" />
+                    {/* SVG Clipboard */}
+                    <svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <rect x="25" y="20" width="50" height="65" rx="8" fill="white" stroke="#3b82f6" strokeWidth="4" />
+                      <rect x="38" y="12" width="24" height="12" rx="4" fill="#3b82f6" />
+                      <path d="M35 40 L42 47 L58 32" stroke="#22c55e" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+                      <path d="M35 55 L42 62 L58 47" stroke="#22c55e" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+                      <path d="M35 70 L42 77 L58 62" stroke="#22c55e" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    {/* Overlapping lock badge */}
                     <div style={{
-                      position: 'absolute',
-                      bottom: '24px',
-                      right: '24px',
-                      backgroundColor: '#f59e0b',
-                      borderRadius: '50%',
-                      padding: '8px',
-                      color: 'white',
-                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                      position: 'absolute', bottom: '-10px', right: '-10px',
+                      backgroundColor: '#a855f7', borderRadius: '50%', padding: '12px',
+                      color: '#ffffff', boxShadow: '0 4px 10px rgba(168, 85, 247, 0.4)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center'
                     }}>
                       <Lock size={20} />
                     </div>
                   </div>
-
-                  {/* Join Form */}
-                  <div className="card" style={{ flex: 1 }}>
+                  
+                  {/* Form */}
+                  <div style={{ flex: 1 }}>
+                    <h2 style={{ fontSize: '24px', fontWeight: '800', color: '#0f172a', margin: '0 0 8px 0' }}>Join a Test</h2>
+                    <p style={{ fontSize: '14px', color: '#64748b', margin: '0 0 24px 0', lineHeight: '1.5' }}>
+                      Enter the details provided by your teacher to start your assessment.
+                    </p>
+                    
                     <form onSubmit={handleEnterTest} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                       {errorMsg && (
-                        <div style={{ padding: '12px', backgroundColor: 'var(--color-error-container)', color: 'var(--color-on-error-container)', borderRadius: '8px', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <div style={{ padding: '12px', backgroundColor: '#fef2f2', color: '#ef4444', borderRadius: '8px', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '500' }}>
                           <AlertTriangle size={16} /> {errorMsg}
                         </div>
                       )}
-
+                      
                       <div>
-                        <label className="input-label">Teacher Email Address</label>
-                        <input
-                          type="email"
-                          className="input-field"
-                          placeholder="teacher@institution.edu"
-                          value={teacherEmail}
-                          onChange={(e) => setTeacherEmail(e.target.value)}
-                          required
-                        />
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#475569', marginBottom: '8px' }}>Teacher Email Address</label>
+                        <div style={{ position: 'relative' }}>
+                          <span style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', fontSize: '16px' }}>✉️</span>
+                          <input
+                            type="email"
+                            placeholder="Enter teacher email address"
+                            value={teacherEmail}
+                            onChange={(e) => setTeacherEmail(e.target.value)}
+                            required
+                            style={{
+                              width: '100%', padding: '12px 16px 12px 42px', borderRadius: '12px', border: '1px solid #e2e8f0',
+                              fontSize: '14px', outline: 'none', color: '#0f172a', backgroundColor: '#ffffff'
+                            }}
+                          />
+                        </div>
                       </div>
-
+                      
                       <div>
-                        <label className="input-label">Test Access Code</label>
-                        <input
-                          type="text"
-                          className="input-field"
-                          placeholder="e.g. 123456"
-                          value={accessCode}
-                          onChange={(e) => setAccessCode(e.target.value)}
-                          required
-                          style={{ letterSpacing: '2px', fontWeight: 'bold' }}
-                        />
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#475569', marginBottom: '8px' }}>Test Access Code (6-digit PIN)</label>
+                        <div style={{ position: 'relative' }}>
+                          <span style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', fontSize: '16px' }}>🔒</span>
+                          <input
+                            type={showPin ? 'text' : 'password'}
+                            placeholder="Enter 6-digit PIN"
+                            value={accessCode}
+                            onChange={(e) => setAccessCode(e.target.value)}
+                            required
+                            maxLength={6}
+                            style={{
+                              width: '100%', padding: '12px 42px 12px 42px', borderRadius: '12px', border: '1px solid #e2e8f0',
+                              fontSize: '14px', outline: 'none', color: '#0f172a', backgroundColor: '#ffffff',
+                              letterSpacing: showPin ? 'normal' : '6px', fontWeight: 'bold'
+                            }}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPin(!showPin)}
+                            style={{
+                              position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)',
+                              border: 'none', backgroundColor: 'transparent', cursor: 'pointer', color: '#94a3b8',
+                              fontSize: '16px'
+                            }}
+                          >
+                            {showPin ? '👁️' : '🙈'}
+                          </button>
+                        </div>
                       </div>
-
-                      <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '12px', fontSize: '14px', borderRadius: '8px' }} disabled={loading}>
-                        {loading ? 'Verifying Access...' : 'Join Test'}
+                      
+                      <button
+                        type="submit"
+                        style={{
+                          width: '100%', padding: '14px', backgroundColor: '#ea580c', color: '#ffffff',
+                          borderRadius: '12px', border: 'none', fontSize: '15px', fontWeight: '700',
+                          cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          gap: '8px', transition: 'background-color 0.2s'
+                        }}
+                        disabled={loading}
+                      >
+                        {loading ? 'Verifying Access...' : 'Start Test'} <ArrowRight size={18} />
                       </button>
                     </form>
                   </div>
                 </div>
+                
+                {/* Right Column: How it works */}
+                <div style={{ paddingLeft: '8px' }}>
+                  <h3 style={{ fontSize: '16px', fontWeight: '800', color: '#0f172a', margin: '0 0 20px 0' }}>How it works?</h3>
+                  
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                    <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
+                      <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: '#e0f2fe', color: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <span style={{ fontSize: '18px' }}>✉️</span>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>Get teacher email</div>
+                        <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px', lineHeight: '1.4' }}>Obtain the email from your teacher</div>
+                      </div>
+                    </div>
 
-                {/* Right Side: Recent Activity (Fetched Data) */}
-                <div className="card" style={{ height: '100%' }}>
-                  <h3 style={{ fontSize: '15px', fontWeight: '700', marginBottom: '16px' }}>Recent Activity</h3>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', fontSize: '12px' }}>
-                    {myAttempts.length === 0 ? (
-                      <div style={{ color: '#64748b', textAlign: 'center', padding: '16px' }}>No recent activity to display.</div>
-                    ) : (
-                      myAttempts.slice(0, 5).map((attempt, idx) => (
-                        <div key={idx} style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
-                          <div style={{ 
-                            backgroundColor: attempt.score / attempt.total_questions >= 0.7 ? '#dcfce7' : attempt.score / attempt.total_questions >= 0.4 ? '#fef3c7' : '#fee2e2', 
-                            padding: '8px', 
-                            borderRadius: '8px',
-                            color: attempt.score / attempt.total_questions >= 0.7 ? '#16a34a' : attempt.score / attempt.total_questions >= 0.4 ? '#d97706' : '#dc2626'
-                          }}>
-                            <FileCheck2 size={16} />
-                          </div>
-                          <div style={{ flex: 1 }}>
-                            <div style={{ fontWeight: '600', color: '#0f172a' }}>Test Completed</div>
-                            <div style={{ color: '#64748b', marginTop: '2px' }}>Score: {attempt.score}/{attempt.total_questions} ({(attempt.score/attempt.total_questions*100).toFixed(1)}%)</div>
-                          </div>
-                          <span style={{ color: '#94a3b8', fontSize: '11px' }}>{new Date(attempt.completed_at).toLocaleDateString()}</span>
-                        </div>
-                      ))
-                    )}
+                    <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
+                      <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: '#dcfce7', color: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <span style={{ fontSize: '18px' }}>🔒</span>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>Enter 6-digit PIN</div>
+                        <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px', lineHeight: '1.4' }}>Use the 6-digit access code provided by your teacher</div>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
+                      <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: '#f3e8ff', color: '#a855f7', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <span style={{ fontSize: '18px' }}>▶️</span>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>Start the test</div>
+                        <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px', lineHeight: '1.4' }}>Read instructions and begin your assessment</div>
+                      </div>
+                    </div>
                   </div>
                 </div>
-
               </div>
 
-              {/* Bottom: Active Metrics */}
+              {/* Your Performance Overview Section */}
               <div>
-                <h3 style={{ fontSize: '16px', fontWeight: '700', marginBottom: '16px', color: '#0f172a' }}>Your Active Metrics</h3>
-                <div className="stats-overview-grid">
-                  <div className="stats-card">
-                    <div className="stats-card-icon" style={{ backgroundColor: '#fff7ed', color: '#ea580c' }}>
-                      <ClipboardEdit size={24} />
+                <h3 style={{ fontSize: '20px', fontWeight: '800', color: '#0f172a', margin: '0 0 8px 0' }}>Your Performance Overview</h3>
+                <p style={{ color: '#64748b', fontSize: '14px', margin: '0 0 20px 0' }}>
+                  Track your progress over time and see how you're improving.
+                </p>
+                
+                {/* Stat cards row */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px' }}>
+                  <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', padding: '24px', display: 'flex', alignItems: 'center', gap: '20px', boxShadow: '0 1px 3px rgba(0,0,0,0.02)', border: '1px solid #f1f5f9' }}>
+                    <div style={{ width: '56px', height: '56px', borderRadius: '16px', backgroundColor: '#e0f2fe', color: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <ClipboardEdit size={28} />
                     </div>
-                    <div className="stats-card-info">
-                      <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '600', textTransform: 'uppercase' }}>Tests Taken</span>
-                      <span className="stats-card-value">{myAttempts.length}</span>
-                      <span className="stats-card-change" style={{ color: 'var(--color-success)' }}>+5 this month</span>
-                    </div>
-                  </div>
-
-                  <div className="stats-card">
-                    <div className="stats-card-icon" style={{ backgroundColor: '#dcfce7', color: 'var(--color-success)' }}>
-                      <Target size={24} />
-                    </div>
-                    <div className="stats-card-info">
-                      <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '600', textTransform: 'uppercase' }}>Average Score</span>
-                      <span className="stats-card-value">{averageAccuracy}%</span>
-                      <span className="stats-card-change" style={{ color: 'var(--color-success)' }}>+12% from last month</span>
+                    <div>
+                      <div style={{ fontSize: '13px', fontWeight: '600', color: '#64748b', marginBottom: '4px' }}>Tests Taken</div>
+                      <div style={{ fontSize: '28px', fontWeight: '800', color: '#0f172a', lineHeight: '1.2' }}>{myAttempts.length}</div>
+                      <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}><span style={{ color: '#3b82f6', fontWeight: '600' }}>+{Math.min(myAttempts.length, 5)}</span> this month</div>
                     </div>
                   </div>
 
-                  <div className="stats-card">
-                    <div className="stats-card-icon" style={{ backgroundColor: '#e0f2fe', color: '#0284c7' }}>
-                      <CheckSquare size={24} />
+                  <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', padding: '24px', display: 'flex', alignItems: 'center', gap: '20px', boxShadow: '0 1px 3px rgba(0,0,0,0.02)', border: '1px solid #f1f5f9' }}>
+                    <div style={{ width: '56px', height: '56px', borderRadius: '16px', backgroundColor: '#dcfce7', color: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <CheckCircle2 size={28} />
                     </div>
-                    <div className="stats-card-info">
-                      <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '600', textTransform: 'uppercase' }}>Tests Completed</span>
-                      <span className="stats-card-value">{myAttempts.length}</span>
-                      <span className="stats-card-change" style={{ color: 'var(--color-success)' }}>+4 this month</span>
+                    <div>
+                      <div style={{ fontSize: '13px', fontWeight: '600', color: '#64748b', marginBottom: '4px' }}>Average Score</div>
+                      <div style={{ fontSize: '28px', fontWeight: '800', color: '#0f172a', lineHeight: '1.2' }}>{averageAccuracy || 0}%</div>
+                      <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}><span style={{ color: '#16a34a', fontWeight: '600' }}>+12%</span> from last month</div>
                     </div>
                   </div>
 
-                  <div className="stats-card">
-                    <div className="stats-card-icon" style={{ backgroundColor: '#f3e8ff', color: '#a855f7' }}>
-                      <TrendingUp size={24} />
+                  <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', padding: '24px', display: 'flex', alignItems: 'center', gap: '20px', boxShadow: '0 1px 3px rgba(0,0,0,0.02)', border: '1px solid #f1f5f9' }}>
+                    <div style={{ width: '56px', height: '56px', borderRadius: '16px', backgroundColor: '#f3e8ff', color: '#a855f7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <BarChart3 size={28} />
                     </div>
-                    <div className="stats-card-info">
-                      <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '600', textTransform: 'uppercase' }}>Average Performance</span>
-                      <span className="stats-card-value">{myAttempts.length > 0 ? 'Top 16%' : 'N/A'}</span>
-                      <span className="stats-card-change" style={{ color: 'var(--color-success)' }}>Better than 84% of students</span>
+                    <div>
+                      <div style={{ fontSize: '13px', fontWeight: '600', color: '#64748b', marginBottom: '4px' }}>Tests Completed</div>
+                      <div style={{ fontSize: '28px', fontWeight: '800', color: '#0f172a', lineHeight: '1.2' }}>{myAttempts.length}</div>
+                      <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}><span style={{ color: '#a855f7', fontWeight: '600' }}>+4</span> this month</div>
                     </div>
+                  </div>
+
+                  <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', padding: '24px', display: 'flex', alignItems: 'center', gap: '20px', boxShadow: '0 1px 3px rgba(0,0,0,0.02)', border: '1px solid #f1f5f9' }}>
+                    <div style={{ width: '56px', height: '56px', borderRadius: '16px', backgroundColor: '#fff7ed', color: '#ea580c', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <TrendingUp size={28} />
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '13px', fontWeight: '600', color: '#64748b', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>Average Improvement <AlertCircle size={12} /></div>
+                      <div style={{ fontSize: '28px', fontWeight: '800', color: '#0f172a', lineHeight: '1.2' }}>{averageImprovement >= 0 ? '+' : ''}{averageImprovement}%</div>
+                      <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}>Compared to your previous scores</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Quick Actions Section */}
+              <div>
+                <h3 style={{ fontSize: '20px', fontWeight: '800', color: '#0f172a', margin: '0 0 8px 0' }}>Quick Actions</h3>
+                <p style={{ color: '#64748b', fontSize: '14px', margin: '0 0 20px 0' }}>
+                  Shortcuts to help you learn, practice, and improve.
+                </p>
+                
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px' }}>
+                  <div onClick={() => setActiveTab('lobby')} style={{ backgroundColor: '#ffffff', borderRadius: '16px', padding: '20px', border: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: '#e0f2fe', color: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <ClipboardEdit size={20} />
+                      </div>
+                      <div>
+                        <div style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>Practice Now</div>
+                        <div style={{ fontSize: '11px', color: '#64748b', marginTop: '2px' }}>Take a quick test to sharpen...</div>
+                      </div>
+                    </div>
+                    <ArrowRight size={16} color="#94a3b8" />
+                  </div>
+
+                  <div onClick={() => setActiveTab('review_attempts')} style={{ backgroundColor: '#ffffff', borderRadius: '16px', padding: '20px', border: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: '#dcfce7', color: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <BarChart3 size={20} />
+                      </div>
+                      <div>
+                        <div style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>View Results</div>
+                        <div style={{ fontSize: '11px', color: '#64748b', marginTop: '2px' }}>Check your performance</div>
+                      </div>
+                    </div>
+                    <ArrowRight size={16} color="#94a3b8" />
+                  </div>
+
+                  <div onClick={() => setActiveTab('review_attempts')} style={{ backgroundColor: '#ffffff', borderRadius: '16px', padding: '20px', border: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: '#f3e8ff', color: '#a855f7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Clock size={20} />
+                      </div>
+                      <div>
+                        <div style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>Review Attempts</div>
+                        <div style={{ fontSize: '11px', color: '#64748b', marginTop: '2px' }}>Review all your previous...</div>
+                      </div>
+                    </div>
+                    <ArrowRight size={16} color="#94a3b8" />
+                  </div>
+
+                  <div onClick={() => setActiveTab('leaderboard')} style={{ backgroundColor: '#ffffff', borderRadius: '16px', padding: '20px', border: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: '#fff7ed', color: '#ea580c', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Trophy size={20} />
+                      </div>
+                      <div>
+                        <div style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>Leaderboard</div>
+                        <div style={{ fontSize: '11px', color: '#64748b', marginTop: '2px' }}>See how you rank among...</div>
+                      </div>
+                    </div>
+                    <ArrowRight size={16} color="#94a3b8" />
                   </div>
                 </div>
               </div>
