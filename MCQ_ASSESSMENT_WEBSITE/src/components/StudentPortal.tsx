@@ -1375,8 +1375,8 @@ Content-Type: text/html; charset=UTF-8
                           <line x1="0" y1="110" x2="300" y2="110" stroke="#f1f5f9" strokeWidth="1" />
                           
                           {/* Line and Area */}
-                          <path d="M0 110 L50 80 L120 50 L200 30 L300 45 L300 120 L0 120 Z" fill="rgba(234, 88, 12, 0.1)" />
-                          <path d="M0 110 L50 80 L120 50 L200 30 L300 45" fill="none" stroke="#ea580c" strokeWidth="3" />
+                          <path d={`M 0 110 L 50 ${110 - performanceTrend[0] * 0.9} L 120 ${110 - performanceTrend[1] * 0.9} L 200 ${110 - performanceTrend[2] * 0.9} L 300 ${110 - performanceTrend[3] * 0.9} L 300 110 Z`} fill="rgba(234, 88, 12, 0.1)" />
+                          <path d={`M 0 110 L 50 ${110 - performanceTrend[0] * 0.9} L 120 ${110 - performanceTrend[1] * 0.9} L 200 ${110 - performanceTrend[2] * 0.9} L 300 ${110 - performanceTrend[3] * 0.9}`} fill="none" stroke="#ea580c" strokeWidth="3" />
                           
                           {/* Points */}
                           <circle cx="50" cy={110 - (performanceTrend[0] * 0.9)} r="4" fill="#ea580c" />
