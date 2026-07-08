@@ -21,6 +21,7 @@ interface Test {
   teacher_email: string;
   questions: Question[];
   type?: 'test' | 'assignment' | 'quiz' | 'live_exam';
+  created_at?: string;
 }
 
 interface Attempt {
@@ -1088,7 +1089,7 @@ Content-Type: text/html; charset=UTF-8
                   </div>
                   <div className="stats-card-info">
                     <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '600', textTransform: 'uppercase' }}>Tests Taken</span>
-                    <span className="stats-card-value">{myAttempts.length > 0 ? myAttempts.length : 24}</span>
+                    <span className="stats-card-value">{myAttempts.length}</span>
                     <span className="stats-card-change" style={{ color: 'var(--color-success)' }}>+5 this month</span>
                   </div>
                 </div>
@@ -1099,7 +1100,7 @@ Content-Type: text/html; charset=UTF-8
                   </div>
                   <div className="stats-card-info">
                     <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '600', textTransform: 'uppercase' }}>Average Score</span>
-                    <span className="stats-card-value">{averageAccuracy > 0 ? `${averageAccuracy}%` : '78.6%'}</span>
+                    <span className="stats-card-value">{averageAccuracy}%</span>
                     <span className="stats-card-change" style={{ color: 'var(--color-success)' }}>+12% from last month</span>
                   </div>
                 </div>
@@ -1110,7 +1111,7 @@ Content-Type: text/html; charset=UTF-8
                   </div>
                   <div className="stats-card-info">
                     <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '600', textTransform: 'uppercase' }}>Tests Completed</span>
-                    <span className="stats-card-value">{myAttempts.length > 0 ? myAttempts.length : 18}</span>
+                    <span className="stats-card-value">{myAttempts.length}</span>
                     <span className="stats-card-change" style={{ color: 'var(--color-success)' }}>+4 this month</span>
                   </div>
                 </div>
@@ -1121,7 +1122,7 @@ Content-Type: text/html; charset=UTF-8
                   </div>
                   <div className="stats-card-info">
                     <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '600', textTransform: 'uppercase' }}>Average Performance</span>
-                    <span className="stats-card-value">Top 16%</span>
+                    <span className="stats-card-value">{myAttempts.length > 0 ? "Top 16%" : "N/A"}</span>
                     <span className="stats-card-change" style={{ color: 'var(--color-success)' }}>Better than 84% of students</span>
                   </div>
                 </div>
@@ -1214,29 +1215,21 @@ Content-Type: text/html; charset=UTF-8
                     </div>
 
                     <div className="upcoming-test-feed">
-                      <div className="upcoming-test-row">
-                        <div className="upcoming-test-info">
-                          <span style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a' }}>Physics Quiz</span>
-                          <span style={{ fontSize: '11px', color: '#64748b', marginTop: '2px' }}>09:00 AM - 10:00 AM</span>
-                        </div>
-                        <span className="chip chip-neutral" style={{ fontSize: '9px', padding: '2px 8px' }}>Quiz</span>
-                      </div>
-
-                      <div className="upcoming-test-row">
-                        <div className="upcoming-test-info">
-                          <span style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a' }}>Math Assignment</span>
-                          <span style={{ fontSize: '11px', color: '#64748b', marginTop: '2px' }}>11:00 AM - 12:30 PM</span>
-                        </div>
-                        <span className="chip chip-neutral" style={{ fontSize: '9px', padding: '2px 8px', backgroundColor: '#ffe4e6', color: '#be123c' }}>Assignment</span>
-                      </div>
-
-                      <div className="upcoming-test-row">
-                        <div className="upcoming-test-info">
-                          <span style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a' }}>Chemistry Test</span>
-                          <span style={{ fontSize: '11px', color: '#64748b', marginTop: '2px' }}>02:00 PM - 03:00 PM</span>
-                        </div>
-                        <span className="chip chip-neutral" style={{ fontSize: '9px', padding: '2px 8px', backgroundColor: '#e0f2fe', color: '#0369a1' }}>Test</span>
-                      </div>
+                      {availableTests.length === 0 ? (
+                        <div style={{ fontSize: '13px', color: '#64748b', textAlign: 'center', padding: '16px' }}>No upcoming tests scheduled.</div>
+                      ) : (
+                        availableTests.slice(0, 3).map((test, idx) => (
+                          <div className="upcoming-test-row" key={idx}>
+                            <div className="upcoming-test-info">
+                              <span style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a' }}>{test.title}</span>
+                              <span style={{ fontSize: '11px', color: '#64748b', marginTop: '2px' }}>{test.created_at ? new Date(test.created_at).toLocaleDateString() : 'N/A'}</span>
+                            </div>
+                            <span className="chip chip-neutral" style={{ fontSize: '9px', padding: '2px 8px', backgroundColor: test.type === 'assignment' ? '#ffe4e6' : test.type === 'test' ? '#e0f2fe' : '#f1f5f9', color: test.type === 'assignment' ? '#be123c' : test.type === 'test' ? '#0369a1' : '#475569' }}>
+                              {test.type ? test.type.toUpperCase() : 'TEST'}
+                            </span>
+                          </div>
+                        ))
+                      )}
                     </div>
 
                     <button className="btn btn-secondary" style={{ width: '100%', marginTop: '16px', padding: '8px', fontSize: '12px', borderRadius: 'var(--radius-sm)' }}>
@@ -1248,22 +1241,16 @@ Content-Type: text/html; charset=UTF-8
                   <div className="card">
                     <h3 style={{ fontSize: '15px', fontWeight: '700', marginBottom: '16px' }}>Recent Activity</h3>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '12px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <span style={{ color: '#475569' }}>✅ Physics Quiz submitted</span>
-                        <span style={{ color: '#94a3b8' }}>2h ago</span>
-                      </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <span style={{ color: '#475569' }}>📝 Math Assignment due Nov 8</span>
-                        <span style={{ color: '#94a3b8' }}>5h ago</span>
-                      </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <span style={{ color: '#475569' }}>🏆 AI Concepts Live Exam completed</span>
-                        <span style={{ color: '#94a3b8' }}>1d ago</span>
-                      </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <span style={{ color: '#475569' }}>📅 Chemistry Test scheduled</span>
-                        <span style={{ color: '#94a3b8' }}>2d ago</span>
-                      </div>
+                      {myAttempts.length === 0 ? (
+                        <div style={{ color: '#64748b', textAlign: 'center', padding: '16px' }}>No recent activity.</div>
+                      ) : (
+                        myAttempts.slice(0, 4).map((attempt, idx) => (
+                          <div style={{ display: 'flex', justifyContent: 'space-between' }} key={idx}>
+                            <span style={{ color: '#475569' }}>✅ Completed test (Score: {attempt.score}/{attempt.total_questions})</span>
+                            <span style={{ color: '#94a3b8' }}>{new Date(attempt.completed_at).toLocaleDateString()}</span>
+                          </div>
+                        ))
+                      )}
                     </div>
                   </div>
 
