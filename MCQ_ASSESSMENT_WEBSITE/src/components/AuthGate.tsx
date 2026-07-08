@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { supabase } from '../utils/supabase';
-import { Mail, Lock, AlertCircle, ArrowRight, User, CheckCircle2 } from 'lucide-react';
+import { Mail, Lock, AlertCircle, ArrowRight, User, CheckCircle2, GraduationCap, School } from 'lucide-react';
 
 interface AuthGateProps {
   onAuthSuccess: (user: { id: string; email: string; role: 'teacher' | 'student' }, isDemo: boolean) => void;
@@ -15,6 +15,16 @@ export default function AuthGate({ onAuthSuccess }: AuthGateProps) {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+  const [clickCount, setClickCount] = useState(0);
+  const [showSandbox, setShowSandbox] = useState(false);
+
+  const handleLogoClick = () => {
+    const newCount = clickCount + 1;
+    setClickCount(newCount);
+    if (newCount >= 5) {
+      setShowSandbox(true);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -116,7 +126,10 @@ export default function AuthGate({ onAuthSuccess }: AuthGateProps) {
       
       {/* Top Navigation Bar */}
       <header className="login-navbar">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div 
+          onClick={handleLogoClick}
+          style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', userSelect: 'none' }}
+        >
           <div style={{
             width: '32px',
             height: '32px',
@@ -263,7 +276,7 @@ export default function AuthGate({ onAuthSuccess }: AuthGateProps) {
                 transition: 'all 0.15s ease'
               }}
             >
-              🎓 Take Test
+              <GraduationCap size={16} /> Take Test
             </button>
             <button
               type="button"
@@ -286,7 +299,7 @@ export default function AuthGate({ onAuthSuccess }: AuthGateProps) {
                 transition: 'all 0.15s ease'
               }}
             >
-              🏫 Conduct Test
+              <School size={16} /> Conduct Test
             </button>
           </div>
 
@@ -425,44 +438,46 @@ export default function AuthGate({ onAuthSuccess }: AuthGateProps) {
           </div>
 
           {/* Sandbox Development bypass */}
-          <div style={{
-            marginTop: '24px',
-            paddingTop: '20px',
-            borderTop: '1px solid #e2e8f0',
-            textAlign: 'center'
-          }}>
-            <p style={{
-              fontSize: '11px',
-              fontWeight: '700',
-              color: '#64748b',
-              textTransform: 'uppercase',
-              letterSpacing: '0.05em',
-              marginBottom: '12px'
+          {showSandbox && (
+            <div style={{
+              marginTop: '24px',
+              paddingTop: '20px',
+              borderTop: '1px solid #e2e8f0',
+              textAlign: 'center'
             }}>
-              Sandbox Development Tools
-            </p>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-              <button
-                type="button"
-                onClick={() => handleLaunchDemo('student')}
-                className="btn btn-secondary"
-                style={{ padding: '8px 12px', fontSize: '11px' }}
-              >
-                Demo Student
-              </button>
-              <button
-                type="button"
-                onClick={() => handleLaunchDemo('teacher')}
-                className="btn btn-secondary"
-                style={{ padding: '8px 12px', fontSize: '11px' }}
-              >
-                Demo Teacher
-              </button>
+              <p style={{
+                fontSize: '11px',
+                fontWeight: '700',
+                color: '#64748b',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                marginBottom: '12px'
+              }}>
+                Sandbox Development Tools
+              </p>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                <button
+                  type="button"
+                  onClick={() => handleLaunchDemo('student')}
+                  className="btn btn-secondary"
+                  style={{ padding: '8px 12px', fontSize: '11px' }}
+                >
+                  Demo Student
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleLaunchDemo('teacher')}
+                  className="btn btn-secondary"
+                  style={{ padding: '8px 12px', fontSize: '11px' }}
+                >
+                  Demo Teacher
+                </button>
+              </div>
+              <p style={{ fontSize: '10px', color: '#94a3b8', marginTop: '8px' }}>
+                Bypasses Supabase server connection for evaluation.
+              </p>
             </div>
-            <p style={{ fontSize: '10px', color: '#94a3b8', marginTop: '8px' }}>
-              Bypasses Supabase server connection for evaluation.
-            </p>
-          </div>
+          )}
 
         </div>
       </div>
