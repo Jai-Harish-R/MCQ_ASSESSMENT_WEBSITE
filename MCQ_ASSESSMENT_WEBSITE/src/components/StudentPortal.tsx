@@ -798,6 +798,23 @@ Content-Type: text/html; charset=UTF-8
     ? Math.round((myAttempts.reduce((sum, att) => sum + (att.score / att.total_questions), 0) / totalCompleted) * 100)
     : 0;
 
+  const averageImprovement = React.useMemo(() => {
+    if (myAttempts.length < 2) {
+      if (myAttempts.length === 1) {
+        return Math.round((myAttempts[0].score / myAttempts[0].total_questions) * 100);
+      }
+      return 0;
+    }
+    const sorted = [...myAttempts].sort((a, b) => new Date(a.completed_at).getTime() - new Date(b.completed_at).getTime());
+    let totalDiff = 0;
+    for (let i = 1; i < sorted.length; i++) {
+      const currentPct = (sorted[i].score / sorted[i].total_questions) * 100;
+      const prevPct = (sorted[i - 1].score / sorted[i - 1].total_questions) * 100;
+      totalDiff += (currentPct - prevPct);
+    }
+    return Math.round(totalDiff / (sorted.length - 1));
+  }, [myAttempts]);
+
   // Active Exam View hides sidebar
   if (viewState === 'exam' || viewState === 'result') {
     return (
@@ -1233,9 +1250,9 @@ Content-Type: text/html; charset=UTF-8
                     <BarChart3 size={28} />
                   </div>
                   <div>
-                    <div style={{ fontSize: '13px', fontWeight: '600', color: '#64748b', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>Average Performance <AlertCircle size={12} /></div>
-                    <div style={{ fontSize: '28px', fontWeight: '800', color: '#0f172a', lineHeight: '1.2' }}>Top {Math.max(1, Math.round(100 - (averageAccuracy || 0)))}%</div>
-                    <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}>Better than 84% of students</div>
+                    <div style={{ fontSize: '13px', fontWeight: '600', color: '#64748b', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>Average Improvement <AlertCircle size={12} /></div>
+                    <div style={{ fontSize: '28px', fontWeight: '800', color: '#0f172a', lineHeight: '1.2' }}>{averageImprovement >= 0 ? '+' : ''}{averageImprovement}%</div>
+                    <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}>Real-time update</div>
                   </div>
                 </div>
               </div>
