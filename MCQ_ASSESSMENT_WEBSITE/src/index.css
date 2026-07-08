@@ -670,7 +670,7 @@ h1, h2, h3, h4, h5, h6 {
   display: grid;
   grid-template-columns: 1.2fr 1fr;
   min-height: 100vh;
-  background: radial-gradient(circle at top right, #ffedd5 0%, #ffffff 40%, #fff7ed 100%);
+  background-color: #f8fafc;
 }
 
 @media (max-width: 1024px) {
@@ -683,12 +683,12 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .login-left-panel {
-  background: transparent;
+  background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   padding: 48px;
-  border-right: none;
+  border-right: 1px solid #fed7aa;
 }
 
 .login-left-content {
