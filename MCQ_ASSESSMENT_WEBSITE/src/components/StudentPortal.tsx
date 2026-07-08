@@ -1,9 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../utils/supabase';
+// { useState, useEffect, useRef } from 'react';
 import { 
   Clock, ArrowLeft, ArrowRight, Flag, CheckCircle2, 
   AlertTriangle, LogOut, GraduationCap,
-  LayoutDashboard, BookOpen, Award
+  LayoutDashboard, BookOpen, Award,
+  Hand, ClipboardEdit, Target, CheckSquare, TrendingUp, CalendarDays,
+  FileStack, BarChart3, Inbox, FileText, Trophy, ShieldCheck,
+  FileCheck2, ClipboardList, Lock, Calendar
 } from 'lucide-react';
 import studentAvatar from '../assets/student_avatar.png';
 
@@ -316,14 +320,14 @@ export default function StudentPortal({ user, isDemo, onLogout }: StudentPortalP
 
         // Fetch test details for each attempt
         if (attemptsData && attemptsData.length > 0) {
-          const testIds = attemptsData.map(a => a.test_id);
+          const testIds = attemptsData.map((a: any) => a.test_id);
           const { data: testsData } = await supabase
             .from('tests')
             .select('id, title')
             .in('id', testIds);
 
-          const mapped = (attemptsData || []).map(att => {
-            const t = (testsData || []).find(x => x.id === att.test_id);
+          const mapped = (attemptsData || []).map((att: any) => {
+            const t = (testsData || []).find((x: any) => x.id === att.test_id);
             return { ...att, test_title: t ? t.title : 'Assessment' };
           });
           setMyAttempts(mapped);
@@ -1075,7 +1079,7 @@ Content-Type: text/html; charset=UTF-8
               
               {/* Welcome Header */}
               <div>
-                <h1 style={{ fontSize: '28px', fontWeight: '700' }}>Welcome back, {studentDisplayName}! 👋</h1>
+                <h1 style={{ fontSize: '28px', fontWeight: '700' }}>Welcome back, {studentDisplayName}! <Hand style={{ display: "inline-block", color: "#f59e0b", marginLeft: "8px" }} /></h1>
                 <p style={{ color: 'var(--color-on-surface-variant)', fontSize: '14px', marginTop: '4px' }}>
                   Ready to test your skills? Join a test using the details below.
                 </p>
@@ -1084,9 +1088,7 @@ Content-Type: text/html; charset=UTF-8
               {/* Stats Overview Grid */}
               <div className="stats-overview-grid">
                 <div className="stats-card">
-                  <div className="stats-card-icon" style={{ backgroundColor: '#fff7ed', color: '#ea580c' }}>
-                    📝
-                  </div>
+                  <div className="stats-card-icon" style={{ backgroundColor: "#fff7ed", color: "#ea580c" }}><ClipboardEdit size={24} /></div>
                   <div className="stats-card-info">
                     <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '600', textTransform: 'uppercase' }}>Tests Taken</span>
                     <span className="stats-card-value">{myAttempts.length}</span>
@@ -1095,9 +1097,7 @@ Content-Type: text/html; charset=UTF-8
                 </div>
 
                 <div className="stats-card">
-                  <div className="stats-card-icon" style={{ backgroundColor: '#dcfce7', color: 'var(--color-success)' }}>
-                    🎯
-                  </div>
+                  <div className="stats-card-icon" style={{ backgroundColor: "#dcfce7", color: "var(--color-success)" }}><Target size={24} /></div>
                   <div className="stats-card-info">
                     <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '600', textTransform: 'uppercase' }}>Average Score</span>
                     <span className="stats-card-value">{averageAccuracy}%</span>
@@ -1106,9 +1106,7 @@ Content-Type: text/html; charset=UTF-8
                 </div>
 
                 <div className="stats-card">
-                  <div className="stats-card-icon" style={{ backgroundColor: '#e0f2fe', color: '#0284c7' }}>
-                    ✅
-                  </div>
+                  <div className="stats-card-icon" style={{ backgroundColor: "#e0f2fe", color: "#0284c7" }}><CheckSquare size={24} /></div>
                   <div className="stats-card-info">
                     <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '600', textTransform: 'uppercase' }}>Tests Completed</span>
                     <span className="stats-card-value">{myAttempts.length}</span>
@@ -1117,9 +1115,7 @@ Content-Type: text/html; charset=UTF-8
                 </div>
 
                 <div className="stats-card">
-                  <div className="stats-card-icon" style={{ backgroundColor: '#f3e8ff', color: '#a855f7' }}>
-                    📈
-                  </div>
+                  <div className="stats-card-icon" style={{ backgroundColor: "#f3e8ff", color: "#a855f7" }}><TrendingUp size={24} /></div>
                   <div className="stats-card-info">
                     <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '600', textTransform: 'uppercase' }}>Average Performance</span>
                     <span className="stats-card-value">{myAttempts.length > 0 ? "Top 16%" : "N/A"}</span>
@@ -1233,7 +1229,7 @@ Content-Type: text/html; charset=UTF-8
                     </div>
 
                     <button className="btn btn-secondary" style={{ width: '100%', marginTop: '16px', padding: '8px', fontSize: '12px', borderRadius: 'var(--radius-sm)' }}>
-                      📅 Add to Calendar
+                      <CalendarDays size={16} style={{marginRight: "8px"}} /> Add to Calendar
                     </button>
                   </div>
 
@@ -1246,7 +1242,7 @@ Content-Type: text/html; charset=UTF-8
                       ) : (
                         myAttempts.slice(0, 4).map((attempt, idx) => (
                           <div style={{ display: 'flex', justifyContent: 'space-between' }} key={idx}>
-                            <span style={{ color: '#475569' }}>✅ Completed test (Score: {attempt.score}/{attempt.total_questions})</span>
+                            <span style={{ color: '#475569' }}><CheckCircle2 size={14} style={{display: "inline-block", marginRight: "6px", color: "var(--color-success)"}} /> Completed test (Score: {attempt.score}/{attempt.total_questions})</span>
                             <span style={{ color: '#94a3b8' }}>{new Date(attempt.completed_at).toLocaleDateString()}</span>
                           </div>
                         ))
@@ -1366,7 +1362,7 @@ Content-Type: text/html; charset=UTF-8
                 <h3 style={{ fontSize: '15px', fontWeight: '700', marginBottom: '16px' }}>Quick Access</h3>
                 <div className="quick-action-card-grid">
                   <div onClick={() => setActiveTab('review_attempts')} className="quick-action-item">
-                    <span style={{ fontSize: '20px' }}>📁</span>
+                    <FileStack size={20} />
                     <div>
                       <div className="quick-action-item-title">My Submissions</div>
                       <div className="quick-action-item-desc">View your attempts</div>
@@ -1374,7 +1370,7 @@ Content-Type: text/html; charset=UTF-8
                   </div>
 
                   <div onClick={() => setActiveTab('review_attempts')} className="quick-action-item">
-                    <span style={{ fontSize: '20px' }}>📊</span>
+                    <BarChart3 size={20} />
                     <div>
                       <div className="quick-action-item-title">Results History</div>
                       <div className="quick-action-item-desc">Check your scores</div>
@@ -1382,7 +1378,7 @@ Content-Type: text/html; charset=UTF-8
                   </div>
 
                   <a href="#" className="quick-action-item">
-                    <span style={{ fontSize: '20px' }}>📚</span>
+                    <BookOpen size={20} />
                     <div>
                       <div className="quick-action-item-title">Study Materials</div>
                       <div className="quick-action-item-desc">Access resources</div>
@@ -1390,7 +1386,7 @@ Content-Type: text/html; charset=UTF-8
                   </a>
 
                   <a href="#" className="quick-action-item">
-                    <span style={{ fontSize: '20px' }}>📥</span>
+                    <Inbox size={20} />
                     <div>
                       <div className="quick-action-item-title">Download Reports</div>
                       <div className="quick-action-item-desc">Export your data</div>
@@ -1405,212 +1401,161 @@ Content-Type: text/html; charset=UTF-8
           {/* TAB 2: TAKE TEST ENTRY LOBBY */}
           {activeTab === 'lobby' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-              
-              {/* Header */}
               <div>
                 <h1 style={{ fontSize: '28px', fontWeight: '700' }}>Join a Test</h1>
                 <p style={{ color: 'var(--color-on-surface-variant)', fontSize: '14px', marginTop: '4px' }}>
-                  Enter the details provided by your teacher to start your assessment.
+                  Enter your secure access code to begin your proctored examination.
                 </p>
               </div>
 
-              {/* 3-Column Split Card */}
-              <div className="card" style={{ padding: '0', overflow: 'hidden', display: 'grid', gridTemplateColumns: '1.2fr 2fr 1.5fr', border: '1px solid var(--color-outline-variant)' }}>
+              {/* Main Join Layout */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '32px' }}>
                 
-                {/* Left Illustration block */}
-                <div style={{
-                  background: 'linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)',
-                  padding: '40px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  borderRight: '1px solid #fed7aa'
-                }}>
-                  <div style={{
-                    width: '120px',
-                    height: '150px',
-                    backgroundColor: '#ffffff',
-                    borderRadius: '12px',
-                    border: '2px solid #fed7aa',
-                    boxShadow: '0 10px 15px -3px rgba(0,0,0,0.05)',
-                    position: 'relative',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
+                {/* Left Side: Illustration & Form */}
+                <div style={{ display: 'flex', gap: '24px' }}>
+                  {/* Illustration Card */}
+                  <div style={{ 
+                    backgroundColor: '#f8fafc', 
+                    borderRadius: '16px', 
+                    padding: '24px', 
+                    display: 'flex', 
+                    alignItems: 'center', 
                     justifyContent: 'center',
-                    gap: '12px'
+                    flex: '0 0 160px',
+                    position: 'relative',
+                    border: '1px solid #e2e8f0'
                   }}>
-                    {/* Clipboard clip */}
-                    <div style={{ width: '40px', height: '12px', backgroundColor: '#ea580c', borderTopLeftRadius: '4px', borderTopRightRadius: '4px', position: 'absolute', top: '-6px', left: '50%', transform: 'translateX(-50%)' }}></div>
-                    <span style={{ fontSize: '32px' }}>📋</span>
-                    {/* Checkmarks */}
-                    <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
-                      <span style={{ color: 'var(--color-success)', fontWeight: 'bold' }}>✓</span>
-                      <span style={{ color: 'var(--color-success)', fontWeight: 'bold' }}>✓</span>
-                      <span style={{ color: 'var(--color-success)', fontWeight: 'bold' }}>✓</span>
+                    <ClipboardList size={80} color="#94a3b8" />
+                    <div style={{
+                      position: 'absolute',
+                      bottom: '24px',
+                      right: '24px',
+                      backgroundColor: '#f59e0b',
+                      borderRadius: '50%',
+                      padding: '8px',
+                      color: 'white',
+                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                    }}>
+                      <Lock size={20} />
                     </div>
-                    {/* Lock */}
-                    <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: '#ffe4e6', color: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'absolute', bottom: '-10px', right: '-10px', border: '2px solid #fca5a5', fontSize: '12px' }}>🔒</div>
+                  </div>
+
+                  {/* Join Form */}
+                  <div className="card" style={{ flex: 1 }}>
+                    <form onSubmit={handleEnterTest} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                      {errorMsg && (
+                        <div style={{ padding: '12px', backgroundColor: 'var(--color-error-container)', color: 'var(--color-on-error-container)', borderRadius: '8px', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <AlertTriangle size={16} /> {errorMsg}
+                        </div>
+                      )}
+
+                      <div>
+                        <label className="input-label">Teacher Email Address</label>
+                        <input
+                          type="email"
+                          className="input-field"
+                          placeholder="teacher@institution.edu"
+                          value={teacherEmail}
+                          onChange={(e) => setTeacherEmail(e.target.value)}
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <label className="input-label">Test Access Code</label>
+                        <input
+                          type="text"
+                          className="input-field"
+                          placeholder="e.g. 123456"
+                          value={accessCode}
+                          onChange={(e) => setAccessCode(e.target.value)}
+                          required
+                          style={{ letterSpacing: '2px', fontWeight: 'bold' }}
+                        />
+                      </div>
+
+                      <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '12px', fontSize: '14px', borderRadius: '8px' }} disabled={loading}>
+                        {loading ? 'Verifying Access...' : 'Join Test'}
+                      </button>
+                    </form>
                   </div>
                 </div>
 
-                {/* Center Form block */}
-                <div style={{ padding: '40px' }}>
-                  <h3 style={{ fontSize: '18px', fontWeight: '700', marginBottom: '8px' }}>Join a Test</h3>
-                  <p style={{ fontSize: '13px', color: '#64748b', marginBottom: '24px' }}>Enter details provided by your teacher to start.</p>
-
-                  {errorMsg && (
-                    <div className="chip chip-error" style={{ display: 'flex', width: '100%', borderRadius: 'var(--radius-sm)', padding: '10px', marginBottom: '16px', gap: '8px', fontSize: '13px', textTransform: 'none' }}>
-                      <AlertTriangle size={16} style={{ flexShrink: 0 }} />
-                      <span>{errorMsg}</span>
-                    </div>
-                  )}
-
-                  <form onSubmit={(e) => handleEnterTest(e)} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                    <div>
-                      <label className="input-label">Teacher Email Address</label>
-                      <input
-                        type="email"
-                        className="input-field"
-                        placeholder="teacher@school.edu"
-                        value={teacherEmail}
-                        onChange={(e) => setTeacherEmail(e.target.value)}
-                        required
-                      />
-                    </div>
-
-                    <div>
-                      <label className="input-label">Test Access Code (6-digit PIN)</label>
-                      <input
-                        type="text"
-                        className="input-field"
-                        placeholder="Enter 6-digit PIN"
-                        value={accessCode}
-                        onChange={(e) => setAccessCode(e.target.value)}
-                        required
-                      />
-                    </div>
-
-                    <button
-                      type="submit"
-                      className="btn btn-primary"
-                      style={{ width: '100%', height: '44px', marginTop: '8px', borderRadius: 'var(--radius-sm)' }}
-                      disabled={loading}
-                    >
-                      {loading ? 'Validating...' : 'Start Test'}
-                      {!loading && <ArrowRight size={16} />}
-                    </button>
-                  </form>
-                </div>
-
-                {/* Right Guide panel */}
-                <div style={{ padding: '40px', backgroundColor: '#f8fafc', borderLeft: '1px solid var(--color-outline-variant)' }}>
-                  <h4 style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a', marginBottom: '16px' }}>How it works?</h4>
-                  
+                {/* Right Side: Recent Activity (Fetched Data) */}
+                <div className="card" style={{ height: '100%' }}>
+                  <h3 style={{ fontSize: '15px', fontWeight: '700', marginBottom: '16px' }}>Recent Activity</h3>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', fontSize: '12px' }}>
-                    <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-                      <div style={{ width: '24px', height: '24px', borderRadius: '6px', backgroundColor: '#e0f2fe', color: '#0284c7', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontWeight: '700' }}>1</div>
-                      <div>
-                        <span style={{ fontWeight: '700', display: 'block', color: '#0f172a' }}>Get teacher email</span>
-                        <span style={{ color: '#64748b' }}>Obtain the email from your teacher</span>
-                      </div>
-                    </div>
-
-                    <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-                      <div style={{ width: '24px', height: '24px', borderRadius: '6px', backgroundColor: '#dcfce7', color: 'var(--color-success)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontWeight: '700' }}>2</div>
-                      <div>
-                        <span style={{ fontWeight: '700', display: 'block', color: '#0f172a' }}>Enter 6-digit PIN</span>
-                        <span style={{ color: '#64748b' }}>Use the 6-digit access code provided by your teacher</span>
-                      </div>
-                    </div>
-
-                    <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-                      <div style={{ width: '24px', height: '24px', borderRadius: '6px', backgroundColor: '#ffedd5', color: '#ea580c', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontWeight: '700' }}>3</div>
-                      <div>
-                        <span style={{ fontWeight: '700', display: 'block', color: '#0f172a' }}>Start the test</span>
-                        <span style={{ color: '#64748b' }}>Read instructions and begin your assessment</span>
-                      </div>
-                    </div>
+                    {myAttempts.length === 0 ? (
+                      <div style={{ color: '#64748b', textAlign: 'center', padding: '16px' }}>No recent activity to display.</div>
+                    ) : (
+                      myAttempts.slice(0, 5).map((attempt, idx) => (
+                        <div key={idx} style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                          <div style={{ 
+                            backgroundColor: attempt.score / attempt.total_questions >= 0.7 ? '#dcfce7' : attempt.score / attempt.total_questions >= 0.4 ? '#fef3c7' : '#fee2e2', 
+                            padding: '8px', 
+                            borderRadius: '8px',
+                            color: attempt.score / attempt.total_questions >= 0.7 ? '#16a34a' : attempt.score / attempt.total_questions >= 0.4 ? '#d97706' : '#dc2626'
+                          }}>
+                            <FileCheck2 size={16} />
+                          </div>
+                          <div style={{ flex: 1 }}>
+                            <div style={{ fontWeight: '600', color: '#0f172a' }}>Test Completed</div>
+                            <div style={{ color: '#64748b', marginTop: '2px' }}>Score: {attempt.score}/{attempt.total_questions} ({(attempt.score/attempt.total_questions*100).toFixed(1)}%)</div>
+                          </div>
+                          <span style={{ color: '#94a3b8', fontSize: '11px' }}>{new Date(attempt.completed_at).toLocaleDateString()}</span>
+                        </div>
+                      ))
+                    )}
                   </div>
                 </div>
 
               </div>
 
-              {/* Your Performance Overview */}
+              {/* Bottom: Active Metrics */}
               <div>
-                <h3 style={{ fontSize: '16px', fontWeight: '700', marginBottom: '16px' }}>Your Performance Overview</h3>
+                <h3 style={{ fontSize: '16px', fontWeight: '700', marginBottom: '16px', color: '#0f172a' }}>Your Active Metrics</h3>
                 <div className="stats-overview-grid">
                   <div className="stats-card">
-                    <div className="stats-card-icon" style={{ backgroundColor: '#fff7ed', color: '#ea580c' }}>📝</div>
+                    <div className="stats-card-icon" style={{ backgroundColor: '#fff7ed', color: '#ea580c' }}>
+                      <ClipboardEdit size={24} />
+                    </div>
                     <div className="stats-card-info">
-                      <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '600' }}>Tests Taken</span>
-                      <span className="stats-card-value">24</span>
-                      <span style={{ fontSize: '10px', color: 'var(--color-success)', fontWeight: '600' }}>+5 this month</span>
+                      <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '600', textTransform: 'uppercase' }}>Tests Taken</span>
+                      <span className="stats-card-value">{myAttempts.length}</span>
+                      <span className="stats-card-change" style={{ color: 'var(--color-success)' }}>+5 this month</span>
                     </div>
                   </div>
 
                   <div className="stats-card">
-                    <div className="stats-card-icon" style={{ backgroundColor: '#dcfce7', color: 'var(--color-success)' }}>🎯</div>
+                    <div className="stats-card-icon" style={{ backgroundColor: '#dcfce7', color: 'var(--color-success)' }}>
+                      <Target size={24} />
+                    </div>
                     <div className="stats-card-info">
-                      <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '600' }}>Average Score</span>
-                      <span className="stats-card-value">78.6%</span>
-                      <span style={{ fontSize: '10px', color: 'var(--color-success)', fontWeight: '600' }}>+12% from last month</span>
+                      <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '600', textTransform: 'uppercase' }}>Average Score</span>
+                      <span className="stats-card-value">{averageAccuracy}%</span>
+                      <span className="stats-card-change" style={{ color: 'var(--color-success)' }}>+12% from last month</span>
                     </div>
                   </div>
 
                   <div className="stats-card">
-                    <div className="stats-card-icon" style={{ backgroundColor: '#e0f2fe', color: '#0284c7' }}>✅</div>
+                    <div className="stats-card-icon" style={{ backgroundColor: '#e0f2fe', color: '#0284c7' }}>
+                      <CheckSquare size={24} />
+                    </div>
                     <div className="stats-card-info">
-                      <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '600' }}>Tests Completed</span>
-                      <span className="stats-card-value">18</span>
-                      <span style={{ fontSize: '10px', color: 'var(--color-success)', fontWeight: '600' }}>+4 this month</span>
+                      <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '600', textTransform: 'uppercase' }}>Tests Completed</span>
+                      <span className="stats-card-value">{myAttempts.length}</span>
+                      <span className="stats-card-change" style={{ color: 'var(--color-success)' }}>+4 this month</span>
                     </div>
                   </div>
 
                   <div className="stats-card">
-                    <div className="stats-card-icon" style={{ backgroundColor: '#f3e8ff', color: '#a855f7' }}>📈</div>
+                    <div className="stats-card-icon" style={{ backgroundColor: '#f3e8ff', color: '#a855f7' }}>
+                      <TrendingUp size={24} />
+                    </div>
                     <div className="stats-card-info">
-                      <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '600' }}>Average Improvement</span>
-                      <span className="stats-card-value">+12.4%</span>
-                      <span style={{ fontSize: '10px', color: '#64748b' }}>Compared to your previous scores</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Quick Actions Row */}
-              <div>
-                <h3 style={{ fontSize: '16px', fontWeight: '700', marginBottom: '16px' }}>Quick Actions</h3>
-                <div className="quick-action-card-grid">
-                  <div onClick={() => setActiveTab('lobby')} className="quick-action-item">
-                    <span style={{ fontSize: '20px' }}>📝</span>
-                    <div>
-                      <div className="quick-action-item-title">Practice Now</div>
-                      <div className="quick-action-item-desc">Take a quick test to sharpen your skills</div>
-                    </div>
-                  </div>
-
-                  <div onClick={() => setActiveTab('review_attempts')} className="quick-action-item">
-                    <span style={{ fontSize: '20px' }}>📊</span>
-                    <div>
-                      <div className="quick-action-item-title">View Results</div>
-                      <div className="quick-action-item-desc">Check your performance and score history</div>
-                    </div>
-                  </div>
-
-                  <div onClick={() => setActiveTab('review_attempts')} className="quick-action-item">
-                    <span style={{ fontSize: '20px' }}>📁</span>
-                    <div>
-                      <div className="quick-action-item-title">Review Attempts</div>
-                      <div className="quick-action-item-desc">Review all your previous attempts</div>
-                    </div>
-                  </div>
-
-                  <div onClick={() => setActiveTab('leaderboard')} className="quick-action-item">
-                    <span style={{ fontSize: '20px' }}>🏆</span>
-                    <div>
-                      <div className="quick-action-item-title">Leaderboard</div>
-                      <div className="quick-action-item-desc">See how you rank among others</div>
+                      <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '600', textTransform: 'uppercase' }}>Average Performance</span>
+                      <span className="stats-card-value">{myAttempts.length > 0 ? 'Top 16%' : 'N/A'}</span>
+                      <span className="stats-card-change" style={{ color: 'var(--color-success)' }}>Better than 84% of students</span>
                     </div>
                   </div>
                 </div>
@@ -1622,161 +1567,122 @@ Content-Type: text/html; charset=UTF-8
           {/* TAB 3: REVIEW ATTEMPTS (CALENDAR GRID INTEGRATION) */}
           {activeTab === 'review_attempts' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-              
-              {/* Header */}
               <div>
                 <h1 style={{ fontSize: '28px', fontWeight: '700' }}>Review Attempts</h1>
                 <p style={{ color: 'var(--color-on-surface-variant)', fontSize: '14px', marginTop: '4px' }}>
-                  Review your past attempts and analyze your performance.
+                  Analyze your performance history and review answers from past tests.
                 </p>
               </div>
 
-              {/* Two Column Layout */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '32px' }}>
-                
-                {/* Left side: Calendar with popovers & attempts on select */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-                  
-                  <div className="calendar-card">
-                    <div className="calendar-header-row">
-                      <h3 style={{ fontSize: '16px', fontWeight: '700' }}>June 2025</h3>
-                      <div style={{ display: 'flex', gap: '8px' }}>
-                        <button onClick={() => setSelectedDate(new Date(2025, 5, 7))} className="btn btn-secondary" style={{ padding: '4px 10px', fontSize: '12px' }}>Today</button>
-                      </div>
-                    </div>
-
-                    <div className="calendar-days-grid">
-                      <div className="calendar-weekday">Sun</div>
-                      <div className="calendar-weekday">Mon</div>
-                      <div className="calendar-weekday">Tue</div>
-                      <div className="calendar-weekday">Wed</div>
-                      <div className="calendar-weekday">Thu</div>
-                      <div className="calendar-weekday">Fri</div>
-                      <div className="calendar-weekday">Sat</div>
-
-                      {/* June 2025 Day Cells */}
-                      {Array.from({ length: 30 }, (_, i) => {
-                        const dayNum = i + 1;
-                        const isSelected = selectedDate.getDate() === dayNum && selectedDate.getMonth() === 5;
-                        const isToday = dayNum === 7;
-                        
-                        return (
-                          <div
-                            key={dayNum}
-                            onClick={() => setSelectedDate(new Date(2025, 5, dayNum))}
-                            className={`calendar-day-cell ${isSelected ? 'selected' : ''} ${isToday ? 'today' : ''}`}
-                          >
-                            <span className="calendar-day-num">{dayNum}</span>
-                            <div className="calendar-dots-container">
-                              {dayNum === 7 && (
-                                <>
-                                  <span className="calendar-dot calendar-dot-quiz" title="Physics Quiz"></span>
-                                  <span className="calendar-dot calendar-dot-assignment" title="Math Assignment"></span>
-                                  <span className="calendar-dot calendar-dot-result" title="Chemistry Test"></span>
-                                </>
-                              )}
-                              {dayNum === 6 && (
-                                <span className="calendar-dot calendar-dot-assignment" title="Math Assignment"></span>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px' }}>
+                {/* Left: Calendar Component */}
+                <div className="calendar-card">
+                  <div className="calendar-header-row">
+                    <h3 style={{ fontSize: '16px', fontWeight: '700' }}>June 2025</h3>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button className="btn btn-secondary" style={{ padding: '4px 10px', fontSize: '12px' }}>Today</button>
+                      <button className="btn btn-secondary" style={{ padding: '4px 8px', fontSize: '12px' }}>&lt;</button>
+                      <button className="btn btn-secondary" style={{ padding: '4px 8px', fontSize: '12px' }}>&gt;</button>
                     </div>
                   </div>
 
-                  {/* Day Detailed attempts list */}
-                  <div className="card">
-                    <h3 style={{ fontSize: '15px', fontWeight: '700', marginBottom: '16px' }}>
-                      Tests on {selectedDate.getDate()} June 2025
-                    </h3>
+                  <div className="calendar-days-grid">
+                    <div className="calendar-weekday">Sun</div>
+                    <div className="calendar-weekday">Mon</div>
+                    <div className="calendar-weekday">Tue</div>
+                    <div className="calendar-weekday">Wed</div>
+                    <div className="calendar-weekday">Thu</div>
+                    <div className="calendar-weekday">Fri</div>
+                    <div className="calendar-weekday">Sat</div>
 
-                    {/* Filter attempts dynamically */}
-                    {(() => {
-                      const dayAttempts = myAttempts.filter(att => {
-                        const d = new Date(att.completed_at);
-                        return d.getDate() === selectedDate.getDate() && d.getMonth() === selectedDate.getMonth();
-                      });
-
-                      if (dayAttempts.length === 0) {
-                        return (
-                          <div style={{ textAlign: 'center', padding: '32px', color: '#64748b', fontSize: '13px' }}>
-                            No assessments completed on this day. Try selecting June 6 or June 7!
-                          </div>
-                        );
-                      }
-
+                    {/* Simple Calendar Grid Mockup */}
+                    {Array.from({ length: 30 }, (_, i) => {
+                      const dayNum = i + 1;
+                      const isSelected = selectedDate.getDate() === dayNum;
                       return (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                          {dayAttempts.map(att => {
-                            const pct = Math.round((att.score / att.total_questions) * 100);
-                            const durationText = att.time_taken_seconds
-                              ? `${Math.floor(att.time_taken_seconds / 60)}m ${att.time_taken_seconds % 60}s`
-                              : '21m 32s';
-
-                            return (
-                              <div key={att.id} style={{ border: '1px solid var(--color-outline-variant)', borderRadius: 'var(--radius-default)', padding: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                  <div>
-                                    <h4 style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>{att.test_title}</h4>
-                                    <span style={{ fontSize: '11px', color: '#64748b' }}>Submitted: {new Date(att.completed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                                  </div>
-                                  <span className="chip chip-success" style={{ fontSize: '12px' }}>{pct}% Score</span>
-                                </div>
-
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#f8fafc', padding: '12px', borderRadius: '6px', fontSize: '12px', color: '#475569' }}>
-                                  <div><strong>Questions:</strong> {att.total_questions}</div>
-                                  <div><strong>Correct:</strong> {att.score}</div>
-                                  <div><strong>Incorrect:</strong> {att.total_questions - att.score}</div>
-                                  <div><strong>Time Taken:</strong> {durationText}</div>
-                                </div>
-
-                                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                                  <button onClick={() => handleReviewPastAttempt(att)} className="btn btn-primary" style={{ padding: '8px 20px', fontSize: '12px', borderRadius: '4px' }}>
-                                    Review Attempt
-                                  </button>
-                                </div>
-                              </div>
-                            );
-                          })}
+                        <div
+                          key={dayNum}
+                          onClick={() => setSelectedDate(new Date(2025, 5, dayNum))}
+                          className={`calendar-day-cell ${isSelected ? 'selected' : ''}`}
+                        >
+                          <span className="calendar-day-num">{dayNum}</span>
+                          <div className="calendar-dots-container">
+                            {/* Randomly mock dots for visual effect */}
+                            {dayNum % 7 === 0 && <span className="calendar-dot calendar-dot-test"></span>}
+                            {dayNum % 5 === 0 && <span className="calendar-dot calendar-dot-quiz"></span>}
+                          </div>
                         </div>
                       );
-                    })()}
+                    })}
+                  </div>
+                  
+                  <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', marginTop: '16px', fontSize: '11px', color: '#64748b' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <span className="calendar-dot calendar-dot-test"></span> Test
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <span className="calendar-dot calendar-dot-quiz"></span> Quiz
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <span className="calendar-dot calendar-dot-assignment"></span> Assignment
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right: Past Attempts List & Analysis */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                  
+                  {/* Past Attempts */}
+                  <div className="card">
+                    <h3 style={{ fontSize: '16px', fontWeight: '700', marginBottom: '20px' }}>Your Past Attempts</h3>
+                    
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                      {myAttempts.length === 0 ? (
+                        <div style={{ textAlign: 'center', padding: '40px', color: '#64748b' }}>
+                          <ClipboardList size={40} style={{ margin: '0 auto 16px', opacity: 0.5 }} />
+                          <p>You have not completed any tests yet.</p>
+                        </div>
+                      ) : (
+                        myAttempts.map((attempt) => {
+                          const percentage = Math.round((attempt.score / attempt.total_questions) * 100);
+                          let statusColor = percentage >= 70 ? '#16a34a' : percentage >= 40 ? '#d97706' : '#dc2626';
+                          let statusBg = percentage >= 70 ? '#dcfce7' : percentage >= 40 ? '#fef3c7' : '#fee2e2';
+
+                          return (
+                            <div key={attempt.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', border: '1px solid #e2e8f0', borderRadius: '12px' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                                <div style={{ backgroundColor: statusBg, color: statusColor, padding: '12px', borderRadius: '10px' }}>
+                                  <FileText size={24} />
+                                </div>
+                                <div>
+                                  <h4 style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>Completed Test</h4>
+                                  <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                      <Calendar size={14} />
+                                      {new Date(attempt.completed_at).toLocaleDateString()}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+                                <div style={{ textAlign: 'right' }}>
+                                  <div style={{ fontSize: '16px', fontWeight: '700', color: statusColor }}>{percentage}%</div>
+                                  <div style={{ fontSize: '11px', color: '#64748b' }}>{attempt.score} / {attempt.total_questions} Points</div>
+                                </div>
+                                <button className="btn btn-secondary" style={{ padding: '8px 16px', fontSize: '13px' }} onClick={() => handleReviewPastAttempt(attempt)}>
+                                  Review
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
                   </div>
 
                 </div>
-
-                {/* Right side: Recent Attempts quick review list */}
-                <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                  <h3 style={{ fontSize: '15px', fontWeight: '700' }}>Recent Attempts</h3>
-                  
-                  {myAttempts.length === 0 ? (
-                    <div style={{ textAlign: 'center', padding: '24px', color: '#64748b' }}>No attempts recorded yet.</div>
-                  ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                      {myAttempts.map(att => {
-                        const pct = Math.round((att.score / att.total_questions) * 100);
-                        return (
-                          <div key={att.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', border: '1px solid var(--color-outline-variant)', borderRadius: 'var(--radius-default)' }}>
-                            <div>
-                              <h4 style={{ fontSize: '13px', fontWeight: '700' }}>{att.test_title}</h4>
-                              <span style={{ fontSize: '11px', color: '#94a3b8' }}>{new Date(att.completed_at).toLocaleDateString()}</span>
-                            </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                              <span style={{ fontWeight: '700', fontSize: '13px', color: pct >= 50 ? 'var(--color-success)' : 'var(--color-error)' }}>{pct}%</span>
-                              <button onClick={() => handleReviewPastAttempt(att)} className="btn btn-secondary" style={{ padding: '6px 12px', fontSize: '11px', borderRadius: '4px' }}>
-                                Review
-                              </button>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-
               </div>
-
             </div>
           )}
 
@@ -1958,9 +1864,9 @@ Content-Type: text/html; charset=UTF-8
                       <h4 style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a', marginBottom: '12px' }}>About Leaderboard</h4>
                       
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '12px', color: '#64748b' }}>
-                        <div>🏆 <strong>Rank is based on marks:</strong> Higher marks in the selected test gets a higher rank.</div>
-                        <div>📊 <strong>Ties are broken by time:</strong> If marks are same, a faster attempt gets a higher rank.</div>
-                        <div>🛡️ <strong>Fair and accurate:</strong> Results are calculated instantly and fairly for all students.</div>
+                        <div style={{display:"flex",gap:"8px"}}><Trophy size={16} color="#eab308" /> <span><strong>Rank is based on marks:</strong> Higher marks in the selected test gets a higher rank.</span></div>
+                        <div style={{display:"flex",gap:"8px"}}><BarChart3 size={16} color="#3b82f6" /> <span><strong>Ties are broken by time:</strong> If marks are same, a faster attempt gets a higher rank.</span></div>
+                        <div style={{display:"flex",gap:"8px"}}><ShieldCheck size={16} color="#10b981" /> <span><strong>Fair and accurate:</strong> Results are calculated instantly and fairly for all students.</span></div>
                       </div>
                     </div>
 
