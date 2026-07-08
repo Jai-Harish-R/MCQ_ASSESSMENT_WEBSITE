@@ -241,7 +241,7 @@ export default function StudentPortal({ user, isDemo, onLogout }: StudentPortalP
   const [myAttempts, setMyAttempts] = useState<Attempt[]>([]);
   const [availableTests, setAvailableTests] = useState<Test[]>([]);
 
-  const [isLoadingData, setIsLoadingData] = useState(true);
+  const [, setIsLoadingData] = useState(true);
 
   // Interactive Calendar and Popover states
   const [selectedDate, setSelectedDate] = useState<Date>(new Date(2025, 5, 7)); // Default to June 7, 2025
@@ -1024,8 +1024,20 @@ Content-Type: text/html; charset=UTF-8
       if (type === 'assignment') assignments++;
       if (type === 'live_exam') live_exams++;
     });
+    
+    // Generate donut chart conic gradient
+    let currentPct = 0;
+    const gradients = [];
+    if (tests > 0) { const p = (tests/total)*100; gradients.push(`#3b82f6 ${currentPct}% ${currentPct + p}%`); currentPct += p; }
+    if (quizzes > 0) { const p = (quizzes/total)*100; gradients.push(`#a855f7 ${currentPct}% ${currentPct + p}%`); currentPct += p; }
+    if (assignments > 0) { const p = (assignments/total)*100; gradients.push(`#f59e0b ${currentPct}% ${currentPct + p}%`); currentPct += p; }
+    if (live_exams > 0) { const p = (live_exams/total)*100; gradients.push(`#ef4444 ${currentPct}% ${currentPct + p}%`); currentPct += p; }
+    
+    const bg = gradients.length > 0 ? `conic-gradient(${gradients.join(', ')})` : 'conic-gradient(#f1f5f9 0% 100%)';
+
     return {
       total,
+      bg,
       tests: { count: tests, pct: total ? Math.round((tests/total)*100) : 0 },
       quizzes: { count: quizzes, pct: total ? Math.round((quizzes/total)*100) : 0 },
       assignments: { count: assignments, pct: total ? Math.round((assignments/total)*100) : 0 },
@@ -1172,22 +1184,13 @@ Content-Type: text/html; charset=UTF-8
             <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
               
               {/* Welcome Section */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <div>
-                  <h1 style={{ fontSize: '32px', fontWeight: '800', color: '#0f172a', letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    Welcome back, {studentDisplayName || 'jhgno.official'}! 👋
-                  </h1>
-                  <p style={{ color: '#64748b', fontSize: '15px', marginTop: '6px', fontWeight: '500' }}>
-                    Track your progress, learn consistently, and achieve your goals.
-                  </p>
-                </div>
-                {/* Live data indicator */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px', borderRadius: '20px', backgroundColor: isLoadingData ? '#f1f5f9' : '#dcfce7', border: `1px solid ${isLoadingData ? '#e2e8f0' : '#86efac'}`, transition: 'all 0.3s' }}>
-                  <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: isLoadingData ? '#94a3b8' : '#16a34a', animation: isLoadingData ? 'none' : 'pulse 2s infinite' }} />
-                  <span style={{ fontSize: '12px', fontWeight: '700', color: isLoadingData ? '#64748b' : '#16a34a' }}>
-                    {isLoadingData ? 'Syncing...' : 'Live Data'}
-                  </span>
-                </div>
+              <div>
+                <h1 style={{ fontSize: '32px', fontWeight: '800', color: '#0f172a', letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  Welcome back, {studentDisplayName || 'jhgno.official'}! 👋
+                </h1>
+                <p style={{ color: '#64748b', fontSize: '15px', marginTop: '6px', fontWeight: '500' }}>
+                  Track your progress, learn consistently, and achieve your goals.
+                </p>
               </div>
 
               {/* 4 Stat Cards Row */}
@@ -1209,7 +1212,7 @@ Content-Type: text/html; charset=UTF-8
                   </div>
                   <div>
                     <div style={{ fontSize: '13px', fontWeight: '600', color: '#64748b', marginBottom: '4px' }}>Average Score</div>
-                    <div style={{ fontSize: '28px', fontWeight: '800', color: '#0f172a', lineHeight: '1.2' }}>{averageAccuracy}%</div>
+                    <div style={{ fontSize: '28px', fontWeight: '800', color: '#0f172a', lineHeight: '1.2' }}>{averageAccuracy || 0}%</div>
                     <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}><span style={{ color: '#16a34a', fontWeight: '600' }}>+12%</span> from last month</div>
                   </div>
                 </div>
@@ -1231,7 +1234,7 @@ Content-Type: text/html; charset=UTF-8
                   </div>
                   <div>
                     <div style={{ fontSize: '13px', fontWeight: '600', color: '#64748b', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>Average Performance <AlertCircle size={12} /></div>
-                    <div style={{ fontSize: '28px', fontWeight: '800', color: '#0f172a', lineHeight: '1.2' }}>Top 16%</div>
+                    <div style={{ fontSize: '28px', fontWeight: '800', color: '#0f172a', lineHeight: '1.2' }}>Top {Math.max(1, Math.round(100 - (averageAccuracy || 0)))}%</div>
                     <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}>Better than 84% of students</div>
                   </div>
                 </div>
@@ -1246,7 +1249,7 @@ Content-Type: text/html; charset=UTF-8
                   {/* Calendar Box */}
                   <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', padding: '24px', boxShadow: '0 1px 3px rgba(0,0,0,0.02)', border: '1px solid #f1f5f9' }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
-                      <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#0f172a', margin: 0 }}>June 2025</h3>
+                      <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#0f172a', margin: 0 }}>{new Date().toLocaleString('default', { month: 'long', year: 'numeric' })}</h3>
                       <div style={{ display: 'flex', gap: '8px' }}>
                         <button style={{ padding: '6px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', backgroundColor: '#ffffff', fontSize: '13px', fontWeight: '600', color: '#0f172a', cursor: 'pointer' }}>Today</button>
                         <button style={{ padding: '6px 10px', borderRadius: '8px', border: '1px solid #e2e8f0', backgroundColor: '#ffffff', fontSize: '13px', fontWeight: '600', color: '#0f172a', cursor: 'pointer' }}>&lt;</button>
@@ -1259,36 +1262,53 @@ Content-Type: text/html; charset=UTF-8
                         <div key={day} style={{ fontSize: '12px', fontWeight: '600', color: '#64748b', paddingBottom: '8px' }}>{day}</div>
                       ))}
                       
-                      {/* Fake Calendar Grid for Visuals */}
+                      {/* Dynamic Real-time Calendar Grid */}
                       {Array.from({length: 35}, (_, i) => {
-                        const date = i - 4; // Start offset
-                        if (date <= 0) return <div key={i} style={{ color: '#cbd5e1', padding: '16px 0', fontSize: '14px', fontWeight: '500' }}>{31 + date}</div>;
-                        if (date > 30) return <div key={i} style={{ color: '#cbd5e1', padding: '16px 0', fontSize: '14px', fontWeight: '500' }}>{date - 30}</div>;
+                        const today = new Date();
+                        const year = today.getFullYear();
+                        const month = today.getMonth();
+                        const firstDay = new Date(year, month, 1).getDay();
+                        const daysInMonth = new Date(year, month + 1, 0).getDate();
+                        const daysInPrevMonth = new Date(year, month, 0).getDate();
                         
-                        const isSelected = date === 7;
+                        const dateNum = i - firstDay + 1;
+                        let isCurrentMonth = true;
+                        let displayNum = dateNum;
+                        
+                        if (dateNum <= 0) {
+                          isCurrentMonth = false;
+                          displayNum = daysInPrevMonth + dateNum;
+                        } else if (dateNum > daysInMonth) {
+                          isCurrentMonth = false;
+                          displayNum = dateNum - daysInMonth;
+                        }
+                        
+                        const currentDateString = new Date(year, isCurrentMonth ? month : (dateNum <= 0 ? month - 1 : month + 1), displayNum).toISOString().split('T')[0];
+                        
+                        // Check if any tests were taken on this day
+                        const dayAttempts = myAttempts.filter(att => new Date(att.completed_at).toISOString().split('T')[0] === currentDateString);
+                        const isToday = isCurrentMonth && displayNum === today.getDate();
                         
                         return (
                           <div key={i} style={{ 
                             position: 'relative', padding: '12px 0 24px', fontSize: '14px', fontWeight: '600', 
-                            color: isSelected ? '#ea580c' : '#0f172a',
-                            backgroundColor: isSelected ? '#fff7ed' : 'transparent',
+                            color: isCurrentMonth ? (isToday ? '#ea580c' : '#0f172a') : '#cbd5e1',
+                            backgroundColor: isToday ? '#fff7ed' : 'transparent',
                             borderRadius: '12px', cursor: 'pointer',
                             display: 'flex', flexDirection: 'column', alignItems: 'center'
                           }}>
-                            {date}
+                            {displayNum}
                             
-                            {/* Render Icons for Specific Dates as per image */}
-                            {(date === 2 || date === 16 || date === 17) && <FileText size={14} color="#3b82f6" style={{ position: 'absolute', bottom: '6px' }} />}
-                            {(date === 3 || date === 10) && <ClipboardEdit size={14} color="#ea580c" style={{ position: 'absolute', bottom: '6px' }} />}
-                            {(date === 4 || date === 9 || date === 24) && <Target size={14} color="#22c55e" style={{ position: 'absolute', bottom: '6px' }} />}
-                            {(date === 11 || date === 18 || date === 25) && <Trophy size={14} color="#a855f7" style={{ position: 'absolute', bottom: '6px' }} />}
-                            
-                            {isSelected && (
-                              <div style={{ position: 'absolute', bottom: '6px', display: 'flex', gap: '4px' }}>
-                                <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#3b82f6' }}></div>
-                                <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#ea580c' }}></div>
-                                <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#22c55e' }}></div>
-                              </div>
+                            {/* Render Icons for Specific Dates dynamically based on myAttempts */}
+                            {dayAttempts.length > 0 && (
+                                <div style={{ position: 'absolute', bottom: '6px', display: 'flex', gap: '2px' }}>
+                                  {dayAttempts.slice(0, 3).map((att, idx) => {
+                                    if (att.test_type === 'quiz') return <FileText key={idx} size={14} color="#3b82f6" />;
+                                    if (att.test_type === 'assignment') return <ClipboardEdit key={idx} size={14} color="#ea580c" />;
+                                    if (att.test_type === 'live_exam') return <Trophy key={idx} size={14} color="#a855f7" />;
+                                    return <Target key={idx} size={14} color="#22c55e" />; // test/result
+                                  })}
+                                </div>
                             )}
                           </div>
                         )
@@ -1315,9 +1335,12 @@ Content-Type: text/html; charset=UTF-8
                       
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                         {/* Dynamic Donut Chart */}
-                        <div style={{ width: '120px', height: '120px', borderRadius: '50%', border: '24px solid #3b82f6', borderTopColor: '#f59e0b', borderRightColor: '#a855f7', borderBottomColor: '#22c55e', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
+                        <div style={{ width: '120px', height: '120px', borderRadius: '50%', background: assessmentsOverview.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', position: 'relative' }}>
+                          <div style={{ width: '72px', height: '72px', backgroundColor: '#ffffff', borderRadius: '50%', position: 'absolute' }}></div>
+                          <div style={{ zIndex: 10, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                           <span style={{ fontSize: '20px', fontWeight: '800', color: '#0f172a' }}>{assessmentsOverview.total || 0}</span>
                           <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '600' }}>Total</span>
+                          </div>
                         </div>
                         
                         {/* List */}
