@@ -15,7 +15,9 @@ export default function App() {
   const [user, setUser] = useState<UserState | null>(null);
   const [isDemo, setIsDemo] = useState(false);
   const [initializing, setInitializing] = useState(true);
-  const [requiresPasswordReset, setRequiresPasswordReset] = useState(false);
+  const [requiresPasswordReset, setRequiresPasswordReset] = useState(() => {
+    return typeof window !== 'undefined' && window.location.hash.includes('type=recovery');
+  });
 
   useEffect(() => {
     // 1. Check if user is already logged in on Supabase
@@ -129,20 +131,24 @@ export default function App() {
     );
   }
 
-  if (!user) {
-    return <AuthGate onAuthSuccess={handleAuthSuccess} />;
-  }
-
   if (requiresPasswordReset) {
     return (
       <UpdatePassword 
-        onSuccess={() => setRequiresPasswordReset(false)} 
+        onSuccess={() => {
+          setRequiresPasswordReset(false);
+          window.history.replaceState(null, '', window.location.pathname);
+        }} 
         onCancel={() => {
           setRequiresPasswordReset(false);
+          window.history.replaceState(null, '', window.location.pathname);
           supabase.auth.signOut();
         }} 
       />
     );
+  }
+
+  if (!user) {
+    return <AuthGate onAuthSuccess={handleAuthSuccess} />;
   }
 
   return (
