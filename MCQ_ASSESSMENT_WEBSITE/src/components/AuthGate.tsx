@@ -12,11 +12,13 @@ export default function AuthGate({ onAuthSuccess }: AuthGateProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
+  const [username, setUsername] = useState('');
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
   const [clickCount, setClickCount] = useState(0);
   const [showSandbox, setShowSandbox] = useState(false);
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
 
   const handleLogoClick = () => {
     const newCount = clickCount + 1;
@@ -48,6 +50,7 @@ export default function AuthGate({ onAuthSuccess }: AuthGateProps) {
             data: {
               role: activeTab,
               full_name: fullName,
+              username: username,
             },
           },
         });
@@ -106,6 +109,33 @@ export default function AuthGate({ onAuthSuccess }: AuthGateProps) {
     } catch (err: any) {
       console.error("Auth error:", err);
       setErrorMsg(err.message || 'An error occurred during authentication.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMsg('');
+    setSuccessMsg('');
+    
+    if (!email) {
+      setErrorMsg('Please enter your email address to reset your password.');
+      return;
+    }
+    
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + '/reset-password',
+      });
+
+      if (error) throw error;
+      
+      setSuccessMsg('Password reset instructions have been sent to your email.');
+    } catch (err: any) {
+      console.error("Password reset error:", err);
+      setErrorMsg(err.message || 'An error occurred during password reset.');
     } finally {
       setLoading(false);
     }
@@ -355,87 +385,171 @@ export default function AuthGate({ onAuthSuccess }: AuthGateProps) {
           )}
 
           {/* Form */}
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            {isSignUp && (
+          {isForgotPassword ? (
+            <form onSubmit={handleForgotPassword} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div>
-                <label className="input-label">Full Name</label>
+                <label className="input-label">Email Address</label>
                 <div style={{ position: 'relative' }}>
-                  <User size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                  <Mail size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
                   <input
-                    type="text"
+                    type="email"
                     className="input-field"
                     style={{ paddingLeft: '38px' }}
-                    placeholder="e.g. Harish Kumar"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
+                    placeholder="you@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     disabled={loading}
                     required
                   />
                 </div>
               </div>
-            )}
-
-            <div>
-              <label className="input-label">Email Address</label>
-              <div style={{ position: 'relative' }}>
-                <Mail size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
-                <input
-                  type="email"
-                  className="input-field"
-                  style={{ paddingLeft: '38px' }}
-                  placeholder="you@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  disabled={loading}
-                  required
-                />
+              <button
+                type="submit"
+                className="btn btn-primary"
+                style={{ width: '100%', height: '44px', marginTop: '12px', borderRadius: 'var(--radius-sm)' }}
+                disabled={loading}
+              >
+                {loading ? 'Processing...' : 'Send Reset Link'}
+              </button>
+              
+              <div style={{ textAlign: 'center', marginTop: '16px' }}>
+                <button
+                  type="button"
+                  onClick={() => { setIsForgotPassword(false); setErrorMsg(''); setSuccessMsg(''); }}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#64748b',
+                    fontSize: '13px',
+                    fontWeight: '500',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px',
+                    width: '100%'
+                  }}
+                >
+                  <ArrowRight size={14} style={{ transform: 'rotate(180deg)' }} /> Back to Sign In
+                </button>
               </div>
-            </div>
+            </form>
+          ) : (
+            <>
+              <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                {isSignUp && (
+                  <>
+                    <div>
+                      <label className="input-label">Full Name</label>
+                      <div style={{ position: 'relative' }}>
+                        <User size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                        <input
+                          type="text"
+                          className="input-field"
+                          style={{ paddingLeft: '38px' }}
+                          placeholder="e.g. Harish Kumar"
+                          value={fullName}
+                          onChange={(e) => setFullName(e.target.value)}
+                          disabled={loading}
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="input-label">Username</label>
+                      <div style={{ position: 'relative' }}>
+                        <User size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                        <input
+                          type="text"
+                          className="input-field"
+                          style={{ paddingLeft: '38px' }}
+                          placeholder="e.g. harish_123"
+                          value={username}
+                          onChange={(e) => setUsername(e.target.value)}
+                          disabled={loading}
+                          required
+                        />
+                      </div>
+                    </div>
+                  </>
+                )}
 
-            <div>
-              <label className="input-label">Password</label>
-              <div style={{ position: 'relative' }}>
-                <Lock size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
-                <input
-                  type="password"
-                  className="input-field"
-                  style={{ paddingLeft: '38px' }}
-                  placeholder="••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                <div>
+                  <label className="input-label">Email Address</label>
+                  <div style={{ position: 'relative' }}>
+                    <Mail size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                    <input
+                      type="email"
+                      className="input-field"
+                      style={{ paddingLeft: '38px' }}
+                      placeholder="you@example.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      disabled={loading}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  {!isSignUp ? (
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                      <label className="input-label" style={{ marginBottom: 0 }}>Password</label>
+                      <button 
+                        type="button"
+                        onClick={() => { setIsForgotPassword(true); setErrorMsg(''); setSuccessMsg(''); }}
+                        style={{ background: 'none', border: 'none', color: '#ea580c', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}
+                      >
+                        Forgot Password?
+                      </button>
+                    </div>
+                  ) : (
+                    <label className="input-label">Password</label>
+                  )}
+                  <div style={{ position: 'relative' }}>
+                    <Lock size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                    <input
+                      type="password"
+                      className="input-field"
+                      style={{ paddingLeft: '38px' }}
+                      placeholder="••••••"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      disabled={loading}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  style={{ width: '100%', height: '44px', marginTop: '12px', borderRadius: 'var(--radius-sm)' }}
                   disabled={loading}
-                  required
-                />
+                >
+                  {loading ? 'Processing...' : isSignUp ? `Sign Up` : 'Sign In'}
+                  {!loading && <ArrowRight size={16} />}
+                </button>
+              </form>
+
+              {/* Toggle Log In / Sign Up */}
+              <div style={{ textAlign: 'center', marginTop: '20px' }}>
+                <button
+                  onClick={() => { setIsSignUp(!isSignUp); setErrorMsg(''); setSuccessMsg(''); }}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#2563eb',
+                    fontSize: '13px',
+                    fontWeight: '500',
+                    cursor: 'pointer'
+                  }}
+                >
+                  {isSignUp ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}
+                </button>
               </div>
-            </div>
-
-            <button
-              type="submit"
-              className="btn btn-primary"
-              style={{ width: '100%', height: '44px', marginTop: '12px', borderRadius: 'var(--radius-sm)' }}
-              disabled={loading}
-            >
-              {loading ? 'Processing...' : isSignUp ? `Sign Up` : 'Sign In'}
-              {!loading && <ArrowRight size={16} />}
-            </button>
-          </form>
-
-          {/* Toggle Log In / Sign Up */}
-          <div style={{ textAlign: 'center', marginTop: '20px' }}>
-            <button
-              onClick={() => { setIsSignUp(!isSignUp); setErrorMsg(''); setSuccessMsg(''); }}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: '#2563eb',
-                fontSize: '13px',
-                fontWeight: '500',
-                cursor: 'pointer'
-              }}
-            >
-              {isSignUp ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}
-            </button>
-          </div>
+            </>
+          )}
 
           {/* Sandbox Development bypass */}
           {showSandbox && (
