@@ -1002,6 +1002,35 @@ Content-Type: text/html; charset=UTF-8
   
 
   // STANDARD PORTAL WITH SIDEBAR
+  
+  const assessmentsOverview = React.useMemo(() => {
+    const total = availableTests.length;
+    let tests = 0, quizzes = 0, assignments = 0, live_exams = 0;
+    availableTests.forEach(t => {
+      const type = t.type || 'test';
+      if (type === 'test') tests++;
+      if (type === 'quiz') quizzes++;
+      if (type === 'assignment') assignments++;
+      if (type === 'live_exam') live_exams++;
+    });
+    return {
+      total,
+      tests: { count: tests, pct: total ? Math.round((tests/total)*100) : 0 },
+      quizzes: { count: quizzes, pct: total ? Math.round((quizzes/total)*100) : 0 },
+      assignments: { count: assignments, pct: total ? Math.round((assignments/total)*100) : 0 },
+      live_exams: { count: live_exams, pct: total ? Math.round((live_exams/total)*100) : 0 },
+    };
+  }, [availableTests]);
+
+  const performanceTrend = React.useMemo(() => {
+    // Get last 4 attempts
+    const recent = [...myAttempts].sort((a, b) => new Date(a.completed_at).getTime() - new Date(b.completed_at).getTime()).slice(-4);
+    while (recent.length < 4) {
+      recent.unshift({ score: 0, total_questions: 1 } as any); // padding
+    }
+    return recent.map(att => Math.round((att.score / att.total_questions) * 100));
+  }, [myAttempts]);
+
   return (
     <div className="edu-app-frame" style={{ backgroundColor: '#fafafa' }}>
       
@@ -1265,18 +1294,18 @@ Content-Type: text/html; charset=UTF-8
                       <p style={{ fontSize: '13px', color: '#64748b', margin: '0 0 24px 0' }}>Your overall activity this month</p>
                       
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        {/* Fake Donut Chart */}
+                        {/* Dynamic Donut Chart */}
                         <div style={{ width: '120px', height: '120px', borderRadius: '50%', border: '24px solid #3b82f6', borderTopColor: '#f59e0b', borderRightColor: '#a855f7', borderBottomColor: '#22c55e', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
-                          <span style={{ fontSize: '20px', fontWeight: '800', color: '#0f172a' }}>24</span>
+                          <span style={{ fontSize: '20px', fontWeight: '800', color: '#0f172a' }}>{assessmentsOverview.total || 0}</span>
                           <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '600' }}>Total</span>
                         </div>
                         
                         {/* List */}
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', flex: 1, paddingLeft: '24px' }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', fontWeight: '600' }}><span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width:'8px',height:'8px',borderRadius:'50%',backgroundColor:'#3b82f6' }}></div> Tests</span> <span>8 (33%)</span></div>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', fontWeight: '600' }}><span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width:'8px',height:'8px',borderRadius:'50%',backgroundColor:'#a855f7' }}></div> Quizzes</span> <span>6 (25%)</span></div>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', fontWeight: '600' }}><span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width:'8px',height:'8px',borderRadius:'50%',backgroundColor:'#f59e0b' }}></div> Assignments</span> <span>6 (25%)</span></div>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', fontWeight: '600' }}><span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width:'8px',height:'8px',borderRadius:'50%',backgroundColor:'#ef4444' }}></div> Live Exams</span> <span>3 (12%)</span></div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', fontWeight: '600' }}><span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width:'8px',height:'8px',borderRadius:'50%',backgroundColor:'#3b82f6' }}></div> Tests</span> <span>{assessmentsOverview.tests.count} ({assessmentsOverview.tests.pct}%)</span></div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', fontWeight: '600' }}><span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width:'8px',height:'8px',borderRadius:'50%',backgroundColor:'#a855f7' }}></div> Quizzes</span> <span>{assessmentsOverview.quizzes.count} ({assessmentsOverview.quizzes.pct}%)</span></div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', fontWeight: '600' }}><span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width:'8px',height:'8px',borderRadius:'50%',backgroundColor:'#f59e0b' }}></div> Assignments</span> <span>{assessmentsOverview.assignments.count} ({assessmentsOverview.assignments.pct}%)</span></div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', fontWeight: '600' }}><span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width:'8px',height:'8px',borderRadius:'50%',backgroundColor:'#ef4444' }}></div> Live Exams</span> <span>{assessmentsOverview.live_exams.count} ({assessmentsOverview.live_exams.pct}%)</span></div>
                         </div>
                       </div>
                     </div>
@@ -1307,10 +1336,10 @@ Content-Type: text/html; charset=UTF-8
                           <path d="M0 110 L50 80 L120 50 L200 30 L300 45" fill="none" stroke="#ea580c" strokeWidth="3" />
                           
                           {/* Points */}
-                          <circle cx="50" cy="80" r="4" fill="#ea580c" />
-                          <circle cx="120" cy="50" r="4" fill="#ea580c" />
-                          <circle cx="200" cy="30" r="4" fill="#ea580c" />
-                          <circle cx="300" cy="45" r="4" fill="#ea580c" />
+                          <circle cx="50" cy={110 - (performanceTrend[0] * 0.9)} r="4" fill="#ea580c" />
+                          <circle cx="120" cy={110 - (performanceTrend[1] * 0.9)} r="4" fill="#ea580c" />
+                          <circle cx="200" cy={110 - (performanceTrend[2] * 0.9)} r="4" fill="#ea580c" />
+                          <circle cx="300" cy={110 - (performanceTrend[3] * 0.9)} r="4" fill="#ea580c" />
                         </svg>
                         {/* Axis Labels */}
                         <div style={{ position: 'absolute', bottom: '-15px', display: 'flex', justifyContent: 'space-between', width: '100%', fontSize: '10px', color: '#94a3b8', fontWeight: '600' }}>
@@ -1394,69 +1423,38 @@ Content-Type: text/html; charset=UTF-8
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                          <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: '#e0f2fe', color: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <FileText size={20} />
-                          </div>
-                          <div>
-                            <div style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>Physics Quiz</div>
-                            <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>09:00 AM - 10:00 AM</div>
-                          </div>
-                        </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                          <span style={{ backgroundColor: '#e0f2fe', color: '#3b82f6', fontSize: '11px', fontWeight: '700', padding: '4px 10px', borderRadius: '20px' }}>Quiz</span>
-                          <ArrowRight size={14} color="#94a3b8" />
-                        </div>
-                      </div>
-
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                          <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: '#fff7ed', color: '#ea580c', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <ClipboardEdit size={20} />
-                          </div>
-                          <div>
-                            <div style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>Math Assignment</div>
-                            <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>11:00 AM - 12:30 PM</div>
-                          </div>
-                        </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                          <span style={{ backgroundColor: '#fff7ed', color: '#ea580c', fontSize: '11px', fontWeight: '700', padding: '4px 10px', borderRadius: '20px' }}>Assignment</span>
-                          <ArrowRight size={14} color="#94a3b8" />
-                        </div>
-                      </div>
-
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                          <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: '#dcfce7', color: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <Target size={20} />
-                          </div>
-                          <div>
-                            <div style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>Chemistry Test</div>
-                            <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>02:00 PM - 03:00 PM</div>
-                          </div>
-                        </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                          <span style={{ backgroundColor: '#dcfce7', color: '#16a34a', fontSize: '11px', fontWeight: '700', padding: '4px 10px', borderRadius: '20px' }}>Test</span>
-                          <ArrowRight size={14} color="#94a3b8" />
-                        </div>
-                      </div>
-
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                          <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: '#f3e8ff', color: '#a855f7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <Trophy size={20} />
-                          </div>
-                          <div>
-                            <div style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>AI Concepts Live Exam</div>
-                            <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>05:00 PM - 06:30 PM</div>
-                          </div>
-                        </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                          <span style={{ backgroundColor: '#f3e8ff', color: '#a855f7', fontSize: '11px', fontWeight: '700', padding: '4px 10px', borderRadius: '20px' }}>Live Exam</span>
-                          <ArrowRight size={14} color="#94a3b8" />
-                        </div>
-                      </div>
+                      {availableTests.length === 0 ? (
+                        <div style={{ fontSize: '13px', color: '#64748b', textAlign: 'center', padding: '20px' }}>No upcoming tests available.</div>
+                      ) : (
+                        availableTests.slice(0, 4).map(test => {
+                          const isQuiz = test.title?.toLowerCase().includes('quiz') || test.type === 'quiz';
+                          const isAssignment = test.title?.toLowerCase().includes('assignment') || test.type === 'assignment';
+                          const isLive = test.title?.toLowerCase().includes('live') || test.type === 'live_exam';
+                          
+                          let bg = '#dcfce7', fg = '#16a34a', typeLabel = 'Test', Icon = Target;
+                          if (isQuiz) { bg = '#e0f2fe'; fg = '#3b82f6'; typeLabel = 'Quiz'; Icon = FileText; }
+                          if (isAssignment) { bg = '#fff7ed'; fg = '#ea580c'; typeLabel = 'Assignment'; Icon = ClipboardEdit; }
+                          if (isLive) { bg = '#f3e8ff'; fg = '#a855f7'; typeLabel = 'Live Exam'; Icon = Trophy; }
+                          
+                          return (
+                            <div key={test.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                                <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: fg, color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                  <Icon size={20} />
+                                </div>
+                                <div>
+                                  <div style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '140px' }}>{test.title}</div>
+                                  <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>{new Date(test.created_at || Date.now()).toLocaleDateString()}</div>
+                                </div>
+                              </div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                <span style={{ backgroundColor: bg, color: fg, fontSize: '11px', fontWeight: '700', padding: '4px 10px', borderRadius: '20px', whiteSpace: 'nowrap' }}>{typeLabel}</span>
+                                <ArrowRight size={14} color="#94a3b8" />
+                              </div>
+                            </div>
+                          );
+                        })
+                      )}
                     </div>
 
                     <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
@@ -1474,34 +1472,31 @@ Content-Type: text/html; charset=UTF-8
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                          <CheckCircle2 size={16} color="#16a34a" />
-                          <span style={{ fontSize: '13px', fontWeight: '600', color: '#0f172a' }}>Physics Quiz submitted</span>
-                        </div>
-                        <span style={{ fontSize: '12px', color: '#94a3b8', fontWeight: '500' }}>2h ago</span>
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                          <Clock3 size={16} color="#ea580c" />
-                          <span style={{ fontSize: '13px', fontWeight: '600', color: '#0f172a' }}>Math Assignment due Nov 8</span>
-                        </div>
-                        <span style={{ fontSize: '12px', color: '#94a3b8', fontWeight: '500' }}>5h ago</span>
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                          <Trophy size={16} color="#a855f7" />
-                          <span style={{ fontSize: '13px', fontWeight: '600', color: '#0f172a' }}>AI Live Exam completed</span>
-                        </div>
-                        <span style={{ fontSize: '12px', color: '#94a3b8', fontWeight: '500' }}>1d ago</span>
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                          <FileText size={16} color="#3b82f6" />
-                          <span style={{ fontSize: '13px', fontWeight: '600', color: '#0f172a' }}>Chemistry Test scheduled</span>
-                        </div>
-                        <span style={{ fontSize: '12px', color: '#94a3b8', fontWeight: '500' }}>2d ago</span>
-                      </div>
+                      {myAttempts.length === 0 ? (
+                        <div style={{ fontSize: '13px', color: '#64748b', textAlign: 'center', padding: '20px' }}>No recent activity found.</div>
+                      ) : (
+                        myAttempts.slice(0, 4).map(attempt => {
+                          const pct = (attempt.score / attempt.total_questions) * 100;
+                          const isPassed = pct >= 40;
+                          
+                          let fg = isPassed ? '#16a34a' : '#ea580c';
+                          let Icon = isPassed ? CheckCircle2 : AlertCircle;
+                          
+                          return (
+                            <div key={attempt.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                <Icon size={16} color={fg} />
+                                <span style={{ fontSize: '13px', fontWeight: '600', color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '180px' }}>
+                                  {attempt.test_title || 'Assessment'} submitted
+                                </span>
+                              </div>
+                              <span style={{ fontSize: '12px', color: '#94a3b8', fontWeight: '500', whiteSpace: 'nowrap' }}>
+                                {new Date(attempt.completed_at).toLocaleDateString()}
+                              </span>
+                            </div>
+                          );
+                        })
+                      )}
                     </div>
                   </div>
 
