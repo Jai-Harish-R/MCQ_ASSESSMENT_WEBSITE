@@ -29,6 +29,7 @@ interface Test {
 }
 
 interface Attempt {
+  test_title?: string;
   test_type?: string;
   id: string;
   test_id: string;
@@ -37,7 +38,6 @@ interface Attempt {
   total_questions: number;
   completed_at: string;
   allowed_retry: boolean;
-  test_title?: string;
   time_taken_seconds?: number;
   student_name?: string;
   answers?: Record<string, number>;
@@ -391,10 +391,29 @@ export default function StudentPortal({ user, isDemo, onLogout }: StudentPortalP
   };
 
   useEffect(() => {
+    let subscription: any = null;
+
     if (activeTab === 'dashboard' || activeTab === 'lobby' || activeTab === 'review_attempts') {
       loadPortalData();
+
+      if (!isDemo) {
+        subscription = supabase.channel('student-dashboard-realtime')
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'test_attempts', filter: `student_email=eq.${user.email}` }, () => {
+            loadPortalData();
+          })
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'tests' }, () => {
+            loadPortalData();
+          })
+          .subscribe();
+      }
     }
-  }, [activeTab, user.id, isDemo]);
+
+    return () => {
+      if (subscription) {
+        supabase.removeChannel(subscription);
+      }
+    };
+  }, [activeTab, user.id, isDemo, user.email]);
 
   // Start timer during exam
   useEffect(() => {
