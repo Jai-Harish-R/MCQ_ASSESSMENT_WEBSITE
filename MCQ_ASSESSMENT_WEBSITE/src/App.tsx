@@ -3,7 +3,6 @@ import { supabase } from './utils/supabase';
 import AuthGate from './components/AuthGate';
 import TeacherDashboard from './components/TeacherDashboard';
 import StudentPortal from './components/StudentPortal';
-import UpdatePassword from './components/UpdatePassword';
 
 interface UserState {
   id: string;
@@ -15,9 +14,6 @@ export default function App() {
   const [user, setUser] = useState<UserState | null>(null);
   const [isDemo, setIsDemo] = useState(false);
   const [initializing, setInitializing] = useState(true);
-  const [requiresPasswordReset, setRequiresPasswordReset] = useState(() => {
-    return typeof window !== 'undefined' && window.location.hash.includes('type=recovery');
-  });
 
   useEffect(() => {
     // 1. Check if user is already logged in on Supabase
@@ -61,11 +57,7 @@ export default function App() {
     checkUser();
 
     // 2. Setup auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'PASSWORD_RECOVERY') {
-        setRequiresPasswordReset(true);
-      }
-
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session?.user) {
         try {
           const { data: profile } = await supabase
@@ -128,22 +120,6 @@ export default function App() {
       }}>
         Initializing Academic Precision secure channel...
       </div>
-    );
-  }
-
-  if (requiresPasswordReset) {
-    return (
-      <UpdatePassword 
-        onSuccess={() => {
-          setRequiresPasswordReset(false);
-          window.history.replaceState(null, '', window.location.pathname);
-        }} 
-        onCancel={() => {
-          setRequiresPasswordReset(false);
-          window.history.replaceState(null, '', window.location.pathname);
-          supabase.auth.signOut();
-        }} 
-      />
     );
   }
 

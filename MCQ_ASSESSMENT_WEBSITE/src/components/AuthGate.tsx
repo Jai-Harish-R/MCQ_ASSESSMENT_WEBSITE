@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { supabase } from '../utils/supabase';
-import { Mail, Lock, AlertCircle, ArrowRight, User, CheckCircle2, GraduationCap, School } from 'lucide-react';
+import { Mail, Lock, AlertCircle, ArrowRight, User, CheckCircle2, GraduationCap, School, ShieldCheck } from 'lucide-react';
 
 interface AuthGateProps {
   onAuthSuccess: (user: { id: string; email: string; role: 'teacher' | 'student' }, isDemo: boolean) => void;
@@ -12,16 +12,11 @@ export default function AuthGate({ onAuthSuccess }: AuthGateProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
-  const [username, setUsername] = useState('');
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
   const [clickCount, setClickCount] = useState(0);
   const [showSandbox, setShowSandbox] = useState(false);
-  const [resetStep, setResetStep] = useState<'idle' | 'email' | 'pin' | 'password'>('idle');
-  const [otp, setOtp] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
 
   const handleLogoClick = () => {
     const newCount = clickCount + 1;
@@ -53,7 +48,6 @@ export default function AuthGate({ onAuthSuccess }: AuthGateProps) {
             data: {
               role: activeTab,
               full_name: fullName,
-              username: username,
             },
           },
         });
@@ -112,90 +106,6 @@ export default function AuthGate({ onAuthSuccess }: AuthGateProps) {
     } catch (err: any) {
       console.error("Auth error:", err);
       setErrorMsg(err.message || 'An error occurred during authentication.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSendResetEmail = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrorMsg('');
-    setSuccessMsg('');
-    
-    if (!email) {
-      setErrorMsg('Please enter your email address to reset your password.');
-      return;
-    }
-    
-    setLoading(true);
-    try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email);
-
-      if (error) throw error;
-      
-      setSuccessMsg('A 6-digit PIN has been sent to your email.');
-      setResetStep('pin');
-    } catch (err: any) {
-      console.error("Password reset error:", err);
-      setErrorMsg(err.message || 'An error occurred during password reset.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleVerifyOtp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrorMsg('');
-    setSuccessMsg('');
-    
-    if (!otp) {
-      setErrorMsg('Please enter the 6-digit PIN.');
-      return;
-    }
-    
-    setLoading(true);
-    try {
-      const { data, error } = await supabase.auth.verifyOtp({
-        email,
-        token: otp,
-        type: 'recovery'
-      });
-
-      if (error) throw error;
-      if (data.session) {
-        setSuccessMsg('PIN verified. Please enter your new password.');
-        setResetStep('password');
-      } else {
-        throw new Error('Session not established.');
-      }
-    } catch (err: any) {
-      setErrorMsg(err.message || 'Invalid or expired PIN.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleUpdatePassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrorMsg('');
-    setSuccessMsg('');
-    
-    if (newPassword !== confirmPassword) {
-      setErrorMsg('Passwords do not match.');
-      return;
-    }
-    
-    setLoading(true);
-    try {
-      const { error } = await supabase.auth.updateUser({ password: newPassword });
-      if (error) throw error;
-      
-      setSuccessMsg('Password updated successfully! Logging you in...');
-      setTimeout(() => {
-        setResetStep('idle');
-      }, 1500);
-    } catch (err: any) {
-      setErrorMsg(err.message || 'Error updating password.');
     } finally {
       setLoading(false);
     }
@@ -270,7 +180,7 @@ export default function AuthGate({ onAuthSuccess }: AuthGateProps) {
               textTransform: 'uppercase',
               letterSpacing: '0.05em'
             }}>
-              🛡️ Secure Assessment Platform
+              <ShieldCheck size={14} /> Secure Assessment Platform
             </span>
           </div>
 
@@ -299,7 +209,7 @@ export default function AuthGate({ onAuthSuccess }: AuthGateProps) {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '12px' }}>
             <div className="login-benefit-card">
               <div className="login-benefit-icon" style={{ backgroundColor: '#ffedd5', color: '#ea580c' }}>
-                🛡️
+                <ShieldCheck size={20} />
               </div>
               <div>
                 <h4 style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>100% Secure</h4>
@@ -309,7 +219,7 @@ export default function AuthGate({ onAuthSuccess }: AuthGateProps) {
 
             <div className="login-benefit-card">
               <div className="login-benefit-icon" style={{ backgroundColor: '#dcfce7', color: '#166534' }}>
-                🎓
+                <GraduationCap size={20} />
               </div>
               <div>
                 <h4 style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>Trusted Platform</h4>
@@ -445,226 +355,87 @@ export default function AuthGate({ onAuthSuccess }: AuthGateProps) {
           )}
 
           {/* Form */}
-          {resetStep !== 'idle' ? (
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            {isSignUp && (
+              <div>
+                <label className="input-label">Full Name</label>
+                <div style={{ position: 'relative' }}>
+                  <User size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                  <input
+                    type="text"
+                    className="input-field"
+                    style={{ paddingLeft: '38px' }}
+                    placeholder="e.g. Harish Kumar"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    disabled={loading}
+                    required
+                  />
+                </div>
+              </div>
+            )}
+
             <div>
-              {resetStep === 'email' && (
-                <form onSubmit={handleSendResetEmail} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                  <div>
-                    <label className="input-label">Email Address</label>
-                    <div style={{ position: 'relative' }}>
-                      <Mail size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
-                      <input
-                        type="email"
-                        className="input-field"
-                        style={{ paddingLeft: '38px' }}
-                        placeholder="you@example.com"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        disabled={loading}
-                        required
-                      />
-                    </div>
-                  </div>
-                  <button type="submit" className="btn btn-primary" style={{ width: '100%', height: '44px', marginTop: '12px', borderRadius: 'var(--radius-sm)' }} disabled={loading}>
-                    {loading ? 'Processing...' : 'Send Reset PIN'}
-                  </button>
-                </form>
-              )}
-
-              {resetStep === 'pin' && (
-                <form onSubmit={handleVerifyOtp} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                  <div>
-                    <label className="input-label">6-Digit PIN</label>
-                    <div style={{ position: 'relative' }}>
-                      <Lock size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
-                      <input
-                        type="text"
-                        className="input-field"
-                        style={{ paddingLeft: '38px', letterSpacing: '0.2em' }}
-                        placeholder="123456"
-                        value={otp}
-                        onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
-                        maxLength={6}
-                        disabled={loading}
-                        required
-                      />
-                    </div>
-                    <p style={{ fontSize: '12px', color: '#64748b', marginTop: '8px' }}>Check your email for the verification code.</p>
-                  </div>
-                  <button type="submit" className="btn btn-primary" style={{ width: '100%', height: '44px', marginTop: '12px', borderRadius: 'var(--radius-sm)' }} disabled={loading}>
-                    {loading ? 'Verifying...' : 'Verify PIN'}
-                  </button>
-                </form>
-              )}
-
-              {resetStep === 'password' && (
-                <form onSubmit={handleUpdatePassword} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                  <div>
-                    <label className="input-label">New Password</label>
-                    <div style={{ position: 'relative' }}>
-                      <Lock size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
-                      <input
-                        type="password"
-                        className="input-field"
-                        style={{ paddingLeft: '38px' }}
-                        placeholder="••••••"
-                        value={newPassword}
-                        onChange={(e) => setNewPassword(e.target.value)}
-                        disabled={loading}
-                        required
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="input-label">Confirm New Password</label>
-                    <div style={{ position: 'relative' }}>
-                      <Lock size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
-                      <input
-                        type="password"
-                        className="input-field"
-                        style={{ paddingLeft: '38px' }}
-                        placeholder="••••••"
-                        value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
-                        disabled={loading}
-                        required
-                      />
-                    </div>
-                  </div>
-                  <button type="submit" className="btn btn-primary" style={{ width: '100%', height: '44px', marginTop: '12px', borderRadius: 'var(--radius-sm)' }} disabled={loading}>
-                    {loading ? 'Updating...' : 'Update Password'}
-                  </button>
-                </form>
-              )}
-
-              <div style={{ textAlign: 'center', marginTop: '16px' }}>
-                <button
-                  type="button"
-                  onClick={() => { setResetStep('idle'); setErrorMsg(''); setSuccessMsg(''); }}
-                  style={{
-                    background: 'none', border: 'none', color: '#64748b', fontSize: '13px', fontWeight: '500', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', width: '100%'
-                  }}
-                >
-                  <ArrowRight size={14} style={{ transform: 'rotate(180deg)' }} /> Cancel Reset
-                </button>
+              <label className="input-label">Email Address</label>
+              <div style={{ position: 'relative' }}>
+                <Mail size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                <input
+                  type="email"
+                  className="input-field"
+                  style={{ paddingLeft: '38px' }}
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={loading}
+                  required
+                />
               </div>
             </div>
-          ) : (
-            <>
-              <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                {isSignUp && (
-                  <>
-                    <div>
-                      <label className="input-label">Full Name</label>
-                      <div style={{ position: 'relative' }}>
-                        <User size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
-                        <input
-                          type="text"
-                          className="input-field"
-                          style={{ paddingLeft: '38px' }}
-                          placeholder="e.g. Harish Kumar"
-                          value={fullName}
-                          onChange={(e) => setFullName(e.target.value)}
-                          disabled={loading}
-                          required
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <label className="input-label">Username</label>
-                      <div style={{ position: 'relative' }}>
-                        <User size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
-                        <input
-                          type="text"
-                          className="input-field"
-                          style={{ paddingLeft: '38px' }}
-                          placeholder="e.g. harish_123"
-                          value={username}
-                          onChange={(e) => setUsername(e.target.value)}
-                          disabled={loading}
-                          required
-                        />
-                      </div>
-                    </div>
-                  </>
-                )}
 
-                <div>
-                  <label className="input-label">Email Address</label>
-                  <div style={{ position: 'relative' }}>
-                    <Mail size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
-                    <input
-                      type="email"
-                      className="input-field"
-                      style={{ paddingLeft: '38px' }}
-                      placeholder="you@example.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      disabled={loading}
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  {!isSignUp ? (
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                      <label className="input-label" style={{ marginBottom: 0 }}>Password</label>
-                      <button 
-                        type="button"
-                        onClick={() => { setResetStep('email'); setErrorMsg(''); setSuccessMsg(''); }}
-                        style={{ background: 'none', border: 'none', color: '#ea580c', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}
-                      >
-                        Forgot Password?
-                      </button>
-                    </div>
-                  ) : (
-                    <label className="input-label">Password</label>
-                  )}
-                  <div style={{ position: 'relative' }}>
-                    <Lock size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
-                    <input
-                      type="password"
-                      className="input-field"
-                      style={{ paddingLeft: '38px' }}
-                      placeholder="••••••"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      disabled={loading}
-                      required
-                    />
-                  </div>
-                </div>
-
-                <button
-                  type="submit"
-                  className="btn btn-primary"
-                  style={{ width: '100%', height: '44px', marginTop: '12px', borderRadius: 'var(--radius-sm)' }}
+            <div>
+              <label className="input-label">Password</label>
+              <div style={{ position: 'relative' }}>
+                <Lock size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                <input
+                  type="password"
+                  className="input-field"
+                  style={{ paddingLeft: '38px' }}
+                  placeholder="••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   disabled={loading}
-                >
-                  {loading ? 'Processing...' : isSignUp ? `Sign Up` : 'Sign In'}
-                  {!loading && <ArrowRight size={16} />}
-                </button>
-              </form>
-
-              {/* Toggle Log In / Sign Up */}
-              <div style={{ textAlign: 'center', marginTop: '20px' }}>
-                <button
-                  onClick={() => { setIsSignUp(!isSignUp); setErrorMsg(''); setSuccessMsg(''); }}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: '#2563eb',
-                    fontSize: '13px',
-                    fontWeight: '500',
-                    cursor: 'pointer'
-                  }}
-                >
-                  {isSignUp ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}
-                </button>
+                  required
+                />
               </div>
-            </>
-          )}
+            </div>
+
+            <button
+              type="submit"
+              className="btn btn-primary"
+              style={{ width: '100%', height: '44px', marginTop: '12px', borderRadius: 'var(--radius-sm)' }}
+              disabled={loading}
+            >
+              {loading ? 'Processing...' : isSignUp ? `Sign Up` : 'Sign In'}
+              {!loading && <ArrowRight size={16} />}
+            </button>
+          </form>
+
+          {/* Toggle Log In / Sign Up */}
+          <div style={{ textAlign: 'center', marginTop: '20px' }}>
+            <button
+              onClick={() => { setIsSignUp(!isSignUp); setErrorMsg(''); setSuccessMsg(''); }}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#2563eb',
+                fontSize: '13px',
+                fontWeight: '500',
+                cursor: 'pointer'
+              }}
+            >
+              {isSignUp ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}
+            </button>
+          </div>
 
           {/* Sandbox Development bypass */}
           {showSandbox && (
