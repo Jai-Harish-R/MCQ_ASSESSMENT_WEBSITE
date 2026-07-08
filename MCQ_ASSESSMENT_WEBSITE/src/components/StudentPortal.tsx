@@ -29,6 +29,7 @@ interface Test {
 }
 
 interface Attempt {
+  test_type?: string;
   id: string;
   test_id: string;
   student_email: string;
@@ -323,12 +324,12 @@ export default function StudentPortal({ user, isDemo, onLogout }: StudentPortalP
           const testIds = attemptsData.map((a: any) => a.test_id);
           const { data: testsData } = await supabase
             .from('tests')
-            .select('id, title')
+            .select('id, title, type')
             .in('id', testIds);
 
           const mapped = (attemptsData || []).map((att: any) => {
             const t = (testsData || []).find((x: any) => x.id === att.test_id);
-            return { ...att, test_title: t ? t.title : 'Assessment' };
+            return { ...att, test_title: t ? t.title : 'Assessment', test_type: t ? t.type : 'test' };
           });
           setMyAttempts(mapped);
         } else {
@@ -967,6 +968,37 @@ Content-Type: text/html; charset=UTF-8
       </div>
     );
   }
+  const assessmentsOverview = React.useMemo(() => {
+    const total = myAttempts.length;
+    const counts: any = { test: 0, quiz: 0, assignment: 0, live_exam: 0, result: 0 };
+    myAttempts.forEach((att: any) => {
+      const t = att.test_type || 'test';
+      if (counts[t] !== undefined) counts[t]++;
+    });
+    
+    let currentPct = 0;
+    const gradients: string[] = [];
+    const colors = { test: '#ea580c', quiz: '#a855f7', assignment: '#f97316', live_exam: '#ef4444', result: '#22c55e' };
+    
+    ['test', 'quiz', 'assignment', 'live_exam', 'result'].forEach(type => {
+      if (counts[type] > 0) {
+        const pct = (counts[type] / total) * 100;
+        gradients.push(`${(colors as any)[type]} ${currentPct}% ${currentPct + pct}%`);
+        currentPct += pct;
+      }
+    });
+    
+    const bg = gradients.length > 0 ? `conic-gradient(${gradients.join(', ')})` : 'conic-gradient(#f1f5f9 0% 100%)';
+    return { counts, bg, total };
+  }, [myAttempts]);
+
+  const performanceTrend = React.useMemo(() => {
+    // Get last 4 attempts, chronological (reverse the reverse order)
+    const recent = [...myAttempts].sort((a, b) => new Date(a.completed_at).getTime() - new Date(b.completed_at).getTime()).slice(-4);
+    if (recent.length === 0) return [];
+    
+    return recent.map(att => Math.round((att.score / att.total_questions) * 100));
+  }, [myAttempts]);
 
   // STANDARD PORTAL WITH SIDEBAR
   return (
@@ -1264,53 +1296,36 @@ Content-Type: text/html; charset=UTF-8
                   </div>
 
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-around', gap: '16px', marginTop: '12px' }}>
-                    {/* CSS Donut Chart */}
                     <div style={{
-                      position: 'relative',
-                      width: '140px',
-                      height: '140px',
-                      borderRadius: '50%',
-                      background: 'conic-gradient(#ea580c 0% 33%, #a855f7 33% 58%, #f97316 58% 83%, #ef4444 83% 95%, #22c55e 95% 100%)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
+                      position: 'relative', width: '140px', height: '140px', borderRadius: '50%',
+                      background: assessmentsOverview.bg,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center'
                     }}>
                       <div style={{
-                        width: '94px',
-                        height: '94px',
-                        borderRadius: '50%',
-                        backgroundColor: '#ffffff',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        justifyContent: 'center'
+                        width: '94px', height: '94px', borderRadius: '50%', backgroundColor: '#ffffff',
+                        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'
                       }}>
-                        <span style={{ fontSize: '24px', fontWeight: '800', color: '#0f172a' }}>24</span>
+                        <span style={{ fontSize: '24px', fontWeight: '800', color: '#0f172a' }}>{assessmentsOverview.total}</span>
                         <span style={{ fontSize: '9px', color: '#94a3b8', textTransform: 'uppercase', fontWeight: '700' }}>Total</span>
                       </div>
                     </div>
 
-                    {/* Chart Legend */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '12px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#ea580c' }}></span>
-                        <span>Tests (8, 33%)</span>
+                        <span>Tests ({assessmentsOverview.counts.test}, {assessmentsOverview.total ? Math.round((assessmentsOverview.counts.test / assessmentsOverview.total) * 100) : 0}%)</span>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#a855f7' }}></span>
-                        <span>Quizzes (6, 25%)</span>
+                        <span>Quizzes ({assessmentsOverview.counts.quiz}, {assessmentsOverview.total ? Math.round((assessmentsOverview.counts.quiz / assessmentsOverview.total) * 100) : 0}%)</span>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#f97316' }}></span>
-                        <span>Assignments (6, 25%)</span>
+                        <span>Assignments ({assessmentsOverview.counts.assignment}, {assessmentsOverview.total ? Math.round((assessmentsOverview.counts.assignment / assessmentsOverview.total) * 100) : 0}%)</span>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#ef4444' }}></span>
-                        <span>Live Exams (3, 12%)</span>
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#22c55e' }}></span>
-                        <span>Results (1, 5%)</span>
+                        <span>Live Exams ({assessmentsOverview.counts.live_exam}, {assessmentsOverview.total ? Math.round((assessmentsOverview.counts.live_exam / assessmentsOverview.total) * 100) : 0}%)</span>
                       </div>
                     </div>
                   </div>
@@ -1325,32 +1340,30 @@ Content-Type: text/html; charset=UTF-8
 
                   <div style={{ marginTop: '20px' }}>
                     <svg viewBox="0 0 400 130" style={{ width: '100%', height: '120px' }}>
-                      {/* Grid Lines */}
                       <line x1="50" y1="20" x2="350" y2="20" stroke="#f1f5f9" strokeWidth="1" />
                       <line x1="50" y1="50" x2="350" y2="50" stroke="#f1f5f9" strokeWidth="1" />
                       <line x1="50" y1="80" x2="350" y2="80" stroke="#f1f5f9" strokeWidth="1" />
                       <line x1="50" y1="110" x2="350" y2="110" stroke="#f1f5f9" strokeWidth="1" />
 
-                      {/* Connection Path */}
-                      <path d="M 50 100 L 150 75 L 250 25 L 350 45" fill="none" stroke="#ea580c" strokeWidth="3.5" strokeLinecap="round" />
-                      
-                      {/* Chart Points */}
-                      <circle cx="50" cy="100" r="5" fill="#ea580c" stroke="#ffffff" strokeWidth="1.5" />
-                      <circle cx="150" cy="75" r="5" fill="#ea580c" stroke="#ffffff" strokeWidth="1.5" />
-                      <circle cx="250" cy="25" r="5" fill="#ea580c" stroke="#ffffff" strokeWidth="1.5" />
-                      <circle cx="350" cy="45" r="5" fill="#ea580c" stroke="#ffffff" strokeWidth="1.5" />
+                      {performanceTrend.length > 0 ? (
+                        <>
+                          <path d={`M 50 ${110 - (performanceTrend[0] || 0) * 0.9} ${performanceTrend[1] !== undefined ? `L 150 ${110 - performanceTrend[1] * 0.9}` : ''} ${performanceTrend[2] !== undefined ? `L 250 ${110 - performanceTrend[2] * 0.9}` : ''} ${performanceTrend[3] !== undefined ? `L 350 ${110 - performanceTrend[3] * 0.9}` : ''}`} fill="none" stroke="#ea580c" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" />
+                          
+                          {performanceTrend.map((score, idx) => (
+                            <React.Fragment key={idx}>
+                              <circle cx={50 + (idx * 100)} cy={110 - score * 0.9} r="5" fill="#ea580c" stroke="#ffffff" strokeWidth="1.5" />
+                              <text x={50 + (idx * 100)} y={110 - score * 0.9 - 10} fontSize="9" fontWeight="700" textAnchor="middle" fill="#ea580c">{score}%</text>
+                            </React.Fragment>
+                          ))}
+                        </>
+                      ) : (
+                        <text x="200" y="65" fontSize="12" fontWeight="500" textAnchor="middle" fill="#94a3b8">No tests completed yet</text>
+                      )}
 
-                      {/* Text Values */}
-                      <text x="50" y="86" fontSize="9" fontWeight="700" textAnchor="middle" fill="#ea580c">48%</text>
-                      <text x="150" y="61" fontSize="9" fontWeight="700" textAnchor="middle" fill="#ea580c">62%</text>
-                      <text x="250" y="14" fontSize="9" fontWeight="700" textAnchor="middle" fill="#ea580c">81%</text>
-                      <text x="350" y="32" fontSize="9" fontWeight="700" textAnchor="middle" fill="#ea580c">72%</text>
-
-                      {/* Horizontal Labels */}
-                      <text x="50" y="125" fontSize="10" fontWeight="500" textAnchor="middle" fill="#64748b">Week 1</text>
-                      <text x="150" y="125" fontSize="10" fontWeight="500" textAnchor="middle" fill="#64748b">Week 2</text>
-                      <text x="250" y="125" fontSize="10" fontWeight="500" textAnchor="middle" fill="#64748b">Week 3</text>
-                      <text x="350" y="125" fontSize="10" fontWeight="500" textAnchor="middle" fill="#64748b">Week 4</text>
+                      <text x="50" y="125" fontSize="10" fontWeight="500" textAnchor="middle" fill="#64748b">Test 1</text>
+                      <text x="150" y="125" fontSize="10" fontWeight="500" textAnchor="middle" fill="#64748b">Test 2</text>
+                      <text x="250" y="125" fontSize="10" fontWeight="500" textAnchor="middle" fill="#64748b">Test 3</text>
+                      <text x="350" y="125" fontSize="10" fontWeight="500" textAnchor="middle" fill="#64748b">Test 4</text>
                     </svg>
                   </div>
                 </div>
