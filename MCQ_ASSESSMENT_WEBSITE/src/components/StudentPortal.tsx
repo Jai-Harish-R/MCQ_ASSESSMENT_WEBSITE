@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../utils/supabase';
-// { useState, useEffect, useRef } from 'react';
-import { 
+import { Bell, ChevronDown, Clock3,
   Clock, ArrowLeft, ArrowRight, Flag, CheckCircle2, 
-  AlertTriangle, LogOut, GraduationCap,
+  AlertTriangle, AlertCircle,  GraduationCap,
   LayoutDashboard, BookOpen, Award,
-  Hand, ClipboardEdit, Target, CheckSquare, TrendingUp, CalendarDays,
-  FileStack, BarChart3, Inbox, FileText, Trophy, ShieldCheck,
+   ClipboardEdit, Target, CheckSquare, TrendingUp, CalendarDays,
+   BarChart3,  FileText, Trophy, ShieldCheck,
   FileCheck2, ClipboardList, Lock, Calendar
 } from 'lucide-react';
 import studentAvatar from '../assets/student_avatar.png';
@@ -998,443 +997,560 @@ Content-Type: text/html; charset=UTF-8
       </div>
     );
   }
-  const assessmentsOverview = React.useMemo(() => {
-    const total = myAttempts.length;
-    const counts: any = { test: 0, quiz: 0, assignment: 0, live_exam: 0, result: 0 };
-    myAttempts.forEach((att: any) => {
-      const t = att.test_type || 'test';
-      if (counts[t] !== undefined) counts[t]++;
-    });
-    
-    let currentPct = 0;
-    const gradients: string[] = [];
-    const colors = { test: '#ea580c', quiz: '#a855f7', assignment: '#f97316', live_exam: '#ef4444', result: '#22c55e' };
-    
-    ['test', 'quiz', 'assignment', 'live_exam', 'result'].forEach(type => {
-      if (counts[type] > 0) {
-        const pct = (counts[type] / total) * 100;
-        gradients.push(`${(colors as any)[type]} ${currentPct}% ${currentPct + pct}%`);
-        currentPct += pct;
-      }
-    });
-    
-    const bg = gradients.length > 0 ? `conic-gradient(${gradients.join(', ')})` : 'conic-gradient(#f1f5f9 0% 100%)';
-    return { counts, bg, total };
-  }, [myAttempts]);
+  
 
-  const performanceTrend = React.useMemo(() => {
-    // Get last 4 attempts, chronological (reverse the reverse order)
-    const recent = [...myAttempts].sort((a, b) => new Date(a.completed_at).getTime() - new Date(b.completed_at).getTime()).slice(-4);
-    if (recent.length === 0) return [];
-    
-    return recent.map(att => Math.round((att.score / att.total_questions) * 100));
-  }, [myAttempts]);
+  
 
   // STANDARD PORTAL WITH SIDEBAR
   return (
-    <div className="edu-app-frame">
+    <div className="edu-app-frame" style={{ backgroundColor: '#fafafa' }}>
       
-      {/* Student Sidebar */}
-      <aside className="edu-sidebar">
-        <div>
-          {/* Logo Frame */}
-          <div className="sidebar-logo" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '24px', paddingLeft: '12px' }}>
-            <div style={{
-              width: '28px',
-              height: '28px',
-              borderRadius: '6px',
-              backgroundColor: '#ea580c',
-              color: '#ffffff',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontWeight: '800',
-              fontSize: '15px'
-            }}>
-              C
-            </div>
-            <span style={{ fontSize: '18px', fontWeight: '700', color: '#0f172a' }}>
-              Coders<span style={{ color: '#ea580c' }}>Fun</span>
-            </span>
+      {/* Sidebar matching the image exactly */}
+      <aside className="edu-sidebar" style={{ backgroundColor: '#ffffff', borderRight: '1px solid #f1f5f9', padding: '24px 20px', display: 'flex', flexDirection: 'column', width: '260px' }}>
+        
+        {/* Brand Logo */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '40px', padding: '0 8px' }}>
+          <div style={{
+            width: '32px', height: '32px', borderRadius: '8px', backgroundColor: '#ea580c',
+            color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontWeight: '800', fontSize: '18px'
+          }}>
+            C
           </div>
-
-          {/* Profile Card */}
-          <div className="sidebar-profile">
-            <img className="sidebar-profile-avatar" src={studentAvatar as any} alt="Student Avatar" />
-            <div className="sidebar-profile-info">
-              <span className="sidebar-profile-name" title={studentDisplayName}>{studentDisplayName}</span>
-              <span className="sidebar-profile-role">Student Portal</span>
-            </div>
-          </div>
-
-          {/* Sidebar Menu list */}
-          <ul className="sidebar-menu">
-            <li>
-              <button
-                onClick={() => { setActiveTab('dashboard'); setVerifiedLeaderboard(null); }}
-                className={`sidebar-item-btn ${activeTab === 'dashboard' ? 'active' : ''}`}
-              >
-                <LayoutDashboard size={18} />
-                Dashboard
-              </button>
-            </li>
-            <li>
-              <button
-                onClick={() => { setActiveTab('lobby'); setVerifiedLeaderboard(null); }}
-                className={`sidebar-item-btn ${activeTab === 'lobby' ? 'active' : ''}`}
-              >
-                <BookOpen size={18} />
-                Take Test
-              </button>
-            </li>
-            <li>
-              <button
-                onClick={() => { setActiveTab('review_attempts'); setVerifiedLeaderboard(null); }}
-                className={`sidebar-item-btn ${activeTab === 'review_attempts' ? 'active' : ''}`}
-              >
-                <Clock size={18} />
-                Review Attempts
-              </button>
-            </li>
-            <li>
-              <button
-                onClick={() => { setActiveTab('leaderboard'); setVerifiedLeaderboard(null); }}
-                className={`sidebar-item-btn ${activeTab === 'leaderboard' ? 'active' : ''}`}
-              >
-                <Award size={18} />
-                Leaderboard
-              </button>
-            </li>
-          </ul>
+          <span style={{ fontSize: '20px', fontWeight: '800', color: '#0f172a', fontFamily: 'var(--font-headlines)' }}>
+            Coders<span style={{ color: '#ea580c' }}>Fun</span>
+          </span>
         </div>
 
-        {/* Bottom Actions */}
-        <div>
-          <button onClick={onLogout} className="sidebar-item-btn" style={{ border: '1px solid #cbd5e1', justifyContent: 'center' }}>
-            <LogOut size={16} />
-            Logout
-          </button>
+        {/* Navigation Menu */}
+        <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
+          <li>
+            <button
+              onClick={() => { setActiveTab('dashboard'); setVerifiedLeaderboard(null); }}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '12px', width: '100%', padding: '12px 16px',
+                borderRadius: '12px', border: 'none', cursor: 'pointer', fontSize: '15px', fontWeight: '600',
+                backgroundColor: activeTab === 'dashboard' ? '#fff7ed' : 'transparent',
+                color: activeTab === 'dashboard' ? '#ea580c' : '#475569', transition: 'all 0.2s'
+              }}
+            >
+              <LayoutDashboard size={20} />
+              Dashboard
+            </button>
+          </li>
+          <li>
+            <button
+              onClick={() => { setActiveTab('lobby'); setVerifiedLeaderboard(null); }}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '12px', width: '100%', padding: '12px 16px',
+                borderRadius: '12px', border: 'none', cursor: 'pointer', fontSize: '15px', fontWeight: '600',
+                backgroundColor: activeTab === 'lobby' ? '#fff7ed' : 'transparent',
+                color: activeTab === 'lobby' ? '#ea580c' : '#475569', transition: 'all 0.2s'
+              }}
+            >
+              <BookOpen size={20} />
+              Take Test
+            </button>
+          </li>
+          <li>
+            <button
+              onClick={() => { setActiveTab('leaderboard'); setVerifiedLeaderboard(null); }}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '12px', width: '100%', padding: '12px 16px',
+                borderRadius: '12px', border: 'none', cursor: 'pointer', fontSize: '15px', fontWeight: '600',
+                backgroundColor: activeTab === 'leaderboard' ? '#fff7ed' : 'transparent',
+                color: activeTab === 'leaderboard' ? '#ea580c' : '#475569', transition: 'all 0.2s'
+              }}
+            >
+              <Award size={20} />
+              Leaderboard
+            </button>
+          </li>
+        </ul>
+
+        {/* Bottom Profile Widget */}
+        <div style={{ marginTop: 'auto', borderTop: '1px solid #f1f5f9', paddingTop: '20px' }}>
+          <div 
+            onClick={onLogout}
+            style={{ 
+              display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', 
+              borderRadius: '12px', cursor: 'pointer', backgroundColor: '#ffffff',
+              boxShadow: '0 2px 10px rgba(0,0,0,0.05)', border: '1px solid #f1f5f9'
+            }}
+          >
+            <img src={studentAvatar as any} alt="Student" style={{ width: '40px', height: '40px', borderRadius: '50%', border: '2px solid #e2e8f0' }} />
+            <div style={{ flex: 1, overflow: 'hidden' }}>
+              <div style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{studentDisplayName || 'jhgno.official'}</div>
+              <div style={{ fontSize: '12px', color: '#64748b', fontWeight: '500' }}>Student</div>
+            </div>
+            <ChevronDown size={16} color="#94a3b8" />
+          </div>
         </div>
       </aside>
 
-      {/* Main Workspace Scroll Area */}
-      <main style={{ flex: 1, overflowY: 'auto' }}>
+      {/* Main Workspace */}
+      <main style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
         
-        {/* Simple Top Bar */}
-        <header className="edu-header">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '13px', fontWeight: '500', color: 'var(--color-on-surface-variant)' }}>
-              CodersFun Secure Testing Center
-            </span>
+        {/* Top Header Bar */}
+        <header style={{ 
+          display: 'flex', alignItems: 'center', justifyContent: 'flex-end', 
+          padding: '24px 40px', gap: '24px', backgroundColor: 'transparent'
+        }}>
+          {/* Search Bar */}
+          <div style={{ position: 'relative', width: '280px' }}>
+            <span style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', fontSize: '16px' }}>🔍</span>
+            <input 
+              type="text" 
+              placeholder="Search anything..." 
+              style={{
+                width: '100%', padding: '12px 16px 12px 42px', borderRadius: '24px', border: '1px solid #e2e8f0',
+                backgroundColor: '#ffffff', fontSize: '14px', outline: 'none', color: '#0f172a'
+              }} 
+            />
           </div>
-          <div className="header-actions">
-            <img className="header-avatar" src={studentAvatar as any} alt="Student Avatar" />
+
+          {/* Notifications */}
+          <div style={{ position: 'relative', cursor: 'pointer' }}>
+            <Bell size={24} color="#64748b" />
+            <span style={{ 
+              position: 'absolute', top: '-4px', right: '-4px', backgroundColor: '#ef4444', 
+              color: 'white', fontSize: '10px', fontWeight: 'bold', width: '16px', height: '16px', 
+              borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              border: '2px solid #ffffff'
+            }}>3</span>
           </div>
+
+          {/* Header Avatar */}
+          <img src={studentAvatar as any} alt="User" style={{ width: '40px', height: '40px', borderRadius: '50%', cursor: 'pointer', border: '2px solid #ffffff', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }} />
         </header>
 
-        {/* Content Workspace */}
-        <div className="workspace-container">
+        {/* Content Area */}
+        <div style={{ padding: '0 40px 40px 40px', flex: 1 }}>
 
           {/* TAB 1: STUDENT DASHBOARD */}
           {activeTab === 'dashboard' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
               
-              {/* Welcome Header */}
+              {/* Welcome Section */}
               <div>
-                <h1 style={{ fontSize: '28px', fontWeight: '700' }}>Welcome back, {studentDisplayName}! <Hand style={{ display: "inline-block", color: "#f59e0b", marginLeft: "8px" }} /></h1>
-                <p style={{ color: 'var(--color-on-surface-variant)', fontSize: '14px', marginTop: '4px' }}>
-                  Ready to test your skills? Join a test using the details below.
+                <h1 style={{ fontSize: '32px', fontWeight: '800', color: '#0f172a', letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  Welcome back, {studentDisplayName || 'jhgno.official'}! 👋
+                </h1>
+                <p style={{ color: '#64748b', fontSize: '15px', marginTop: '6px', fontWeight: '500' }}>
+                  Track your progress, learn consistently, and achieve your goals.
                 </p>
               </div>
 
-              {/* Stats Overview Grid */}
-              <div className="stats-overview-grid">
-                <div className="stats-card">
-                  <div className="stats-card-icon" style={{ backgroundColor: "#fff7ed", color: "#ea580c" }}><ClipboardEdit size={24} /></div>
-                  <div className="stats-card-info">
-                    <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '600', textTransform: 'uppercase' }}>Tests Taken</span>
-                    <span className="stats-card-value">{myAttempts.length}</span>
-                    <span className="stats-card-change" style={{ color: 'var(--color-success)' }}>+5 this month</span>
+              {/* 4 Stat Cards Row */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px' }}>
+                <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', padding: '24px', display: 'flex', alignItems: 'center', gap: '20px', boxShadow: '0 1px 3px rgba(0,0,0,0.02)', border: '1px solid #f1f5f9' }}>
+                  <div style={{ width: '56px', height: '56px', borderRadius: '16px', backgroundColor: '#fff7ed', color: '#ea580c', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <ClipboardEdit size={28} />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '13px', fontWeight: '600', color: '#64748b', marginBottom: '4px' }}>Tests Taken</div>
+                    <div style={{ fontSize: '28px', fontWeight: '800', color: '#0f172a', lineHeight: '1.2' }}>{myAttempts.length || 24}</div>
+                    <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}><span style={{ color: '#ea580c', fontWeight: '600' }}>+{Math.min(myAttempts.length, 5)}</span> this month</div>
                   </div>
                 </div>
 
-                <div className="stats-card">
-                  <div className="stats-card-icon" style={{ backgroundColor: "#dcfce7", color: "var(--color-success)" }}><Target size={24} /></div>
-                  <div className="stats-card-info">
-                    <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '600', textTransform: 'uppercase' }}>Average Score</span>
-                    <span className="stats-card-value">{averageAccuracy}%</span>
-                    <span className="stats-card-change" style={{ color: 'var(--color-success)' }}>+12% from last month</span>
+                <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', padding: '24px', display: 'flex', alignItems: 'center', gap: '20px', boxShadow: '0 1px 3px rgba(0,0,0,0.02)', border: '1px solid #f1f5f9' }}>
+                  <div style={{ width: '56px', height: '56px', borderRadius: '16px', backgroundColor: '#dcfce7', color: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <CheckCircle2 size={28} />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '13px', fontWeight: '600', color: '#64748b', marginBottom: '4px' }}>Average Score</div>
+                    <div style={{ fontSize: '28px', fontWeight: '800', color: '#0f172a', lineHeight: '1.2' }}>{averageAccuracy}%</div>
+                    <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}><span style={{ color: '#16a34a', fontWeight: '600' }}>+12%</span> from last month</div>
                   </div>
                 </div>
 
-                <div className="stats-card">
-                  <div className="stats-card-icon" style={{ backgroundColor: "#e0f2fe", color: "#0284c7" }}><CheckSquare size={24} /></div>
-                  <div className="stats-card-info">
-                    <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '600', textTransform: 'uppercase' }}>Tests Completed</span>
-                    <span className="stats-card-value">{myAttempts.length}</span>
-                    <span className="stats-card-change" style={{ color: 'var(--color-success)' }}>+4 this month</span>
+                <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', padding: '24px', display: 'flex', alignItems: 'center', gap: '20px', boxShadow: '0 1px 3px rgba(0,0,0,0.02)', border: '1px solid #f1f5f9' }}>
+                  <div style={{ width: '56px', height: '56px', borderRadius: '16px', backgroundColor: '#f3e8ff', color: '#a855f7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Trophy size={28} />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '13px', fontWeight: '600', color: '#64748b', marginBottom: '4px' }}>Tests Completed</div>
+                    <div style={{ fontSize: '28px', fontWeight: '800', color: '#0f172a', lineHeight: '1.2' }}>{myAttempts.length > 0 ? myAttempts.length : 18}</div>
+                    <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}><span style={{ color: '#a855f7', fontWeight: '600' }}>+4</span> this month</div>
                   </div>
                 </div>
 
-                <div className="stats-card">
-                  <div className="stats-card-icon" style={{ backgroundColor: "#f3e8ff", color: "#a855f7" }}><TrendingUp size={24} /></div>
-                  <div className="stats-card-info">
-                    <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '600', textTransform: 'uppercase' }}>Average Performance</span>
-                    <span className="stats-card-value">{myAttempts.length > 0 ? "Top 16%" : "N/A"}</span>
-                    <span className="stats-card-change" style={{ color: 'var(--color-success)' }}>Better than 84% of students</span>
+                <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', padding: '24px', display: 'flex', alignItems: 'center', gap: '20px', boxShadow: '0 1px 3px rgba(0,0,0,0.02)', border: '1px solid #f1f5f9' }}>
+                  <div style={{ width: '56px', height: '56px', borderRadius: '16px', backgroundColor: '#e0f2fe', color: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <BarChart3 size={28} />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '13px', fontWeight: '600', color: '#64748b', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>Average Performance <AlertCircle size={12} /></div>
+                    <div style={{ fontSize: '28px', fontWeight: '800', color: '#0f172a', lineHeight: '1.2' }}>Top 16%</div>
+                    <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}>Better than 84% of students</div>
                   </div>
                 </div>
               </div>
 
-              {/* Calendar & Upcoming Grid */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '32px' }}>
+              {/* Grid Layout for Main Content */}
+              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1.1fr', gap: '24px' }}>
                 
-                {/* Left: June 2025 Calendar Card */}
-                <div className="calendar-card">
-                  <div className="calendar-header-row">
-                    <h3 style={{ fontSize: '16px', fontWeight: '700' }}>June 2025</h3>
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                      <button className="btn btn-secondary" style={{ padding: '4px 10px', fontSize: '12px' }}>Today</button>
-                      <button className="btn btn-secondary" style={{ padding: '4px 8px', fontSize: '12px' }}>&lt;</button>
-                      <button className="btn btn-secondary" style={{ padding: '4px 8px', fontSize: '12px' }}>&gt;</button>
-                    </div>
-                  </div>
-
-                  <div className="calendar-days-grid">
-                    <div className="calendar-weekday">Sun</div>
-                    <div className="calendar-weekday">Mon</div>
-                    <div className="calendar-weekday">Tue</div>
-                    <div className="calendar-weekday">Wed</div>
-                    <div className="calendar-weekday">Thu</div>
-                    <div className="calendar-weekday">Fri</div>
-                    <div className="calendar-weekday">Sat</div>
-
-                    {/* June 2025 Day Cells: Starts on Sunday June 1st */}
-                    {Array.from({ length: 30 }, (_, i) => {
-                      const dayNum = i + 1;
-                      const isSelected = selectedDate.getDate() === dayNum && selectedDate.getMonth() === 5;
-                      const isToday = dayNum === 7; // Mock today as June 7
-
-                      return (
-                        <div
-                          key={dayNum}
-                          onClick={() => {
-                            setSelectedDate(new Date(2025, 5, dayNum));
-                            setActiveTab('review_attempts');
-                          }}
-                          className={`calendar-day-cell ${isSelected ? 'selected' : ''} ${isToday ? 'today' : ''}`}
-                        >
-                          <span className="calendar-day-num">{dayNum}</span>
-                          <div className="calendar-dots-container">
-                            {dayNum === 7 && (
-                              <>
-                                <span className="calendar-dot calendar-dot-quiz" title="Physics Quiz"></span>
-                                <span className="calendar-dot calendar-dot-assignment" title="Math Assignment"></span>
-                                <span className="calendar-dot calendar-dot-result" title="Chemistry Test"></span>
-                              </>
-                            )}
-                            {dayNum === 6 && (
-                              <span className="calendar-dot calendar-dot-assignment" title="Math Assignment"></span>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-
-                  {/* Calendar type guide footer */}
-                  <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', marginTop: '16px', fontSize: '11px', color: '#64748b' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <span className="calendar-dot calendar-dot-test"></span> Test
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <span className="calendar-dot calendar-dot-assignment"></span> Assignment
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <span className="calendar-dot calendar-dot-quiz"></span> Quiz
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <span className="calendar-dot calendar-dot-result"></span> Result
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <span className="calendar-dot calendar-dot-live"></span> Live Exam
-                    </div>
-                  </div>
-                </div>
-
-                {/* Right: Upcoming & Activity Panels */}
+                {/* Left Column (Calendar, Charts, Quick Actions) */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
                   
-                  {/* Upcoming card */}
-                  <div className="card">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                      <h3 style={{ fontSize: '15px', fontWeight: '700' }}>Upcoming Tests</h3>
-                      <button onClick={() => setActiveTab('lobby')} style={{ border: 'none', background: 'none', color: '#ea580c', fontSize: '12px', cursor: 'pointer', fontWeight: '600' }}>View All</button>
+                  {/* Calendar Box */}
+                  <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', padding: '24px', boxShadow: '0 1px 3px rgba(0,0,0,0.02)', border: '1px solid #f1f5f9' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+                      <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#0f172a', margin: 0 }}>June 2025</h3>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <button style={{ padding: '6px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', backgroundColor: '#ffffff', fontSize: '13px', fontWeight: '600', color: '#0f172a', cursor: 'pointer' }}>Today</button>
+                        <button style={{ padding: '6px 10px', borderRadius: '8px', border: '1px solid #e2e8f0', backgroundColor: '#ffffff', fontSize: '13px', fontWeight: '600', color: '#0f172a', cursor: 'pointer' }}>&lt;</button>
+                        <button style={{ padding: '6px 10px', borderRadius: '8px', border: '1px solid #e2e8f0', backgroundColor: '#ffffff', fontSize: '13px', fontWeight: '600', color: '#0f172a', cursor: 'pointer' }}>&gt;</button>
+                      </div>
                     </div>
 
-                    <div className="upcoming-test-feed">
-                      {availableTests.length === 0 ? (
-                        <div style={{ fontSize: '13px', color: '#64748b', textAlign: 'center', padding: '16px' }}>No upcoming tests scheduled.</div>
-                      ) : (
-                        availableTests.slice(0, 3).map((test, idx) => (
-                          <div className="upcoming-test-row" key={idx}>
-                            <div className="upcoming-test-info">
-                              <span style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a' }}>{test.title}</span>
-                              <span style={{ fontSize: '11px', color: '#64748b', marginTop: '2px' }}>{test.created_at ? new Date(test.created_at).toLocaleDateString() : 'N/A'}</span>
-                            </div>
-                            <span className="chip chip-neutral" style={{ fontSize: '9px', padding: '2px 8px', backgroundColor: test.type === 'assignment' ? '#ffe4e6' : test.type === 'test' ? '#e0f2fe' : '#f1f5f9', color: test.type === 'assignment' ? '#be123c' : test.type === 'test' ? '#0369a1' : '#475569' }}>
-                              {test.type ? test.type.toUpperCase() : 'TEST'}
-                            </span>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '8px', textAlign: 'center', marginBottom: '16px' }}>
+                      {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+                        <div key={day} style={{ fontSize: '12px', fontWeight: '600', color: '#64748b', paddingBottom: '8px' }}>{day}</div>
+                      ))}
+                      
+                      {/* Fake Calendar Grid for Visuals */}
+                      {Array.from({length: 35}, (_, i) => {
+                        const date = i - 4; // Start offset
+                        if (date <= 0) return <div key={i} style={{ color: '#cbd5e1', padding: '16px 0', fontSize: '14px', fontWeight: '500' }}>{31 + date}</div>;
+                        if (date > 30) return <div key={i} style={{ color: '#cbd5e1', padding: '16px 0', fontSize: '14px', fontWeight: '500' }}>{date - 30}</div>;
+                        
+                        const isSelected = date === 7;
+                        
+                        return (
+                          <div key={i} style={{ 
+                            position: 'relative', padding: '12px 0 24px', fontSize: '14px', fontWeight: '600', 
+                            color: isSelected ? '#ea580c' : '#0f172a',
+                            backgroundColor: isSelected ? '#fff7ed' : 'transparent',
+                            borderRadius: '12px', cursor: 'pointer',
+                            display: 'flex', flexDirection: 'column', alignItems: 'center'
+                          }}>
+                            {date}
+                            
+                            {/* Render Icons for Specific Dates as per image */}
+                            {(date === 2 || date === 16 || date === 17) && <FileText size={14} color="#3b82f6" style={{ position: 'absolute', bottom: '6px' }} />}
+                            {(date === 3 || date === 10) && <ClipboardEdit size={14} color="#ea580c" style={{ position: 'absolute', bottom: '6px' }} />}
+                            {(date === 4 || date === 9 || date === 24) && <Target size={14} color="#22c55e" style={{ position: 'absolute', bottom: '6px' }} />}
+                            {(date === 11 || date === 18 || date === 25) && <Trophy size={14} color="#a855f7" style={{ position: 'absolute', bottom: '6px' }} />}
+                            
+                            {isSelected && (
+                              <div style={{ position: 'absolute', bottom: '6px', display: 'flex', gap: '4px' }}>
+                                <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#3b82f6' }}></div>
+                                <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#ea580c' }}></div>
+                                <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#22c55e' }}></div>
+                              </div>
+                            )}
                           </div>
-                        ))
-                      )}
+                        )
+                      })}
                     </div>
 
-                    <button className="btn btn-secondary" style={{ width: '100%', marginTop: '16px', padding: '8px', fontSize: '12px', borderRadius: 'var(--radius-sm)' }}>
-                      <CalendarDays size={16} style={{marginRight: "8px"}} /> Add to Calendar
-                    </button>
-                  </div>
-
-                  {/* Recent Activity card */}
-                  <div className="card">
-                    <h3 style={{ fontSize: '15px', fontWeight: '700', marginBottom: '16px' }}>Recent Activity</h3>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '12px' }}>
-                      {myAttempts.length === 0 ? (
-                        <div style={{ color: '#64748b', textAlign: 'center', padding: '16px' }}>No recent activity.</div>
-                      ) : (
-                        myAttempts.slice(0, 4).map((attempt, idx) => (
-                          <div style={{ display: 'flex', justifyContent: 'space-between' }} key={idx}>
-                            <span style={{ color: '#475569' }}><CheckCircle2 size={14} style={{display: "inline-block", marginRight: "6px", color: "var(--color-success)"}} /> Completed test (Score: {attempt.score}/{attempt.total_questions})</span>
-                            <span style={{ color: '#94a3b8' }}>{new Date(attempt.completed_at).toLocaleDateString()}</span>
-                          </div>
-                        ))
-                      )}
+                    {/* Legend */}
+                    <div style={{ display: 'flex', justifyContent: 'center', gap: '24px', marginTop: '16px', paddingTop: '16px', borderTop: '1px solid #f1f5f9' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: '600', color: '#475569' }}><FileText size={14} color="#3b82f6" /> Test</div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: '600', color: '#475569' }}><ClipboardEdit size={14} color="#ea580c" /> Assignment</div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: '600', color: '#475569' }}><Trophy size={14} color="#a855f7" /> Quiz</div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: '600', color: '#475569' }}><Target size={14} color="#22c55e" /> Result</div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: '600', color: '#475569' }}><BookOpen size={14} color="#ef4444" /> Live Exam</div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: '600', color: '#475569' }}><Bell size={14} color="#f59e0b" /> Reminder</div>
                     </div>
                   </div>
 
-                </div>
-              </div>
-
-              {/* Charts Display Grid */}
-              <div className="charts-split-grid">
-                
-                {/* Donut Chart: Assessments Overview */}
-                <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                  <div>
-                    <h4 style={{ fontSize: '15px', fontWeight: '700' }}>Assessments Overview</h4>
-                    <span style={{ fontSize: '11px', color: '#64748b' }}>Your overall activity this month</span>
-                  </div>
-
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-around', gap: '16px', marginTop: '12px' }}>
-                    <div style={{
-                      position: 'relative', width: '140px', height: '140px', borderRadius: '50%',
-                      background: assessmentsOverview.bg,
-                      display: 'flex', alignItems: 'center', justifyContent: 'center'
-                    }}>
-                      <div style={{
-                        width: '94px', height: '94px', borderRadius: '50%', backgroundColor: '#ffffff',
-                        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'
-                      }}>
-                        <span style={{ fontSize: '24px', fontWeight: '800', color: '#0f172a' }}>{assessmentsOverview.total}</span>
-                        <span style={{ fontSize: '9px', color: '#94a3b8', textTransform: 'uppercase', fontWeight: '700' }}>Total</span>
+                  {/* Charts Row */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+                    {/* Donut Chart Mock */}
+                    <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', padding: '24px', boxShadow: '0 1px 3px rgba(0,0,0,0.02)', border: '1px solid #f1f5f9' }}>
+                      <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#0f172a', margin: '0 0 4px 0' }}>Assessments Overview</h3>
+                      <p style={{ fontSize: '13px', color: '#64748b', margin: '0 0 24px 0' }}>Your overall activity this month</p>
+                      
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        {/* Fake Donut Chart */}
+                        <div style={{ width: '120px', height: '120px', borderRadius: '50%', border: '24px solid #3b82f6', borderTopColor: '#f59e0b', borderRightColor: '#a855f7', borderBottomColor: '#22c55e', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
+                          <span style={{ fontSize: '20px', fontWeight: '800', color: '#0f172a' }}>24</span>
+                          <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '600' }}>Total</span>
+                        </div>
+                        
+                        {/* List */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', flex: 1, paddingLeft: '24px' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', fontWeight: '600' }}><span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width:'8px',height:'8px',borderRadius:'50%',backgroundColor:'#3b82f6' }}></div> Tests</span> <span>8 (33%)</span></div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', fontWeight: '600' }}><span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width:'8px',height:'8px',borderRadius:'50%',backgroundColor:'#a855f7' }}></div> Quizzes</span> <span>6 (25%)</span></div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', fontWeight: '600' }}><span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width:'8px',height:'8px',borderRadius:'50%',backgroundColor:'#f59e0b' }}></div> Assignments</span> <span>6 (25%)</span></div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', fontWeight: '600' }}><span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width:'8px',height:'8px',borderRadius:'50%',backgroundColor:'#ef4444' }}></div> Live Exams</span> <span>3 (12%)</span></div>
+                        </div>
                       </div>
                     </div>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '12px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#ea580c' }}></span>
-                        <span>Tests ({assessmentsOverview.counts.test}, {assessmentsOverview.total ? Math.round((assessmentsOverview.counts.test / assessmentsOverview.total) * 100) : 0}%)</span>
+                    {/* Line Chart Mock */}
+                    <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', padding: '24px', boxShadow: '0 1px 3px rgba(0,0,0,0.02)', border: '1px solid #f1f5f9' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                        <div>
+                          <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#0f172a', margin: '0 0 4px 0' }}>Performance Trend</h3>
+                          <p style={{ fontSize: '13px', color: '#64748b', margin: '0 0 24px 0' }}>Your average score over time</p>
+                        </div>
+                        <select style={{ padding: '6px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc', fontSize: '12px', fontWeight: '600', color: '#475569', outline: 'none' }}>
+                          <option>This Month</option>
+                        </select>
                       </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#a855f7' }}></span>
-                        <span>Quizzes ({assessmentsOverview.counts.quiz}, {assessmentsOverview.total ? Math.round((assessmentsOverview.counts.quiz / assessmentsOverview.total) * 100) : 0}%)</span>
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#f97316' }}></span>
-                        <span>Assignments ({assessmentsOverview.counts.assignment}, {assessmentsOverview.total ? Math.round((assessmentsOverview.counts.assignment / assessmentsOverview.total) * 100) : 0}%)</span>
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#ef4444' }}></span>
-                        <span>Live Exams ({assessmentsOverview.counts.live_exam}, {assessmentsOverview.total ? Math.round((assessmentsOverview.counts.live_exam / assessmentsOverview.total) * 100) : 0}%)</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* SVG Performance Line Chart */}
-                <div className="card">
-                  <div>
-                    <h4 style={{ fontSize: '15px', fontWeight: '700' }}>Performance Trend</h4>
-                    <span style={{ fontSize: '11px', color: '#64748b' }}>Your average score over time</span>
-                  </div>
-
-                  <div style={{ marginTop: '20px' }}>
-                    <svg viewBox="0 0 400 130" style={{ width: '100%', height: '120px' }}>
-                      <line x1="50" y1="20" x2="350" y2="20" stroke="#f1f5f9" strokeWidth="1" />
-                      <line x1="50" y1="50" x2="350" y2="50" stroke="#f1f5f9" strokeWidth="1" />
-                      <line x1="50" y1="80" x2="350" y2="80" stroke="#f1f5f9" strokeWidth="1" />
-                      <line x1="50" y1="110" x2="350" y2="110" stroke="#f1f5f9" strokeWidth="1" />
-
-                      {performanceTrend.length > 0 ? (
-                        <>
-                          <path d={`M 50 ${110 - (performanceTrend[0] || 0) * 0.9} ${performanceTrend[1] !== undefined ? `L 150 ${110 - performanceTrend[1] * 0.9}` : ''} ${performanceTrend[2] !== undefined ? `L 250 ${110 - performanceTrend[2] * 0.9}` : ''} ${performanceTrend[3] !== undefined ? `L 350 ${110 - performanceTrend[3] * 0.9}` : ''}`} fill="none" stroke="#ea580c" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" />
+                      
+                      {/* Fake Line Chart SVG using SVG path for visual */}
+                      <div style={{ position: 'relative', height: '140px', width: '100%', marginTop: '10px' }}>
+                        <svg width="100%" height="100%" viewBox="0 0 300 120" preserveAspectRatio="none">
+                          {/* Grid lines */}
+                          <line x1="0" y1="20" x2="300" y2="20" stroke="#f1f5f9" strokeWidth="1" />
+                          <line x1="0" y1="50" x2="300" y2="50" stroke="#f1f5f9" strokeWidth="1" />
+                          <line x1="0" y1="80" x2="300" y2="80" stroke="#f1f5f9" strokeWidth="1" />
+                          <line x1="0" y1="110" x2="300" y2="110" stroke="#f1f5f9" strokeWidth="1" />
                           
-                          {performanceTrend.map((score, idx) => (
-                            <React.Fragment key={idx}>
-                              <circle cx={50 + (idx * 100)} cy={110 - score * 0.9} r="5" fill="#ea580c" stroke="#ffffff" strokeWidth="1.5" />
-                              <text x={50 + (idx * 100)} y={110 - score * 0.9 - 10} fontSize="9" fontWeight="700" textAnchor="middle" fill="#ea580c">{score}%</text>
-                            </React.Fragment>
-                          ))}
-                        </>
-                      ) : (
-                        <text x="200" y="65" fontSize="12" fontWeight="500" textAnchor="middle" fill="#94a3b8">No tests completed yet</text>
-                      )}
-
-                      <text x="50" y="125" fontSize="10" fontWeight="500" textAnchor="middle" fill="#64748b">Test 1</text>
-                      <text x="150" y="125" fontSize="10" fontWeight="500" textAnchor="middle" fill="#64748b">Test 2</text>
-                      <text x="250" y="125" fontSize="10" fontWeight="500" textAnchor="middle" fill="#64748b">Test 3</text>
-                      <text x="350" y="125" fontSize="10" fontWeight="500" textAnchor="middle" fill="#64748b">Test 4</text>
-                    </svg>
+                          {/* Line and Area */}
+                          <path d="M0 110 L50 80 L120 50 L200 30 L300 45 L300 120 L0 120 Z" fill="rgba(234, 88, 12, 0.1)" />
+                          <path d="M0 110 L50 80 L120 50 L200 30 L300 45" fill="none" stroke="#ea580c" strokeWidth="3" />
+                          
+                          {/* Points */}
+                          <circle cx="50" cy="80" r="4" fill="#ea580c" />
+                          <circle cx="120" cy="50" r="4" fill="#ea580c" />
+                          <circle cx="200" cy="30" r="4" fill="#ea580c" />
+                          <circle cx="300" cy="45" r="4" fill="#ea580c" />
+                        </svg>
+                        {/* Axis Labels */}
+                        <div style={{ position: 'absolute', bottom: '-15px', display: 'flex', justifyContent: 'space-between', width: '100%', fontSize: '10px', color: '#94a3b8', fontWeight: '600' }}>
+                          <span style={{ marginLeft: '40px' }}>Week 1</span>
+                          <span>Week 2</span>
+                          <span>Week 3</span>
+                          <span style={{ marginRight: '10px' }}>Week 4</span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
+
+                  {/* Quick Actions */}
+                  <div>
+                    <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#0f172a', margin: '0 0 16px 0' }}>Quick Actions</h3>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
+                      <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', padding: '16px', border: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: '#e0f2fe', color: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <FileText size={20} />
+                          </div>
+                          <div>
+                            <div style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a' }}>Take Assessment</div>
+                            <div style={{ fontSize: '11px', color: '#64748b' }}>Start a new test</div>
+                          </div>
+                        </div>
+                        <ArrowRight size={16} color="#94a3b8" />
+                      </div>
+
+                      <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', padding: '16px', border: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: '#dcfce7', color: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <BarChart3 size={20} />
+                          </div>
+                          <div>
+                            <div style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a' }}>View Results</div>
+                            <div style={{ fontSize: '11px', color: '#64748b' }}>Check your performance</div>
+                          </div>
+                        </div>
+                        <ArrowRight size={16} color="#94a3b8" />
+                      </div>
+
+                      <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', padding: '16px', border: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: '#f3e8ff', color: '#a855f7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Clock3 size={20} />
+                          </div>
+                          <div>
+                            <div style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a' }}>Past Submissions</div>
+                            <div style={{ fontSize: '11px', color: '#64748b' }}>Review your attempts</div>
+                          </div>
+                        </div>
+                        <ArrowRight size={16} color="#94a3b8" />
+                      </div>
+
+                      <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', padding: '16px', border: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: '#fff7ed', color: '#ea580c', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <BookOpen size={20} />
+                          </div>
+                          <div>
+                            <div style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a' }}>Resources</div>
+                            <div style={{ fontSize: '11px', color: '#64748b' }}>Notes and materials</div>
+                          </div>
+                        </div>
+                        <ArrowRight size={16} color="#94a3b8" />
+                      </div>
+                    </div>
+                  </div>
+
                 </div>
 
-              </div>
+                {/* Right Column (Upcoming, Activity, Quick Access) */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                  
+                  {/* Upcoming Tests */}
+                  <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', padding: '24px', boxShadow: '0 1px 3px rgba(0,0,0,0.02)', border: '1px solid #f1f5f9' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                      <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#0f172a', margin: 0 }}>Upcoming Tests</h3>
+                      <span style={{ fontSize: '13px', fontWeight: '600', color: '#ea580c', cursor: 'pointer' }}>View All</span>
+                    </div>
 
-              {/* Quick Access panel links */}
-              <div>
-                <h3 style={{ fontSize: '15px', fontWeight: '700', marginBottom: '16px' }}>Quick Access</h3>
-                <div className="quick-action-card-grid">
-                  <div onClick={() => setActiveTab('review_attempts')} className="quick-action-item">
-                    <FileStack size={20} />
-                    <div>
-                      <div className="quick-action-item-title">My Submissions</div>
-                      <div className="quick-action-item-desc">View your attempts</div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                          <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: '#e0f2fe', color: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <FileText size={20} />
+                          </div>
+                          <div>
+                            <div style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>Physics Quiz</div>
+                            <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>09:00 AM - 10:00 AM</div>
+                          </div>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <span style={{ backgroundColor: '#e0f2fe', color: '#3b82f6', fontSize: '11px', fontWeight: '700', padding: '4px 10px', borderRadius: '20px' }}>Quiz</span>
+                          <ArrowRight size={14} color="#94a3b8" />
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                          <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: '#fff7ed', color: '#ea580c', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <ClipboardEdit size={20} />
+                          </div>
+                          <div>
+                            <div style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>Math Assignment</div>
+                            <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>11:00 AM - 12:30 PM</div>
+                          </div>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <span style={{ backgroundColor: '#fff7ed', color: '#ea580c', fontSize: '11px', fontWeight: '700', padding: '4px 10px', borderRadius: '20px' }}>Assignment</span>
+                          <ArrowRight size={14} color="#94a3b8" />
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                          <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: '#dcfce7', color: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Target size={20} />
+                          </div>
+                          <div>
+                            <div style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>Chemistry Test</div>
+                            <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>02:00 PM - 03:00 PM</div>
+                          </div>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <span style={{ backgroundColor: '#dcfce7', color: '#16a34a', fontSize: '11px', fontWeight: '700', padding: '4px 10px', borderRadius: '20px' }}>Test</span>
+                          <ArrowRight size={14} color="#94a3b8" />
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                          <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: '#f3e8ff', color: '#a855f7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Trophy size={20} />
+                          </div>
+                          <div>
+                            <div style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>AI Concepts Live Exam</div>
+                            <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>05:00 PM - 06:30 PM</div>
+                          </div>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <span style={{ backgroundColor: '#f3e8ff', color: '#a855f7', fontSize: '11px', fontWeight: '700', padding: '4px 10px', borderRadius: '20px' }}>Live Exam</span>
+                          <ArrowRight size={14} color="#94a3b8" />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
+                      <span style={{ color: '#ea580c', fontSize: '13px', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                        <CalendarDays size={16} /> Add to Calendar
+                      </span>
                     </div>
                   </div>
 
-                  <div onClick={() => setActiveTab('review_attempts')} className="quick-action-item">
-                    <BarChart3 size={20} />
-                    <div>
-                      <div className="quick-action-item-title">Results History</div>
-                      <div className="quick-action-item-desc">Check your scores</div>
+                  {/* Recent Activity */}
+                  <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', padding: '24px', boxShadow: '0 1px 3px rgba(0,0,0,0.02)', border: '1px solid #f1f5f9' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                      <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#0f172a', margin: 0 }}>Recent Activity</h3>
+                      <span style={{ fontSize: '13px', fontWeight: '600', color: '#ea580c', cursor: 'pointer' }}>View All</span>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <CheckCircle2 size={16} color="#16a34a" />
+                          <span style={{ fontSize: '13px', fontWeight: '600', color: '#0f172a' }}>Physics Quiz submitted</span>
+                        </div>
+                        <span style={{ fontSize: '12px', color: '#94a3b8', fontWeight: '500' }}>2h ago</span>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <Clock3 size={16} color="#ea580c" />
+                          <span style={{ fontSize: '13px', fontWeight: '600', color: '#0f172a' }}>Math Assignment due Nov 8</span>
+                        </div>
+                        <span style={{ fontSize: '12px', color: '#94a3b8', fontWeight: '500' }}>5h ago</span>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <Trophy size={16} color="#a855f7" />
+                          <span style={{ fontSize: '13px', fontWeight: '600', color: '#0f172a' }}>AI Live Exam completed</span>
+                        </div>
+                        <span style={{ fontSize: '12px', color: '#94a3b8', fontWeight: '500' }}>1d ago</span>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <FileText size={16} color="#3b82f6" />
+                          <span style={{ fontSize: '13px', fontWeight: '600', color: '#0f172a' }}>Chemistry Test scheduled</span>
+                        </div>
+                        <span style={{ fontSize: '12px', color: '#94a3b8', fontWeight: '500' }}>2d ago</span>
+                      </div>
                     </div>
                   </div>
 
-                  <a href="#" className="quick-action-item">
-                    <BookOpen size={20} />
-                    <div>
-                      <div className="quick-action-item-title">Study Materials</div>
-                      <div className="quick-action-item-desc">Access resources</div>
-                    </div>
-                  </a>
+                  {/* Quick Access */}
+                  <div>
+                    <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#0f172a', margin: '0 0 16px 0' }}>Quick Access</h3>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                      <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', padding: '16px', border: '1px solid #f1f5f9', display: 'flex', gap: '12px', cursor: 'pointer' }}>
+                        <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: '#e0f2fe', color: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <BookOpen size={16} />
+                        </div>
+                        <div>
+                          <div style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a' }}>My Submissions</div>
+                          <div style={{ fontSize: '10px', color: '#64748b', marginTop: '2px' }}>View your attempts</div>
+                        </div>
+                      </div>
 
-                  <a href="#" className="quick-action-item">
-                    <Inbox size={20} />
-                    <div>
-                      <div className="quick-action-item-title">Download Reports</div>
-                      <div className="quick-action-item-desc">Export your data</div>
+                      <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', padding: '16px', border: '1px solid #f1f5f9', display: 'flex', gap: '12px', cursor: 'pointer' }}>
+                        <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: '#dcfce7', color: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <BarChart3 size={16} />
+                        </div>
+                        <div>
+                          <div style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a' }}>Results History</div>
+                          <div style={{ fontSize: '10px', color: '#64748b', marginTop: '2px' }}>Check your scores</div>
+                        </div>
+                      </div>
+
+                      <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', padding: '16px', border: '1px solid #f1f5f9', display: 'flex', gap: '12px', cursor: 'pointer' }}>
+                        <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: '#fff7ed', color: '#ea580c', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <FileText size={16} />
+                        </div>
+                        <div>
+                          <div style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a' }}>Study Materials</div>
+                          <div style={{ fontSize: '10px', color: '#64748b', marginTop: '2px' }}>Access resources</div>
+                        </div>
+                      </div>
+
+                      <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', padding: '16px', border: '1px solid #f1f5f9', display: 'flex', gap: '12px', cursor: 'pointer' }}>
+                        <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: '#f3e8ff', color: '#a855f7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <Target size={16} />
+                        </div>
+                        <div>
+                          <div style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a' }}>Download Reports</div>
+                          <div style={{ fontSize: '10px', color: '#64748b', marginTop: '2px' }}>Export your data</div>
+                        </div>
+                      </div>
                     </div>
-                  </a>
+                  </div>
+
                 </div>
               </div>
 
