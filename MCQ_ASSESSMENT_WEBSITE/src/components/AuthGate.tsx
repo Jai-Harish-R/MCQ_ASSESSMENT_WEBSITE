@@ -18,7 +18,10 @@ export default function AuthGate({ onAuthSuccess }: AuthGateProps) {
   const [successMsg, setSuccessMsg] = useState('');
   const [clickCount, setClickCount] = useState(0);
   const [showSandbox, setShowSandbox] = useState(false);
-  const [isForgotPassword, setIsForgotPassword] = useState(false);
+  const [resetStep, setResetStep] = useState<'idle' | 'email' | 'pin' | 'password'>('idle');
+  const [otp, setOtp] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
   const handleLogoClick = () => {
     const newCount = clickCount + 1;
@@ -114,7 +117,7 @@ export default function AuthGate({ onAuthSuccess }: AuthGateProps) {
     }
   };
 
-  const handleForgotPassword = async (e: React.FormEvent) => {
+  const handleSendResetEmail = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg('');
     setSuccessMsg('');
@@ -126,16 +129,73 @@ export default function AuthGate({ onAuthSuccess }: AuthGateProps) {
     
     setLoading(true);
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: window.location.origin + '/reset-password',
-      });
+      const { error } = await supabase.auth.resetPasswordForEmail(email);
 
       if (error) throw error;
       
-      setSuccessMsg('Password reset instructions have been sent to your email.');
+      setSuccessMsg('A 6-digit PIN has been sent to your email.');
+      setResetStep('pin');
     } catch (err: any) {
       console.error("Password reset error:", err);
       setErrorMsg(err.message || 'An error occurred during password reset.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMsg('');
+    setSuccessMsg('');
+    
+    if (!otp) {
+      setErrorMsg('Please enter the 6-digit PIN.');
+      return;
+    }
+    
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.auth.verifyOtp({
+        email,
+        token: otp,
+        type: 'recovery'
+      });
+
+      if (error) throw error;
+      if (data.session) {
+        setSuccessMsg('PIN verified. Please enter your new password.');
+        setResetStep('password');
+      } else {
+        throw new Error('Session not established.');
+      }
+    } catch (err: any) {
+      setErrorMsg(err.message || 'Invalid or expired PIN.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpdatePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMsg('');
+    setSuccessMsg('');
+    
+    if (newPassword !== confirmPassword) {
+      setErrorMsg('Passwords do not match.');
+      return;
+    }
+    
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) throw error;
+      
+      setSuccessMsg('Password updated successfully! Logging you in...');
+      setTimeout(() => {
+        setResetStep('idle');
+      }, 1500);
+    } catch (err: any) {
+      setErrorMsg(err.message || 'Error updating password.');
     } finally {
       setLoading(false);
     }
@@ -385,55 +445,110 @@ export default function AuthGate({ onAuthSuccess }: AuthGateProps) {
           )}
 
           {/* Form */}
-          {isForgotPassword ? (
-            <form onSubmit={handleForgotPassword} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <div>
-                <label className="input-label">Email Address</label>
-                <div style={{ position: 'relative' }}>
-                  <Mail size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
-                  <input
-                    type="email"
-                    className="input-field"
-                    style={{ paddingLeft: '38px' }}
-                    placeholder="you@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    disabled={loading}
-                    required
-                  />
-                </div>
-              </div>
-              <button
-                type="submit"
-                className="btn btn-primary"
-                style={{ width: '100%', height: '44px', marginTop: '12px', borderRadius: 'var(--radius-sm)' }}
-                disabled={loading}
-              >
-                {loading ? 'Processing...' : 'Send Reset Link'}
-              </button>
-              
+          {resetStep !== 'idle' ? (
+            <div>
+              {resetStep === 'email' && (
+                <form onSubmit={handleSendResetEmail} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <div>
+                    <label className="input-label">Email Address</label>
+                    <div style={{ position: 'relative' }}>
+                      <Mail size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                      <input
+                        type="email"
+                        className="input-field"
+                        style={{ paddingLeft: '38px' }}
+                        placeholder="you@example.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        disabled={loading}
+                        required
+                      />
+                    </div>
+                  </div>
+                  <button type="submit" className="btn btn-primary" style={{ width: '100%', height: '44px', marginTop: '12px', borderRadius: 'var(--radius-sm)' }} disabled={loading}>
+                    {loading ? 'Processing...' : 'Send Reset PIN'}
+                  </button>
+                </form>
+              )}
+
+              {resetStep === 'pin' && (
+                <form onSubmit={handleVerifyOtp} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <div>
+                    <label className="input-label">6-Digit PIN</label>
+                    <div style={{ position: 'relative' }}>
+                      <Lock size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                      <input
+                        type="text"
+                        className="input-field"
+                        style={{ paddingLeft: '38px', letterSpacing: '0.2em' }}
+                        placeholder="123456"
+                        value={otp}
+                        onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
+                        maxLength={6}
+                        disabled={loading}
+                        required
+                      />
+                    </div>
+                    <p style={{ fontSize: '12px', color: '#64748b', marginTop: '8px' }}>Check your email for the verification code.</p>
+                  </div>
+                  <button type="submit" className="btn btn-primary" style={{ width: '100%', height: '44px', marginTop: '12px', borderRadius: 'var(--radius-sm)' }} disabled={loading}>
+                    {loading ? 'Verifying...' : 'Verify PIN'}
+                  </button>
+                </form>
+              )}
+
+              {resetStep === 'password' && (
+                <form onSubmit={handleUpdatePassword} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <div>
+                    <label className="input-label">New Password</label>
+                    <div style={{ position: 'relative' }}>
+                      <Lock size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                      <input
+                        type="password"
+                        className="input-field"
+                        style={{ paddingLeft: '38px' }}
+                        placeholder="••••••"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        disabled={loading}
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="input-label">Confirm New Password</label>
+                    <div style={{ position: 'relative' }}>
+                      <Lock size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                      <input
+                        type="password"
+                        className="input-field"
+                        style={{ paddingLeft: '38px' }}
+                        placeholder="••••••"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        disabled={loading}
+                        required
+                      />
+                    </div>
+                  </div>
+                  <button type="submit" className="btn btn-primary" style={{ width: '100%', height: '44px', marginTop: '12px', borderRadius: 'var(--radius-sm)' }} disabled={loading}>
+                    {loading ? 'Updating...' : 'Update Password'}
+                  </button>
+                </form>
+              )}
+
               <div style={{ textAlign: 'center', marginTop: '16px' }}>
                 <button
                   type="button"
-                  onClick={() => { setIsForgotPassword(false); setErrorMsg(''); setSuccessMsg(''); }}
+                  onClick={() => { setResetStep('idle'); setErrorMsg(''); setSuccessMsg(''); }}
                   style={{
-                    background: 'none',
-                    border: 'none',
-                    color: '#64748b',
-                    fontSize: '13px',
-                    fontWeight: '500',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '6px',
-                    width: '100%'
+                    background: 'none', border: 'none', color: '#64748b', fontSize: '13px', fontWeight: '500', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', width: '100%'
                   }}
                 >
-                  <ArrowRight size={14} style={{ transform: 'rotate(180deg)' }} /> Back to Sign In
+                  <ArrowRight size={14} style={{ transform: 'rotate(180deg)' }} /> Cancel Reset
                 </button>
               </div>
-            </form>
+            </div>
           ) : (
             <>
               <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -497,7 +612,7 @@ export default function AuthGate({ onAuthSuccess }: AuthGateProps) {
                       <label className="input-label" style={{ marginBottom: 0 }}>Password</label>
                       <button 
                         type="button"
-                        onClick={() => { setIsForgotPassword(true); setErrorMsg(''); setSuccessMsg(''); }}
+                        onClick={() => { setResetStep('email'); setErrorMsg(''); setSuccessMsg(''); }}
                         style={{ background: 'none', border: 'none', color: '#ea580c', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}
                       >
                         Forgot Password?
