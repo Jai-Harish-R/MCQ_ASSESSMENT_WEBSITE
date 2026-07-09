@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import VoiceAssistant from '@/components/health/VoiceAssistant'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 
 export const metadata: Metadata = {
   title: 'VitalSync — Your Health, Intelligently Managed',
@@ -27,6 +28,7 @@ export default function RootLayout({
       <body className="antialiased min-h-screen bg-surface text-on-surface font-body selection:bg-primary/30">
         {children}
         <VoiceAssistant />
+        <SpeedInsights />
       </body>
     </html>
   )
