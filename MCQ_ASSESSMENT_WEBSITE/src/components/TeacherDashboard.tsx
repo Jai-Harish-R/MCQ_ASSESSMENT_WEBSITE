@@ -69,6 +69,8 @@ export default function TeacherDashboard({ user, isDemo, onLogout }: TeacherDash
   const [accessCode, setAccessCode] = useState('');
   const [duration, setDuration] = useState(10);
   const [totalStudents, setTotalStudents] = useState(50);
+  const [accessStart, setAccessStart] = useState('');
+  const [accessEnd, setAccessEnd] = useState('');
   const [questions, setQuestions] = useState<Array<{
     text: string;
     options: string[];
@@ -801,6 +803,24 @@ export default function TeacherDashboard({ user, isDemo, onLogout }: TeacherDash
                       value={totalStudents}
                       onChange={(e) => setTotalStudents(parseInt(e.target.value) || 50)}
                       min={1}
+                    />
+                  </div>
+                  <div>
+                    <label className="input-label">Access Start Time</label>
+                    <input
+                      type="datetime-local"
+                      className="input-field"
+                      value={accessStart}
+                      onChange={(e) => setAccessStart(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="input-label">Access End Time</label>
+                    <input
+                      type="datetime-local"
+                      className="input-field"
+                      value={accessEnd}
+                      onChange={(e) => setAccessEnd(e.target.value)}
                     />
                   </div>
                 </div>

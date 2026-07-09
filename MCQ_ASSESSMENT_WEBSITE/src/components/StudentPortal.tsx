@@ -25,6 +25,8 @@ interface Test {
   questions: Question[];
   duration?: number;
   total_students?: number;
+  access_start?: string;
+  access_end?: string;
   type?: 'test' | 'assignment' | 'quiz' | 'live_exam';
   created_at?: string;
 }
@@ -1577,57 +1579,6 @@ Content-Type: text/html; charset=UTF-8
                 {/* Right Column (Upcoming, Activity, Quick Access) */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
                   
-                  {/* Upcoming Tests */}
-                  <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', padding: '24px', boxShadow: '0 1px 3px rgba(0,0,0,0.02)', border: '1px solid #f1f5f9' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                      <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#0f172a', margin: 0 }}>Upcoming Tests</h3>
-                      <span style={{ fontSize: '13px', fontWeight: '600', color: '#ea580c', cursor: 'pointer' }}>View All</span>
-                    </div>
-
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                      {availableTests.length === 0 ? (
-                        <div style={{ fontSize: '13px', color: '#64748b', textAlign: 'center', padding: '20px' }}>No upcoming tests available.</div>
-                      ) : (
-                        availableTests.slice(0, 4).map(test => {
-                          const isQuiz = test.title?.toLowerCase().includes('quiz') || test.type === 'quiz';
-                          const isAssignment = test.title?.toLowerCase().includes('assignment') || test.type === 'assignment';
-                          const isLive = test.title?.toLowerCase().includes('live') || test.type === 'live_exam';
-                          
-                          let bg = '#dcfce7', fg = '#16a34a', typeLabel = 'Test', Icon = Target;
-                          if (isQuiz) { bg = '#e0f2fe'; fg = '#3b82f6'; typeLabel = 'Quiz'; Icon = FileText; }
-                          if (isAssignment) { bg = '#fff7ed'; fg = '#ea580c'; typeLabel = 'Assignment'; Icon = ClipboardEdit; }
-                          if (isLive) { bg = '#f3e8ff'; fg = '#a855f7'; typeLabel = 'Live Exam'; Icon = Trophy; }
-                          
-                          return (
-                            <div key={test.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                                <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: fg, color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                  <Icon size={20} />
-                                </div>
-                                <div>
-                                  <div style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '140px' }}>{test.title}</div>
-                                  <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>
-                                    {new Date(test.created_at || Date.now()).toLocaleDateString()} &bull; {test.duration || 10}m &bull; {test.total_students || 50} students
-                                  </div>
-                                </div>
-                              </div>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                <span style={{ backgroundColor: bg, color: fg, fontSize: '11px', fontWeight: '700', padding: '4px 10px', borderRadius: '20px', whiteSpace: 'nowrap' }}>{typeLabel}</span>
-                                <ArrowRight size={14} color="#94a3b8" />
-                              </div>
-                            </div>
-                          );
-                        })
-                      )}
-                    </div>
-
-                    <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
-                      <span style={{ color: '#ea580c', fontSize: '13px', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                        <CalendarDays size={16} /> Add to Calendar
-                      </span>
-                    </div>
-                  </div>
-
                   {/* Recent Activity */}
                   <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', padding: '24px', boxShadow: '0 1px 3px rgba(0,0,0,0.02)', border: '1px solid #f1f5f9' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
