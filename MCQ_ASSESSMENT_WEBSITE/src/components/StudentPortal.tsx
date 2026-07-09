@@ -933,7 +933,16 @@ Content-Type: text/html; charset=UTF-8
         <div className="container-student" style={{ flex: 1, padding: '32px 0 80px', maxWidth: '800px', margin: '0 auto', width: '100%' }}>
           
           {/* ACTIVE EXAM INTERFACE */}
-          {viewState === 'exam' && activeTest && (
+          {viewState === 'exam' && activeTest && (!activeTest.questions || activeTest.questions.length === 0 || !activeTest.questions[currentQIdx]) && (
+            <div style={{ textAlign: 'center', padding: '60px', backgroundColor: '#ffffff', borderRadius: '16px', border: '1px solid #e2e8f0', marginTop: '32px' }}>
+              <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#0f172a' }}>Error Loading Questions</h2>
+              <p style={{ color: '#64748b', marginTop: '8px' }}>
+                The question data for this test is missing or corrupted. 
+                Please contact your educator.
+              </p>
+            </div>
+          )}
+          {viewState === 'exam' && activeTest && activeTest.questions && activeTest.questions.length > 0 && activeTest.questions[currentQIdx] && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#ffffff', border: '1px solid var(--color-outline-variant)', borderRadius: 'var(--radius-default)', padding: '16px 24px' }}>
                 <div>
@@ -970,17 +979,7 @@ Content-Type: text/html; charset=UTF-8
                   </button>
                 </div>
 
-                {(!activeTest.questions || !activeTest.questions[currentQIdx]) ? (
-                  <div style={{ textAlign: 'center', padding: '40px' }}>
-                    <AlertTriangle size={48} style={{ margin: '0 auto 16px', color: '#ef4444' }} />
-                    <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#0f172a' }}>Error Loading Questions</h2>
-                    <p style={{ color: '#64748b', marginTop: '8px' }}>
-                      The question data for this test is missing or corrupted. 
-                      Please contact your educator.
-                    </p>
-                  </div>
-                ) : (
-                  <>
+                <>
                     <h2 style={{ fontFamily: 'var(--font-body)', fontSize: '18px', fontWeight: '500', lineHeight: '28px', marginBottom: '24px' }}>
                       {activeTest.questions[currentQIdx].text}
                     </h2>
@@ -1009,7 +1008,6 @@ Content-Type: text/html; charset=UTF-8
                       })}
                     </div>
                   </>
-                )}
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid var(--color-outline-variant)', paddingTop: '24px', marginTop: '32px' }}>
                   <button type="button" onClick={() => setCurrentQIdx(Math.max(0, currentQIdx - 1))} className="btn btn-secondary" disabled={currentQIdx === 0}>
