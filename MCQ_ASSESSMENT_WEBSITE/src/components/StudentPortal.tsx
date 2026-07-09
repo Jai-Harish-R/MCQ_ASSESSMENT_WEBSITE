@@ -912,6 +912,47 @@ Content-Type: text/html; charset=UTF-8
     return Math.round(totalDiff / (sorted.length - 1));
   }, [myAttempts]);
 
+
+  const assessmentsOverview = React.useMemo(() => {
+    const total = availableTests.length;
+    let tests = 0, quizzes = 0, assignments = 0, live_exams = 0;
+    availableTests.forEach(t => {
+      const type = t.type || 'test';
+      if (type === 'test') tests++;
+      if (type === 'quiz') quizzes++;
+      if (type === 'assignment') assignments++;
+      if (type === 'live_exam') live_exams++;
+    });
+    
+    // Generate donut chart conic gradient
+    let currentPct = 0;
+    const gradients = [];
+    if (tests > 0) { const p = (tests/total)*100; gradients.push(`#3b82f6 ${currentPct}% ${currentPct + p}%`); currentPct += p; }
+    if (quizzes > 0) { const p = (quizzes/total)*100; gradients.push(`#a855f7 ${currentPct}% ${currentPct + p}%`); currentPct += p; }
+    if (assignments > 0) { const p = (assignments/total)*100; gradients.push(`#f59e0b ${currentPct}% ${currentPct + p}%`); currentPct += p; }
+    if (live_exams > 0) { const p = (live_exams/total)*100; gradients.push(`#ef4444 ${currentPct}% ${currentPct + p}%`); currentPct += p; }
+    
+    const bg = gradients.length > 0 ? `conic-gradient(${gradients.join(', ')})` : 'conic-gradient(#f1f5f9 0% 100%)';
+
+    return {
+      total,
+      bg,
+      tests: { count: tests, pct: total ? Math.round((tests/total)*100) : 0 },
+      quizzes: { count: quizzes, pct: total ? Math.round((quizzes/total)*100) : 0 },
+      assignments: { count: assignments, pct: total ? Math.round((assignments/total)*100) : 0 },
+      live_exams: { count: live_exams, pct: total ? Math.round((live_exams/total)*100) : 0 },
+    };
+  }, [availableTests]);
+
+  const performanceTrend = React.useMemo(() => {
+    // Get last 4 attempts
+    const recent = [...myAttempts].sort((a, b) => new Date(a.completed_at).getTime() - new Date(b.completed_at).getTime()).slice(-4);
+    while (recent.length < 4) {
+      recent.unshift({ score: 0, total_questions: 1 } as any); // padding
+    }
+    return recent.map(att => Math.round((att.score / att.total_questions) * 100));
+  }, [myAttempts]);
+
   // Active Exam View hides sidebar
   if (viewState === 'exam' || viewState === 'result') {
     return (
@@ -1143,46 +1184,6 @@ Content-Type: text/html; charset=UTF-8
 
   // STANDARD PORTAL WITH SIDEBAR
   
-  const assessmentsOverview = React.useMemo(() => {
-    const total = availableTests.length;
-    let tests = 0, quizzes = 0, assignments = 0, live_exams = 0;
-    availableTests.forEach(t => {
-      const type = t.type || 'test';
-      if (type === 'test') tests++;
-      if (type === 'quiz') quizzes++;
-      if (type === 'assignment') assignments++;
-      if (type === 'live_exam') live_exams++;
-    });
-    
-    // Generate donut chart conic gradient
-    let currentPct = 0;
-    const gradients = [];
-    if (tests > 0) { const p = (tests/total)*100; gradients.push(`#3b82f6 ${currentPct}% ${currentPct + p}%`); currentPct += p; }
-    if (quizzes > 0) { const p = (quizzes/total)*100; gradients.push(`#a855f7 ${currentPct}% ${currentPct + p}%`); currentPct += p; }
-    if (assignments > 0) { const p = (assignments/total)*100; gradients.push(`#f59e0b ${currentPct}% ${currentPct + p}%`); currentPct += p; }
-    if (live_exams > 0) { const p = (live_exams/total)*100; gradients.push(`#ef4444 ${currentPct}% ${currentPct + p}%`); currentPct += p; }
-    
-    const bg = gradients.length > 0 ? `conic-gradient(${gradients.join(', ')})` : 'conic-gradient(#f1f5f9 0% 100%)';
-
-    return {
-      total,
-      bg,
-      tests: { count: tests, pct: total ? Math.round((tests/total)*100) : 0 },
-      quizzes: { count: quizzes, pct: total ? Math.round((quizzes/total)*100) : 0 },
-      assignments: { count: assignments, pct: total ? Math.round((assignments/total)*100) : 0 },
-      live_exams: { count: live_exams, pct: total ? Math.round((live_exams/total)*100) : 0 },
-    };
-  }, [availableTests]);
-
-  const performanceTrend = React.useMemo(() => {
-    // Get last 4 attempts
-    const recent = [...myAttempts].sort((a, b) => new Date(a.completed_at).getTime() - new Date(b.completed_at).getTime()).slice(-4);
-    while (recent.length < 4) {
-      recent.unshift({ score: 0, total_questions: 1 } as any); // padding
-    }
-    return recent.map(att => Math.round((att.score / att.total_questions) * 100));
-  }, [myAttempts]);
-
   return (
     <div className="edu-app-frame" style={{ backgroundColor: '#fafafa' }}>
       
