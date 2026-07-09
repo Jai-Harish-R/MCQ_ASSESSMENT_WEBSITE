@@ -7,7 +7,7 @@ import { Bell, ChevronDown, Clock3,
    ClipboardEdit, Target, TrendingUp, CalendarDays,
    BarChart3,  FileText, Trophy, ShieldCheck,
    Lock, Calendar
-} from 'lucide-react';
+, Users, Mail} from 'lucide-react';
 import studentAvatar from '../assets/student_avatar.png';
 
 interface Question {
@@ -2202,194 +2202,242 @@ Content-Type: text/html; charset=UTF-8
             </div>
           )}
 
-          {/* TAB 4: LEADERBOARD VIEW AND VERIFICATION ACCESS GATE */}
+          {/* TAB 4: LEADERBOARD */}
           {activeTab === 'leaderboard' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-              
-              {/* Header */}
               <div>
-                <h1 style={{ fontSize: '28px', fontWeight: '700' }}>Leaderboard</h1>
-                <p style={{ color: 'var(--color-on-surface-variant)', fontSize: '14px', marginTop: '4px' }}>
+                <h1 style={{ fontSize: '28px', fontWeight: '800', color: '#0f172a', letterSpacing: '-0.02em' }}>Leaderboard</h1>
+                <p style={{ color: '#64748b', fontSize: '15px', marginTop: '6px', fontWeight: '500' }}>
                   Compete with others and climb the leaderboard!
                 </p>
               </div>
 
-              {!verifiedLeaderboard ? (
-                // Filter Access Gate (Screenshot 5 right panel style but full size)
-                <div style={{ display: 'flex', justifyContent: 'center', padding: '20px 0' }}>
-                  <div className="card" style={{ width: '100%', maxWidth: '500px', padding: '32px' }}>
-                    <div style={{ width: '48px', height: '48px', borderRadius: '50%', backgroundColor: '#fff7ed', color: '#ea580c', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
-                      <Award size={24} />
-                    </div>
-                    <h2 style={{ fontSize: '20px', fontWeight: '700', textAlign: 'center', marginBottom: '8px' }}>Select Test to View Leaderboard</h2>
-                    <p style={{ fontSize: '13px', color: '#64748b', textAlign: 'center', marginBottom: '24px' }}>
-                      Input details to unlock rankings for your section.
-                    </p>
-
-                    {leaderboardError && (
-                      <div className="chip chip-error" style={{ display: 'flex', width: '100%', borderRadius: 'var(--radius-sm)', padding: '12px', marginBottom: '16px', gap: '8px', fontSize: '13px', textTransform: 'none' }}>
-                        <AlertTriangle size={16} style={{ flexShrink: 0 }} />
-                        <span>{leaderboardError}</span>
-                      </div>
-                    )}
-
-                    <form onSubmit={handleVerifyLeaderboard} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                      <div>
-                        <label className="input-label">Teacher Email</label>
-                        <input
-                          type="email"
-                          className="input-field"
-                          placeholder="teacher.demo@codersfun.com"
-                          value={leaderboardTeacherEmail}
-                          onChange={(e) => setLeaderboardTeacherEmail(e.target.value)}
-                          required
-                        />
-                      </div>
-
-                      <div>
-                        <label className="input-label">Test Access Code (6-digit PIN)</label>
-                        <input
-                          type="text"
-                          className="input-field"
-                          placeholder="123456"
-                          value={leaderboardAccessCode}
-                          onChange={(e) => setLeaderboardAccessCode(e.target.value)}
-                          required
-                        />
-                      </div>
-
-                      <button
-                        type="submit"
-                        className="btn btn-primary"
-                        style={{ width: '100%', height: '44px', marginTop: '12px', borderRadius: 'var(--radius-sm)' }}
-                        disabled={loading}
-                      >
-                        {loading ? 'Verifying...' : 'View Leaderboard'}
-                        {!loading && <ArrowRight size={16} />}
-                      </button>
-                    </form>
-                  </div>
-                </div>
-              ) : (
-                // Full Leaderboard layout (Screenshot 5 visual overhaul)
-                <div className="leaderboard-split-layout">
+              <div style={{ display: 'grid', gridTemplateColumns: '2.5fr 1fr', gap: '24px', alignItems: 'start' }}>
+                
+                {/* Left: Leaderboard Display */}
+                <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', padding: '32px', border: '1px solid #f1f5f9', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
                   
-                  {/* Left Column: Rankings list */}
-                  <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--color-outline-variant)', paddingBottom: '16px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+                    <Trophy size={28} color="#8b5cf6" />
+                    <h2 style={{ fontSize: '22px', fontWeight: '800', color: '#0f172a', margin: 0 }}>Leaderboard</h2>
+                  </div>
+                  <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '24px' }}>Rankings are based on marks scored in the selected test.</p>
+
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 24px', backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', marginBottom: '24px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                      <div style={{ width: '48px', height: '48px', backgroundColor: '#3b82f6', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
+                        <ClipboardEdit size={24} />
+                      </div>
                       <div>
-                        <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#0f172a' }}>{verifiedLeaderboard.test.title}</h3>
-                        <span style={{ fontSize: '12px', color: '#64748b' }}>25 Questions • MCQ Test</span>
-                      </div>
-                      <div style={{ textAlign: 'right' }}>
-                        <span style={{ fontSize: '12px', color: '#64748b', display: 'block' }}>Total Students</span>
-                        <strong style={{ fontSize: '16px', color: '#0f172a' }}>{verifiedLeaderboard.attempts.length}</strong>
+                        <div style={{ fontSize: '15px', fontWeight: '700', color: '#0f172a' }}>Physics Quiz</div>
+                        <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>25 Questions • MCQ Test</div>
                       </div>
                     </div>
-
-                    <div className="table-container">
-                      <table className="density-table">
-                        <thead>
-                          <tr>
-                            <th>Rank</th>
-                            <th>Student</th>
-                            <th style={{ textAlign: 'center' }}>Marks</th>
-                            <th style={{ textAlign: 'center' }}>Percentage</th>
-                            <th style={{ textAlign: 'center' }}>Time Taken</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {verifiedLeaderboard.attempts.map((att, index) => {
-                            const studentRank = index + 1;
-                            const isUser = att.student_email === user.email;
-                            
-                            // Determine name to display
-                            let displayName = att.student_name || att.student_email.split('@')[0];
-                            if (isUser) displayName = `${studentDisplayName} (You)`;
-
-                            const studentPct = Math.round((att.score / att.total_questions) * 100);
-                            const durationText = att.time_taken_seconds
-                              ? `${Math.floor(att.time_taken_seconds / 60)}m ${att.time_taken_seconds % 60}s`
-                              : '18m 24s';
-
-                            return (
-                              <tr key={att.id} style={{ backgroundColor: isUser ? '#ffedd5' : 'transparent' }}>
-                                <td>
-                                  {studentRank === 1 && <span className="medal-badge medal-gold">1st</span>}
-                                  {studentRank === 2 && <span className="medal-badge medal-silver">2nd</span>}
-                                  {studentRank === 3 && <span className="medal-badge medal-bronze">3rd</span>}
-                                  {studentRank > 3 && <strong>#{studentRank}</strong>}
-                                </td>
-                                <td style={{ fontWeight: isUser ? '700' : '500' }}>
-                                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <img src={isUser ? (studentAvatar as any) : "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=80"} style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover' }} alt="" />
-                                    <span>{displayName}</span>
-                                  </div>
-                                </td>
-                                <td style={{ textAlign: 'center', fontWeight: '600' }}>{att.score} / {att.total_questions}</td>
-                                <td style={{ textAlign: 'center', fontWeight: '700', color: '#ea580c' }}>{studentPct}.0%</td>
-                                <td style={{ textAlign: 'center', fontFamily: 'monospace' }}>{durationText}</td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
+                    <div style={{ width: '1px', height: '40px', backgroundColor: '#e2e8f0' }}></div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <Calendar size={20} color="#3b82f6" />
+                      <div>
+                        <div style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>7 June 2025</div>
+                        <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>09:00 AM - 10:00 AM</div>
+                      </div>
                     </div>
-
-                    <button onClick={() => setVerifiedLeaderboard(null)} className="btn btn-secondary" style={{ alignSelf: 'center', borderRadius: '4px', marginTop: '16px' }}>
-                      <ArrowLeft size={14} /> Back to Selection
-                    </button>
+                    <div style={{ width: '1px', height: '40px', backgroundColor: '#e2e8f0' }}></div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <Users size={20} color="#64748b" />
+                      <div>
+                        <div style={{ fontSize: '12px', color: '#64748b' }}>Total Students</div>
+                        <div style={{ fontSize: '15px', fontWeight: '800', color: '#0f172a', marginTop: '2px' }}>48</div>
+                      </div>
+                    </div>
                   </div>
 
-                  {/* Right Column: Filter & About */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-                    
-                    {/* Dynamic Filters Form */}
-                    <div className="card">
-                      <h3 style={{ fontSize: '15px', fontWeight: '700', marginBottom: '16px' }}>Filter Leaderboard</h3>
+                  {/* Leaderboard Table */}
+                  <div style={{ width: '100%' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '60px 2fr 1fr 1fr 1fr', padding: '16px', borderBottom: '1px solid #e2e8f0', fontSize: '12px', fontWeight: '700', color: '#64748b', alignItems: 'center' }}>
+                      <div style={{ textAlign: 'center' }}>Rank</div>
+                      <div>Student</div>
+                      <div style={{ textAlign: 'center' }}>Marks Obtained<br/><span style={{ fontSize: '10px', fontWeight: '500' }}>(out of 25)</span></div>
+                      <div style={{ textAlign: 'center' }}>Percentage</div>
+                      <div style={{ textAlign: 'right' }}>Time Taken</div>
+                    </div>
+
+                    {/* Ranks 1 to 5 */}
+                    {[
+                      { rank: 1, name: 'Aryan Sharma', email: 'aryan.sharma@demo.com', marks: 23, pct: '92.0%', time: '18m 24s', medal: '🥇' },
+                      { rank: 2, name: 'Diya Patel', email: 'diya.patel@demo.com', marks: 22, pct: '88.0%', time: '20m 11s', medal: '🥈' },
+                      { rank: 3, name: 'Rohan Verma', email: 'rohan.verma@demo.com', marks: 21, pct: '84.0%', time: '15m 45s', medal: '🥉' },
+                      { rank: 4, name: 'Ananya Singh', email: 'ananya.singh@demo.com', marks: 20, pct: '80.0%', time: '22m 03s', medal: null },
+                      { rank: 5, name: 'Ishaan Mehta', email: 'ishaan.mehta@demo.com', marks: 19, pct: '76.0%', time: '19m 17s', medal: null }
+                    ].map(st => (
+                      <div key={st.rank} style={{ display: 'grid', gridTemplateColumns: '60px 2fr 1fr 1fr 1fr', padding: '16px', borderBottom: '1px solid #f1f5f9', alignItems: 'center', transition: 'background-color 0.2s' }}>
+                        <div style={{ textAlign: 'center', fontSize: st.medal ? '20px' : '14px', fontWeight: '700', color: st.medal ? 'inherit' : '#0f172a' }}>
+                          {st.medal || st.rank}
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <div style={{ width: '36px', height: '36px', borderRadius: '50%', backgroundColor: '#e2e8f0', overflow: 'hidden' }}>
+                            <img src={studentAvatar} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          </div>
+                          <div>
+                            <div style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>{st.name}</div>
+                            <div style={{ fontSize: '12px', color: '#64748b' }}>{st.email}</div>
+                          </div>
+                        </div>
+                        <div style={{ textAlign: 'center', fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>{st.marks}</div>
+                        <div style={{ textAlign: 'center', fontSize: '14px', fontWeight: '800', color: '#10b981' }}>{st.pct}</div>
+                        <div style={{ textAlign: 'right', fontSize: '13px', fontWeight: '600', color: '#0f172a' }}>{st.time}</div>
+                      </div>
+                    ))}
+
+                    {/* Current User Rank */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '60px 2fr 1fr 1fr 1fr', padding: '16px', backgroundColor: '#f5f3ff', borderLeft: '4px solid #8b5cf6', borderRadius: '4px', alignItems: 'center', margin: '8px 0' }}>
+                      <div style={{ textAlign: 'center', fontSize: '14px', fontWeight: '800', color: '#8b5cf6' }}>23</div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <div style={{ width: '36px', height: '36px', borderRadius: '50%', backgroundColor: '#e2e8f0', overflow: 'hidden' }}>
+                          <img src={studentAvatar} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        </div>
+                        <div>
+                          <div style={{ fontSize: '14px', fontWeight: '800', color: '#8b5cf6' }}>jhgno.official (You)</div>
+                          <div style={{ fontSize: '12px', color: '#6366f1' }}>jhgno.official@demo.com</div>
+                        </div>
+                      </div>
+                      <div style={{ textAlign: 'center', fontSize: '14px', fontWeight: '800', color: '#8b5cf6' }}>15</div>
+                      <div style={{ textAlign: 'center', fontSize: '14px', fontWeight: '800', color: '#8b5cf6' }}>60.0%</div>
+                      <div style={{ textAlign: 'right', fontSize: '13px', fontWeight: '700', color: '#8b5cf6' }}>21m 32s</div>
+                    </div>
+
+                    {/* Ranks 24, 25 */}
+                    {[
+                      { rank: 24, name: 'Kartik Malhotra', email: 'kartik.malhotra@demo.com', marks: 14, pct: '56.0%', time: '23m 10s', color: '#ef4444' },
+                      { rank: 25, name: 'Meera Nair', email: 'meera.nair@demo.com', marks: 13, pct: '52.0%', time: '24m 05s', color: '#ef4444' }
+                    ].map(st => (
+                      <div key={st.rank} style={{ display: 'grid', gridTemplateColumns: '60px 2fr 1fr 1fr 1fr', padding: '16px', borderBottom: '1px solid #f1f5f9', alignItems: 'center' }}>
+                        <div style={{ textAlign: 'center', fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>{st.rank}</div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <div style={{ width: '36px', height: '36px', borderRadius: '50%', backgroundColor: '#e2e8f0', overflow: 'hidden' }}>
+                            <img src={studentAvatar} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          </div>
+                          <div>
+                            <div style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>{st.name}</div>
+                            <div style={{ fontSize: '12px', color: '#64748b' }}>{st.email}</div>
+                          </div>
+                        </div>
+                        <div style={{ textAlign: 'center', fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>{st.marks}</div>
+                        <div style={{ textAlign: 'center', fontSize: '14px', fontWeight: '800', color: st.color }}>{st.pct}</div>
+                        <div style={{ textAlign: 'right', fontSize: '13px', fontWeight: '600', color: '#0f172a' }}>{st.time}</div>
+                      </div>
+                    ))}
+
+                    <div style={{ textAlign: 'center', marginTop: '24px' }}>
+                      <button style={{ border: 'none', backgroundColor: 'transparent', color: '#8b5cf6', fontSize: '14px', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', margin: '0 auto' }}>
+                        View Full Leaderboard <ArrowRight size={16} />
+                      </button>
+                    </div>
+
+                  </div>
+                </div>
+
+                {/* Right: Filter & About */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                  
+                  {/* Filter Card */}
+                  <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', padding: '24px', border: '1px solid #f1f5f9', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
+                    <h3 style={{ fontSize: '16px', fontWeight: '800', color: '#0f172a', margin: '0 0 6px 0' }}>Filter Leaderboard</h3>
+                    <p style={{ fontSize: '13px', color: '#64748b', marginBottom: '20px' }}>Select the test and details to view leaderboard.</p>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: '700', color: '#0f172a', marginBottom: '6px' }}>Date</label>
+                        <div style={{ position: 'relative' }}>
+                          <Calendar size={16} color="#64748b" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+                          <input type="text" defaultValue="7 June 2025" style={{ width: '100%', padding: '10px 12px 10px 36px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '13px', color: '#0f172a', outline: 'none' }} />
+                        </div>
+                      </div>
                       
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                        <div>
-                          <label className="input-label">Date</label>
-                          <input type="text" className="input-field" value="7 June 2025" readOnly />
+                      <div>
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: '700', color: '#0f172a', marginBottom: '6px' }}>Time</label>
+                        <div style={{ position: 'relative' }}>
+                          <Clock size={16} color="#64748b" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+                          <select style={{ width: '100%', padding: '10px 12px 10px 36px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '13px', color: '#0f172a', appearance: 'none', outline: 'none' }}>
+                            <option>09:00 AM - 10:00 AM</option>
+                          </select>
+                          <ChevronDown size={16} color="#64748b" style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
                         </div>
+                      </div>
 
-                        <div>
-                          <label className="input-label">Time</label>
-                          <input type="text" className="input-field" value="09:00 AM - 10:00 AM" readOnly />
+                      <div>
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: '700', color: '#0f172a', marginBottom: '6px' }}>Teacher Email</label>
+                        <div style={{ position: 'relative' }}>
+                          <Mail size={16} color="#64748b" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+                          <input type="email" defaultValue="teacher.demo@codersfun.com" style={{ width: '100%', padding: '10px 12px 10px 36px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '13px', color: '#0f172a', outline: 'none' }} />
                         </div>
+                      </div>
 
-                        <div>
-                          <label className="input-label">Teacher Email</label>
-                          <input type="email" className="input-field" value={leaderboardTeacherEmail} readOnly />
+                      <div>
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: '700', color: '#0f172a', marginBottom: '6px' }}>Test Access Code (6-digit PIN)</label>
+                        <div style={{ position: 'relative' }}>
+                          <Lock size={16} color="#64748b" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+                          <input type="text" defaultValue="123456" style={{ width: '100%', padding: '10px 12px 10px 36px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '13px', color: '#0f172a', outline: 'none' }} />
                         </div>
+                      </div>
 
-                        <div>
-                          <label className="input-label">Test Access Code (6-digit PIN)</label>
-                          <input type="text" className="input-field" value={leaderboardAccessCode} readOnly />
+                      <div>
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: '700', color: '#0f172a', marginBottom: '6px' }}>Test</label>
+                        <div style={{ position: 'relative' }}>
+                          <div style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', width: '24px', height: '24px', backgroundColor: '#3b82f6', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
+                            <ClipboardEdit size={14} />
+                          </div>
+                          <select style={{ width: '100%', padding: '10px 12px 10px 44px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '13px', color: '#0f172a', appearance: 'none', outline: 'none', height: '44px' }}>
+                            <option>Physics Quiz</option>
+                          </select>
+                          <ChevronDown size={16} color="#64748b" style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
                         </div>
+                      </div>
 
-                        <button className="btn btn-primary" style={{ width: '100%', borderRadius: 'var(--radius-sm)' }} disabled>
-                          View Leaderboard
-                        </button>
+                      <button style={{ width: '100%', padding: '12px', borderRadius: '8px', backgroundColor: '#6d28d9', color: '#ffffff', fontSize: '14px', fontWeight: '700', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginTop: '8px' }}>
+                        <Trophy size={16} /> View Leaderboard
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* About Card */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    <h3 style={{ fontSize: '15px', fontWeight: '800', color: '#0f172a', margin: 0 }}>About Leaderboard</h3>
+                    
+                    <div style={{ display: 'flex', gap: '16px' }}>
+                      <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: '#f3e8ff', color: '#8b5cf6', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <Trophy size={20} />
+                      </div>
+                      <div>
+                        <div style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a' }}>Rank is based on marks</div>
+                        <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px', lineHeight: '1.4' }}>Higher marks in the selected test get a higher rank.</div>
                       </div>
                     </div>
 
-                    {/* About Card */}
-                    <div className="card">
-                      <h4 style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a', marginBottom: '12px' }}>About Leaderboard</h4>
-                      
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '12px', color: '#64748b' }}>
-                        <div style={{display:"flex",gap:"8px"}}><Trophy size={16} color="#eab308" /> <span><strong>Rank is based on marks:</strong> Higher marks in the selected test gets a higher rank.</span></div>
-                        <div style={{display:"flex",gap:"8px"}}><BarChart3 size={16} color="#3b82f6" /> <span><strong>Ties are broken by time:</strong> If marks are same, a faster attempt gets a higher rank.</span></div>
-                        <div style={{display:"flex",gap:"8px"}}><ShieldCheck size={16} color="#10b981" /> <span><strong>Fair and accurate:</strong> Results are calculated instantly and fairly for all students.</span></div>
+                    <div style={{ display: 'flex', gap: '16px' }}>
+                      <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: '#dcfce7', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <BarChart3 size={20} />
+                      </div>
+                      <div>
+                        <div style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a' }}>Ties are broken by time</div>
+                        <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px', lineHeight: '1.4' }}>If marks are same, faster attempt gets the higher rank.</div>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '16px' }}>
+                      <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: '#eff6ff', color: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <ShieldCheck size={20} />
+                      </div>
+                      <div>
+                        <div style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a' }}>Fair and accurate</div>
+                        <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px', lineHeight: '1.4' }}>Results are calculated instantly and fairly for all students.</div>
                       </div>
                     </div>
 
                   </div>
 
                 </div>
-              )}
+              </div>
+
             </div>
           )}
 
