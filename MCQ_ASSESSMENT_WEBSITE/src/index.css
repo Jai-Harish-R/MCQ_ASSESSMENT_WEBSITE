@@ -1053,3 +1053,44 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: 0 10px 30px rgba(0,0,0,0.03);
   border: 1px solid #f1f5f9;
 }
+
+
+/* Exam Navigator Styles */
+.nav-box {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  border: 1px solid #e2e8f0;
+  background-color: #ffffff;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  color: #64748b;
+  transition: all 0.2s ease;
+}
+.nav-box:hover {
+  border-color: #94a3b8;
+}
+.nav-box-active {
+  border-color: #0f172a;
+  border-width: 2px;
+  color: #0f172a;
+  font-weight: 700;
+}
+.nav-box-answered {
+  background-color: #e0f2fe;
+  border-color: #3b82f6;
+  color: #1e3a8a;
+}
+.nav-box-flagged {
+  border-color: #ea580c;
+  background-color: #fff7ed;
+}
+.nav-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}

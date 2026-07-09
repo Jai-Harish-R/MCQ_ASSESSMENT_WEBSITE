@@ -956,7 +956,7 @@ Content-Type: text/html; charset=UTF-8
   // Active Exam View hides sidebar
   if (viewState === 'exam' || viewState === 'result') {
     return (
-      <div style={{ backgroundColor: 'var(--color-background)', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ backgroundColor: viewState === 'exam' ? '#fdfbf7' : 'var(--color-background)', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
         <header className="edu-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <div style={{
@@ -971,7 +971,7 @@ Content-Type: text/html; charset=UTF-8
           <div style={{ fontSize: '13px', fontWeight: '500' }}>{user.email}</div>
         </header>
 
-        <div className="container-student" style={{ flex: 1, padding: '32px 0 80px', maxWidth: '800px', margin: '0 auto', width: '100%' }}>
+        <div className="container-student" style={{ flex: 1, padding: '32px 0 80px', maxWidth: viewState === 'exam' ? '1200px' : '800px', margin: '0 auto', width: '100%' }}>
           
           {/* ACTIVE EXAM INTERFACE */}
           {viewState === 'exam' && activeTest && (!activeTest.questions || activeTest.questions.length === 0 || !activeTest.questions[currentQIdx]) && (
@@ -1051,7 +1051,7 @@ Content-Type: text/html; charset=UTF-8
                   </>
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid var(--color-outline-variant)', paddingTop: '24px', marginTop: '32px' }}>
-                  <button type="button" onClick={() => setCurrentQIdx(Math.max(0, currentQIdx - 1))} className="btn btn-secondary" disabled={currentQIdx === 0}>
+                  <button type="button" onClick={() => setCurrentQIdx(Math.max(0, currentQIdx - 1))} style={{ border: '1px solid #ea580c', color: '#ea580c', backgroundColor: 'transparent', display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 24px', borderRadius: '8px', fontWeight: '600', cursor: currentQIdx === 0 ? 'not-allowed' : 'pointer', opacity: currentQIdx === 0 ? 0.5 : 1 }} disabled={currentQIdx === 0}>
                     <ArrowLeft size={16} /> Previous
                   </button>
                   {currentQIdx < activeTest.questions.length - 1 ? (
@@ -1078,8 +1078,9 @@ Content-Type: text/html; charset=UTF-8
                     if (isAnswered) styleClass = 'nav-box-answered';
                     if (isFlagged) styleClass = 'nav-box-flagged';
                     return (
-                      <button key={q.id} onClick={() => setCurrentQIdx(idx)} className={`nav-box ${styleClass} ${isActive ? 'nav-box-active' : ''}`}>
+                      <button key={q.id} onClick={() => setCurrentQIdx(idx)} className={`nav-box ${styleClass} ${isActive ? 'nav-box-active' : ''}`} style={{ position: 'relative', overflow: 'hidden' }}>
                         {idx + 1}
+                        {isFlagged && <div style={{ position: 'absolute', top: '-10px', right: '-10px', width: '20px', height: '20px', backgroundColor: '#ea580c', transform: 'rotate(45deg)' }}></div>}
                       </button>
                     );
                   })}
