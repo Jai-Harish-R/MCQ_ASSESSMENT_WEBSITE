@@ -341,8 +341,8 @@ export default function TeacherDashboard({ user, isDemo, onLogout }: TeacherDash
       setMsg({ type: 'error', text: 'Test title is required.' });
       return;
     }
-    if (!accessCode.trim() || isNaN(Number(accessCode))) {
-      setMsg({ type: 'error', text: 'Access code PIN must be a valid number.' });
+    if (!/^\d{6}$/.test(accessCode.trim())) {
+      setMsg({ type: 'error', text: 'Access code PIN must be exactly a 6-digit number (e.g. 123456).' });
       return;
     }
 
