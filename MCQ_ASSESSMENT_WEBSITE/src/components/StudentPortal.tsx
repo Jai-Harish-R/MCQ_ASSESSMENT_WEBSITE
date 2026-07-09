@@ -606,6 +606,19 @@ export default function StudentPortal({ user, isDemo, onLogout }: StudentPortalP
         return;
       }
 
+      // Access time check
+      const now = new Date();
+      if (test.access_start && now < new Date(test.access_start)) {
+        setErrorMsg('This test has not started yet. Please wait until ' + new Date(test.access_start).toLocaleString());
+        setLoading(false);
+        return;
+      }
+      if (test.access_end && now > new Date(test.access_end)) {
+        setErrorMsg('This test has ended. You can no longer write the exam.');
+        setLoading(false);
+        return;
+      }
+
       if (existingAttempt) {
         if (!existingAttempt.allowed_retry) {
           setErrorMsg(`Already Submitted: You completed this exam on ${new Date(existingAttempt.completed_at).toLocaleDateString()}. Score: ${existingAttempt.score}/${existingAttempt.total_questions}. Ask your educator for a retake authorization if you faced network issues.`);
@@ -617,7 +630,7 @@ export default function StudentPortal({ user, isDemo, onLogout }: StudentPortalP
       }
 
       setActiveTest(test);
-      setSecondsLeft(600);
+      setSecondsLeft((test.duration || 10) * 60);
       setViewState('exam');
     } catch (err: any) {
       console.error(err);
