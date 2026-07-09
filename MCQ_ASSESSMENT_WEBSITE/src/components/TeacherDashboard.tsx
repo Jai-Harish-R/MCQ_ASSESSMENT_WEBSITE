@@ -534,9 +534,17 @@ export default function TeacherDashboard({ user, isDemo, onLogout }: TeacherDash
       <aside className="edu-sidebar">
         <div>
           {/* Logo Frame */}
-          <div className="sidebar-logo">
-            <GraduationCap size={28} />
-            <span>EduVerify Pro</span>
+          <div className="sidebar-logo" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '0 8px' }}>
+            <div style={{
+              width: '32px', height: '32px', borderRadius: '8px', backgroundColor: '#ea580c',
+              color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontWeight: '800', fontSize: '18px'
+            }}>
+              C
+            </div>
+            <span style={{ fontSize: '20px', fontWeight: '800', color: '#0f172a', fontFamily: 'var(--font-headlines)' }}>
+              Coders<span style={{ color: '#ea580c' }}>Fun</span>
+            </span>
           </div>
 
           {/* Profile Card */}
@@ -610,7 +618,7 @@ export default function TeacherDashboard({ user, isDemo, onLogout }: TeacherDash
         <header className="edu-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span style={{ fontSize: '13px', fontWeight: '500', color: 'var(--color-on-surface-variant)' }}>
-              EduVerify Pro Administrator Panel
+              CodersFun Administrator Panel
             </span>
           </div>
           <div className="header-actions">
