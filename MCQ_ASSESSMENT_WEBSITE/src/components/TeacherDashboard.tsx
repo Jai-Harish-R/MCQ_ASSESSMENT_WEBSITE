@@ -350,6 +350,16 @@ export default function TeacherDashboard({ user, isDemo, onLogout }: TeacherDash
       return;
     }
 
+    if (!accessStart || !accessEnd) {
+      setMsg({ type: 'error', text: 'Both Access Start Time and Access End Time must be provided before publishing.' });
+      return;
+    }
+
+    if (new Date(accessStart) >= new Date(accessEnd)) {
+      setMsg({ type: 'error', text: 'Access End Time must be after Access Start Time.' });
+      return;
+    }
+
     for (let i = 0; i < questions.length; i++) {
       if (!questions[i].text.trim()) {
         setMsg({ type: 'error', text: `Question ${i + 1} text cannot be empty.` });
