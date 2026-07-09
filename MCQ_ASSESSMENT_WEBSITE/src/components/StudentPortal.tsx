@@ -970,33 +970,46 @@ Content-Type: text/html; charset=UTF-8
                   </button>
                 </div>
 
-                <h2 style={{ fontFamily: 'var(--font-body)', fontSize: '18px', fontWeight: '500', lineHeight: '28px', marginBottom: '24px' }}>
-                  {activeTest.questions[currentQIdx].text}
-                </h2>
-
-                {activeTest.questions[currentQIdx].imageUrl && (
-                  <div className="exam-img-container" style={{ marginBottom: '24px' }}>
-                    <img src={activeTest.questions[currentQIdx].imageUrl} className="exam-img" alt="Question attachment" />
+                {(!activeTest.questions || !activeTest.questions[currentQIdx]) ? (
+                  <div style={{ textAlign: 'center', padding: '40px' }}>
+                    <AlertTriangle size={48} style={{ margin: '0 auto 16px', color: '#ef4444' }} />
+                    <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#0f172a' }}>Error Loading Questions</h2>
+                    <p style={{ color: '#64748b', marginTop: '8px' }}>
+                      The question data for this test is missing or corrupted. 
+                      Please contact your educator.
+                    </p>
                   </div>
-                )}
+                ) : (
+                  <>
+                    <h2 style={{ fontFamily: 'var(--font-body)', fontSize: '18px', fontWeight: '500', lineHeight: '28px', marginBottom: '24px' }}>
+                      {activeTest.questions[currentQIdx].text}
+                    </h2>
 
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  {activeTest.questions[currentQIdx].options.map((opt, optIdx) => {
-                    const qId = activeTest.questions[currentQIdx].id;
-                    const isSelected = answers[qId] === optIdx;
-                    return (
-                      <label key={optIdx} className={`option-container ${isSelected ? 'selected' : ''}`}>
-                        <input
-                          type="radio"
-                          name={`q-${qId}-options`}
-                          checked={isSelected}
-                          onChange={() => setAnswers({ ...answers, [qId]: optIdx })}
-                        />
-                        <span>{opt}</span>
-                      </label>
-                    );
-                  })}
-                </div>
+                    {activeTest.questions[currentQIdx].imageUrl && (
+                      <div className="exam-img-container" style={{ marginBottom: '24px' }}>
+                        <img src={activeTest.questions[currentQIdx].imageUrl} className="exam-img" alt="Question attachment" />
+                      </div>
+                    )}
+
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      {activeTest.questions[currentQIdx].options.map((opt, optIdx) => {
+                        const qId = activeTest.questions[currentQIdx].id;
+                        const isSelected = answers[qId] === optIdx;
+                        return (
+                          <label key={optIdx} className={`option-container ${isSelected ? 'selected' : ''}`}>
+                            <input
+                              type="radio"
+                              name={`q-${qId}-options`}
+                              checked={isSelected}
+                              onChange={() => setAnswers({ ...answers, [qId]: optIdx })}
+                            />
+                            <span>{opt}</span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </>
+                )}
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid var(--color-outline-variant)', paddingTop: '24px', marginTop: '32px' }}>
                   <button type="button" onClick={() => setCurrentQIdx(Math.max(0, currentQIdx - 1))} className="btn btn-secondary" disabled={currentQIdx === 0}>

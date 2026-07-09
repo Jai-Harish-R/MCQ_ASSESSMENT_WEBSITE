@@ -362,6 +362,11 @@ export default function TeacherDashboard({ user, isDemo, onLogout }: TeacherDash
       return;
     }
 
+    if (questions.length === 0) {
+      setMsg({ type: 'error', text: 'You must add at least one question to the test.' });
+      return;
+    }
+
     for (let i = 0; i < questions.length; i++) {
       if (!questions[i].text.trim()) {
         setMsg({ type: 'error', text: `Question ${i + 1} text cannot be empty.` });
