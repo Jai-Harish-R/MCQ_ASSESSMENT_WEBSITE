@@ -23,6 +23,7 @@ interface Test {
   teacher_email: string;
   questions: Question[];
   duration?: number;
+  total_students?: number;
   created_at: string;
 }
 
@@ -67,6 +68,7 @@ export default function TeacherDashboard({ user, isDemo, onLogout }: TeacherDash
   const [testTitle, setTestTitle] = useState('');
   const [accessCode, setAccessCode] = useState('');
   const [duration, setDuration] = useState(10);
+  const [totalStudents, setTotalStudents] = useState(50);
   const [questions, setQuestions] = useState<Array<{
     text: string;
     options: string[];
@@ -381,6 +383,7 @@ export default function TeacherDashboard({ user, isDemo, onLogout }: TeacherDash
           title: testTitle,
           access_code: accessCode,
           duration: duration,
+          total_students: totalStudents,
           teacher_email: user.email,
           questions: formattedQuestions,
           created_at: new Date().toISOString()
@@ -410,7 +413,8 @@ export default function TeacherDashboard({ user, isDemo, onLogout }: TeacherDash
             access_code: accessCode,
             questions: formattedQuestions,
             type: 'test',
-            duration: duration
+            duration: duration,
+            total_students: totalStudents
           })
           .select()
           .single();
@@ -773,9 +777,30 @@ export default function TeacherDashboard({ user, isDemo, onLogout }: TeacherDash
                     <input
                       type="text"
                       className="input-field"
-                      placeholder="e.g. 55601"
+                      placeholder="e.g. 123456"
                       value={accessCode}
                       onChange={(e) => setAccessCode(e.target.value)}
+                      maxLength={6}
+                    />
+                  </div>
+                  <div>
+                    <label className="input-label">Test Duration (Minutes)</label>
+                    <input
+                      type="number"
+                      className="input-field"
+                      value={duration}
+                      onChange={(e) => setDuration(parseInt(e.target.value) || 10)}
+                      min={1}
+                    />
+                  </div>
+                  <div>
+                    <label className="input-label">Total No of Students</label>
+                    <input
+                      type="number"
+                      className="input-field"
+                      value={totalStudents}
+                      onChange={(e) => setTotalStudents(parseInt(e.target.value) || 50)}
+                      min={1}
                     />
                   </div>
                 </div>

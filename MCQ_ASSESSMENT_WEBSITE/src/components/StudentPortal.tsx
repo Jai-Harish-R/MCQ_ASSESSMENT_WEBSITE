@@ -24,6 +24,7 @@ interface Test {
   teacher_email: string;
   questions: Question[];
   duration?: number;
+  total_students?: number;
   type?: 'test' | 'assignment' | 'quiz' | 'live_exam';
   created_at?: string;
 }
@@ -1600,7 +1601,9 @@ Content-Type: text/html; charset=UTF-8
                                 </div>
                                 <div>
                                   <div style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '140px' }}>{test.title}</div>
-                                  <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>{new Date(test.created_at || Date.now()).toLocaleDateString()}</div>
+                                  <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>
+                                    {new Date(test.created_at || Date.now()).toLocaleDateString()} &bull; {test.duration || 10}m &bull; {test.total_students || 50} students
+                                  </div>
                                 </div>
                               </div>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
