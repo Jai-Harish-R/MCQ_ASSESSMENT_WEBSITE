@@ -288,7 +288,7 @@ export default function AuthGate({ onAuthSuccess }: AuthGateProps) {
                 border: '1px solid #fee2e2'
               }}>
                 <AlertCircle size={18} style={{ flexShrink: 0, marginTop: '2px' }} />
-                <span>{errorMsg}</span>
+                <span>{typeof errorMsg === 'object' ? JSON.stringify(errorMsg) : String(errorMsg)}</span>
               </div>
             )}
 

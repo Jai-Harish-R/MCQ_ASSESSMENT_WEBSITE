@@ -1758,7 +1758,7 @@ Content-Type: text/html; charset=UTF-8
                     <form onSubmit={handleEnterTest} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                       {errorMsg && (
                         <div style={{ padding: '12px', backgroundColor: '#fef2f2', color: '#ef4444', borderRadius: '8px', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '500' }}>
-                          <AlertTriangle size={16} /> {errorMsg}
+                          <AlertTriangle size={16} /> {typeof errorMsg === 'object' ? JSON.stringify(errorMsg) : String(errorMsg)}
                         </div>
                       )}
                       

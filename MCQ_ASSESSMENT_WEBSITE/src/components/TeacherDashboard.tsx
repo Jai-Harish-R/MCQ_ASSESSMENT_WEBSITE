@@ -655,7 +655,7 @@ export default function TeacherDashboard({ user, isDemo, onLogout }: TeacherDash
               padding: '16px'
             }}>
               {msg.type === 'success' ? <Check size={20} /> : <AlertCircle size={20} />}
-              <span>{msg.text}</span>
+              <span>{typeof msg.text === 'object' ? JSON.stringify(msg.text) : String(msg.text)}</span>
             </div>
           )}
 
