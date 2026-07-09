@@ -6,7 +6,7 @@ import { Bell, ChevronDown, Clock3,
   LayoutDashboard, BookOpen, Award,
    ClipboardEdit, Target, TrendingUp, CalendarDays,
    BarChart3,  FileText, Trophy, ShieldCheck,
-   ClipboardList, Lock, Calendar
+   Lock, Calendar
 } from 'lucide-react';
 import studentAvatar from '../assets/student_avatar.png';
 
@@ -1927,121 +1927,278 @@ Content-Type: text/html; charset=UTF-8
           {activeTab === 'review_attempts' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
               <div>
-                <h1 style={{ fontSize: '28px', fontWeight: '700' }}>Review Attempts</h1>
-                <p style={{ color: 'var(--color-on-surface-variant)', fontSize: '14px', marginTop: '4px' }}>
-                  Analyze your performance history and review answers from past tests.
+                <h1 style={{ fontSize: '28px', fontWeight: '800', color: '#0f172a', letterSpacing: '-0.02em' }}>Review Attempts</h1>
+                <p style={{ color: '#64748b', fontSize: '15px', marginTop: '6px', fontWeight: '500' }}>
+                  Review your past attempts and analyze your performance.
                 </p>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '24px' }}>
                 {/* Left: Calendar Component */}
-                <div className="calendar-card">
-                  <div className="calendar-header-row">
-                    <h3 style={{ fontSize: '16px', fontWeight: '700' }}>June 2025</h3>
+                <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', padding: '24px', border: '1px solid #f1f5f9', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
+                  <div style={{ marginBottom: '24px' }}>
+                    <h3 style={{ fontSize: '16px', fontWeight: '800', color: '#0f172a', margin: '0 0 4px 0' }}>Review Attempts</h3>
+                    <p style={{ fontSize: '13px', color: '#64748b', margin: 0 }}>Select a date to see the tests you attempted.</p>
+                  </div>
+                  
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+                    <h3 style={{ fontSize: '15px', fontWeight: '800', color: '#0f172a', margin: 0 }}>
+                      {selectedDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
+                    </h3>
                     <div style={{ display: 'flex', gap: '8px' }}>
-                      <button className="btn btn-secondary" style={{ padding: '4px 10px', fontSize: '12px' }}>Today</button>
-                      <button className="btn btn-secondary" style={{ padding: '4px 8px', fontSize: '12px' }}>&lt;</button>
-                      <button className="btn btn-secondary" style={{ padding: '4px 8px', fontSize: '12px' }}>&gt;</button>
+                      <button onClick={() => setSelectedDate(new Date())} style={{ padding: '6px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', backgroundColor: '#ffffff', fontSize: '12px', fontWeight: '700', color: '#0f172a', cursor: 'pointer' }}>Today</button>
+                      <button onClick={() => setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() - 1, 1))} style={{ padding: '6px 10px', borderRadius: '8px', border: '1px solid #e2e8f0', backgroundColor: '#ffffff', fontSize: '12px', fontWeight: '700', color: '#0f172a', cursor: 'pointer' }}>&lt;</button>
+                      <button onClick={() => setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 1))} style={{ padding: '6px 10px', borderRadius: '8px', border: '1px solid #e2e8f0', backgroundColor: '#ffffff', fontSize: '12px', fontWeight: '700', color: '#0f172a', cursor: 'pointer' }}>&gt;</button>
                     </div>
                   </div>
 
-                  <div className="calendar-days-grid">
-                    <div className="calendar-weekday">Sun</div>
-                    <div className="calendar-weekday">Mon</div>
-                    <div className="calendar-weekday">Tue</div>
-                    <div className="calendar-weekday">Wed</div>
-                    <div className="calendar-weekday">Thu</div>
-                    <div className="calendar-weekday">Fri</div>
-                    <div className="calendar-weekday">Sat</div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '8px', textAlign: 'center', marginBottom: '8px' }}>
+                    {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+                      <div key={day} style={{ fontSize: '12px', fontWeight: '700', color: '#64748b', padding: '8px 0' }}>{day}</div>
+                    ))}
+                  </div>
 
-                    {/* Simple Calendar Grid Mockup */}
-                    {Array.from({ length: 30 }, (_, i) => {
-                      const dayNum = i + 1;
-                      const isSelected = selectedDate.getDate() === dayNum;
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '8px' }}>
+                    {/* Dynamic Calendar Grid */}
+                    {Array.from({ length: 35 }, (_, i) => {
+                      const year = selectedDate.getFullYear();
+                      const month = selectedDate.getMonth();
+                      const firstDay = new Date(year, month, 1).getDay();
+                      const daysInMonth = new Date(year, month + 1, 0).getDate();
+                      const daysInPrevMonth = new Date(year, month, 0).getDate();
+                      
+                      const dateNum = i - firstDay + 1;
+                      let isCurrentMonth = true;
+                      let displayNum = dateNum;
+                      
+                      if (dateNum <= 0) {
+                        isCurrentMonth = false;
+                        displayNum = daysInPrevMonth + dateNum;
+                      } else if (dateNum > daysInMonth) {
+                        isCurrentMonth = false;
+                        displayNum = dateNum - daysInMonth;
+                      }
+                      
+                      const currentDateString = new Date(year, isCurrentMonth ? month : (dateNum <= 0 ? month - 1 : month + 1), displayNum).toISOString().split('T')[0];
+                      const dayAttempts = myAttempts.filter(att => new Date(att.completed_at).toISOString().split('T')[0] === currentDateString);
+                      const isSelected = isCurrentMonth && displayNum === selectedDate.getDate();
+                      
                       return (
                         <div
-                          key={dayNum}
-                          onClick={() => setSelectedDate(new Date(2025, 5, dayNum))}
-                          className={`calendar-day-cell ${isSelected ? 'selected' : ''}`}
+                          key={i}
+                          onClick={() => {
+                            if (isCurrentMonth) {
+                              setSelectedDate(new Date(year, month, displayNum));
+                            }
+                          }}
+                          style={{ 
+                            position: 'relative', height: '64px', fontSize: '14px', fontWeight: '700', 
+                            color: isCurrentMonth ? (isSelected ? '#ea580c' : '#0f172a') : '#cbd5e1',
+                            backgroundColor: isSelected ? '#fff7ed' : 'transparent',
+                            borderRadius: '12px', cursor: isCurrentMonth ? 'pointer' : 'default',
+                            display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: '8px'
+                          }}
                         >
-                          <span className="calendar-day-num">{dayNum}</span>
-                          <div className="calendar-dots-container">
-                            {/* Randomly mock dots for visual effect */}
-                            {dayNum % 7 === 0 && <span className="calendar-dot calendar-dot-test"></span>}
-                            {dayNum % 5 === 0 && <span className="calendar-dot calendar-dot-quiz"></span>}
-                          </div>
+                          {displayNum}
+                          
+                          {/* Render Dots */}
+                          {dayAttempts.length > 0 && (
+                            <div style={{ position: 'absolute', bottom: '12px', display: 'flex', gap: '4px', flexWrap: 'wrap', justifyContent: 'center', width: '80%' }}>
+                              {dayAttempts.slice(0, 3).map((att, idx) => {
+                                let color = '#3b82f6'; // default test
+                                if (att.test_type === 'quiz') color = '#a855f7';
+                                if (att.test_type === 'assignment') color = '#ea580c';
+                                if (att.test_type === 'live_exam') color = '#ef4444';
+                                return <div key={idx} style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: color }}></div>;
+                              })}
+                            </div>
+                          )}
                         </div>
                       );
                     })}
                   </div>
                   
-                  <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', marginTop: '16px', fontSize: '11px', color: '#64748b' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <span className="calendar-dot calendar-dot-test"></span> Test
+                  {/* Legend */}
+                  <div style={{ display: 'flex', gap: '24px', justifyContent: 'center', marginTop: '24px', fontSize: '12px', fontWeight: '600', color: '#475569', flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <div style={{ width: '14px', height: '14px', borderRadius: '4px', backgroundColor: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#3b82f6' }}></div>
+                      </div>
+                      Test
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <span className="calendar-dot calendar-dot-quiz"></span> Quiz
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <div style={{ width: '14px', height: '14px', borderRadius: '4px', backgroundColor: '#fff7ed', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#ea580c' }}></div>
+                      </div>
+                      Assignment
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <span className="calendar-dot calendar-dot-assignment"></span> Assignment
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <div style={{ width: '14px', height: '14px', borderRadius: '4px', backgroundColor: '#f3e8ff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#a855f7' }}></div>
+                      </div>
+                      Quiz
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <div style={{ width: '14px', height: '14px', borderRadius: '4px', backgroundColor: '#dcfce7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#22c55e' }}></div>
+                      </div>
+                      Result
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <div style={{ width: '14px', height: '14px', borderRadius: '4px', backgroundColor: '#fef2f2', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#ef4444' }}></div>
+                      </div>
+                      Live Exam
                     </div>
                   </div>
                 </div>
 
-                {/* Right: Past Attempts List & Analysis */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-                  
-                  {/* Past Attempts */}
-                  <div className="card">
-                    <h3 style={{ fontSize: '16px', fontWeight: '700', marginBottom: '20px' }}>Your Past Attempts</h3>
+                {/* Right: Selected Date Tests */}
+                <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', padding: '24px', border: '1px solid #f1f5f9', boxShadow: '0 1px 3px rgba(0,0,0,0.02)', display: 'flex', flexDirection: 'column' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
+                    <h3 style={{ fontSize: '16px', fontWeight: '800', color: '#0f172a', margin: 0 }}>
+                      Tests on {selectedDate.getDate()} {selectedDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
+                    </h3>
                     
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                      {myAttempts.length === 0 ? (
-                        <div style={{ textAlign: 'center', padding: '40px', color: '#64748b' }}>
-                          <ClipboardList size={40} style={{ margin: '0 auto 16px', opacity: 0.5 }} />
-                          <p>You have not completed any tests yet.</p>
-                        </div>
-                      ) : (
-                        myAttempts.map((attempt) => {
-                          const percentage = Math.round((attempt.score / attempt.total_questions) * 100);
-                          let statusColor = percentage >= 70 ? '#16a34a' : percentage >= 40 ? '#d97706' : '#dc2626';
-                          let statusBg = percentage >= 70 ? '#dcfce7' : percentage >= 40 ? '#fef3c7' : '#fee2e2';
+                    <div style={{ backgroundColor: '#f3e8ff', color: '#a855f7', padding: '4px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '700' }}>
+                      {myAttempts.filter(att => new Date(att.completed_at).toISOString().split('T')[0] === new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate()).toISOString().split('T')[0]).length} Attempts
+                    </div>
+                  </div>
+                  
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', flex: 1, overflowY: 'auto' }}>
+                    {myAttempts
+                      .filter(att => new Date(att.completed_at).toISOString().split('T')[0] === new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate()).toISOString().split('T')[0])
+                      .map((attempt) => {
+                        const pct = Math.round((attempt.score / attempt.total_questions) * 100);
+                        let Icon = FileText;
+                        let color = '#3b82f6', bg = '#eff6ff';
+                        if (attempt.test_type === 'quiz') { color = '#a855f7'; bg = '#f3e8ff'; Icon = Trophy; }
+                        if (attempt.test_type === 'assignment') { color = '#ea580c'; bg = '#fff7ed'; Icon = ClipboardEdit; }
+                        if (attempt.test_type === 'live_exam') { color = '#ef4444'; bg = '#fef2f2'; Icon = Target; }
+                        
+                        let scoreColor = pct >= 70 ? '#16a34a' : pct >= 40 ? '#d97706' : '#dc2626';
 
-                          return (
-                            <div key={attempt.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', border: '1px solid #e2e8f0', borderRadius: '12px' }}>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                                <div style={{ backgroundColor: statusBg, color: statusColor, padding: '12px', borderRadius: '10px' }}>
-                                  <FileText size={24} />
-                                </div>
-                                <div>
-                                  <h4 style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>Completed Test</h4>
-                                  <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                      <Calendar size={14} />
-                                      {new Date(attempt.completed_at).toLocaleDateString()}
-                                    </span>
-                                  </div>
-                                </div>
+                        return (
+                          <div key={attempt.id} onClick={() => handleReviewPastAttempt(attempt)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #f1f5f9', boxShadow: '0 2px 4px rgba(0,0,0,0.02)', cursor: 'pointer', transition: 'transform 0.1s' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                              <div style={{ width: '48px', height: '48px', borderRadius: '12px', backgroundColor: bg, color: color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <Icon size={24} />
                               </div>
-
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
-                                <div style={{ textAlign: 'right' }}>
-                                  <div style={{ fontSize: '16px', fontWeight: '700', color: statusColor }}>{percentage}%</div>
-                                  <div style={{ fontSize: '11px', color: '#64748b' }}>{attempt.score} / {attempt.total_questions} Points</div>
+                              <div>
+                                <h4 style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a', margin: '0 0 4px 0' }}>{attempt.test_title || 'Assessment'}</h4>
+                                <div style={{ fontSize: '12px', color: '#64748b', fontWeight: '500' }}>
+                                  {new Date(attempt.completed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                 </div>
-                                <button className="btn btn-secondary" style={{ padding: '8px 16px', fontSize: '13px' }} onClick={() => handleReviewPastAttempt(attempt)}>
-                                  Review
-                                </button>
                               </div>
                             </div>
-                          );
-                        })
-                      )}
-                    </div>
-                  </div>
 
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+                              <div style={{ textAlign: 'center' }}>
+                                <div style={{ fontSize: '16px', fontWeight: '800', color: scoreColor }}>{pct}%</div>
+                                <div style={{ fontSize: '11px', color: '#64748b', fontWeight: '600' }}>Score</div>
+                              </div>
+                              <ArrowRight size={16} color="#94a3b8" />
+                            </div>
+                          </div>
+                        );
+                    })}
+                    
+                    {myAttempts.filter(att => new Date(att.completed_at).toISOString().split('T')[0] === new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate()).toISOString().split('T')[0]).length === 0 && (
+                      <div style={{ textAlign: 'center', color: '#94a3b8', fontSize: '14px', padding: '40px 0' }}>
+                        No tests attempted on this date.
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
+
+              {/* Recent Attempts List */}
+              <div style={{ marginTop: '16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+                  <h3 style={{ fontSize: '18px', fontWeight: '800', color: '#0f172a', margin: 0 }}>Recent Attempts</h3>
+                  <button style={{ border: 'none', backgroundColor: 'transparent', color: '#6366f1', fontSize: '14px', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}>
+                    View All <ArrowRight size={16} />
+                  </button>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  {myAttempts.length === 0 ? (
+                    <div style={{ textAlign: 'center', padding: '40px', color: '#64748b', backgroundColor: '#ffffff', borderRadius: '16px', border: '1px solid #f1f5f9' }}>
+                      <p>You have not completed any tests yet.</p>
+                    </div>
+                  ) : (
+                    myAttempts.slice(0, 5).map((attempt) => {
+                      const pct = Math.round((attempt.score / attempt.total_questions) * 100);
+                      
+                      let Icon = FileText;
+                      let color = '#3b82f6', bg = '#eff6ff';
+                      let typeName = 'Test';
+                      if (attempt.test_type === 'quiz') { color = '#a855f7'; bg = '#f3e8ff'; Icon = Trophy; typeName = 'Quiz'; }
+                      if (attempt.test_type === 'assignment') { color = '#ea580c'; bg = '#fff7ed'; Icon = ClipboardEdit; typeName = 'Assignment'; }
+                      if (attempt.test_type === 'live_exam') { color = '#ef4444'; bg = '#fef2f2'; Icon = Target; typeName = 'Live Exam'; }
+                      if (attempt.test_type === 'result') { color = '#16a34a'; bg = '#dcfce7'; Icon = BarChart3; typeName = 'Result'; }
+                      
+                      let scoreColor = pct >= 70 ? '#16a34a' : pct >= 40 ? '#d97706' : '#dc2626';
+
+                      return (
+                        <div key={attempt.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 24px', backgroundColor: '#ffffff', borderRadius: '16px', border: '1px solid #f1f5f9', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
+                          
+                          {/* Left: Icon & Title */}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flex: '1 1 30%' }}>
+                            <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: bg, color: color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <Icon size={20} />
+                            </div>
+                            <div>
+                              <h4 style={{ fontSize: '15px', fontWeight: '700', color: '#0f172a', margin: '0 0 4px 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '250px' }}>
+                                {attempt.test_title || 'Assessment'}
+                              </h4>
+                              <div style={{ fontSize: '12px', color: '#64748b', fontWeight: '500' }}>
+                                {typeName} • {attempt.total_questions} Questions
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Middle: Date and Time */}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: '1 1 25%', justifyContent: 'center' }}>
+                            <Calendar size={16} color="#94a3b8" />
+                            <div>
+                              <div style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a' }}>
+                                {new Date(attempt.completed_at).toLocaleDateString('default', { day: 'numeric', month: 'long', year: 'numeric' })}
+                              </div>
+                              <div style={{ fontSize: '12px', color: '#64748b', fontWeight: '500' }}>
+                                {new Date(attempt.completed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Middle Right: Score */}
+                          <div style={{ flex: '1 1 15%', textAlign: 'center' }}>
+                            <div style={{ fontSize: '15px', fontWeight: '800', color: scoreColor }}>{pct}%</div>
+                            <div style={{ fontSize: '11px', color: scoreColor, fontWeight: '600' }}>Score</div>
+                          </div>
+
+                          {/* Right: Button */}
+                          <div style={{ flex: '1 1 20%', display: 'flex', justifyContent: 'flex-end' }}>
+                            <button 
+                              onClick={() => handleReviewPastAttempt(attempt)}
+                              style={{ 
+                                padding: '10px 20px', backgroundColor: '#f5f3ff', color: '#6366f1', 
+                                borderRadius: '10px', border: 'none', fontSize: '13px', fontWeight: '700',
+                                cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px',
+                                transition: 'background-color 0.2s'
+                              }}
+                            >
+                              Review Attempt <ArrowRight size={16} />
+                            </button>
+                          </div>
+
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+
             </div>
           )}
 
