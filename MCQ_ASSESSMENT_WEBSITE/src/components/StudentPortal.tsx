@@ -2074,7 +2074,7 @@ Content-Type: text/html; charset=UTF-8
                                 if (att.test_type === 'quiz') color = '#a855f7';
                                 if (att.test_type === 'assignment') color = '#ea580c';
                                 if (att.test_type === 'live_exam') color = '#ef4444';
-                                return <div key={idx} style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: color }}></div>;
+                                return <div key={idx} style={{ width: '8px', height: '8px', borderRadius: '2px', backgroundColor: color }}></div>;
                               })}
                             </div>
                           )}
