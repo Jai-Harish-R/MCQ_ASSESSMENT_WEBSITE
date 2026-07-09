@@ -407,13 +407,18 @@ export default function StudentPortal({ user, isDemo, onLogout }: StudentPortalP
         }
 
         // Load all tests to show what is active
-        const { data: allTests } = await supabase
-          .from('tests')
-          .select('id, title, access_code, teacher_email, questions')
-          .order('created_at', { ascending: false });
-
-        if (allTests) {
-          setAvailableTests(allTests);
+        if (attemptsData && attemptsData.length > 0) {
+          const testIds = attemptsData.map((a: any) => a.test_id);
+          const { data: takenTests } = await supabase
+            .from('tests')
+            .select('id, title, access_code, teacher_email, type, duration, total_students, created_at, questions')
+            .in('id', testIds)
+            .order('created_at', { ascending: false });
+          if (takenTests) {
+            setAvailableTests(takenTests);
+          }
+        } else {
+          setAvailableTests([]);
         }
       }
     } catch (err) {
@@ -573,7 +578,7 @@ export default function StudentPortal({ user, isDemo, onLogout }: StudentPortalP
         const { data: testData, error: testErr } = await supabase
           .from('tests')
           .select('*')
-          .eq('teacher_email', emailInput.trim())
+          .ilike('teacher_email', emailInput.trim())
           .eq('access_code', pinInput.trim())
           .maybeSingle();
 
