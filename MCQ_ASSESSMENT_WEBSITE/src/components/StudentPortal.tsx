@@ -623,7 +623,7 @@ export default function StudentPortal({ user, isDemo, onLogout }: StudentPortalP
         return;
       }
       if (test.access_end && now > new Date(test.access_end)) {
-        setErrorMsg('This test has ended. You can no longer write the exam.');
+        setErrorMsg('This test has ended on ' + new Date(test.access_end).toLocaleString() + '. You can no longer write the exam.');
         setLoading(false);
         return;
       }
