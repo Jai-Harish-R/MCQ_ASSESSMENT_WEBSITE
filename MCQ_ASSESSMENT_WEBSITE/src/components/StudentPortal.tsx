@@ -23,6 +23,7 @@ interface Test {
   access_code: string;
   teacher_email: string;
   questions: Question[];
+  duration?: number;
   type?: 'test' | 'assignment' | 'quiz' | 'live_exam';
   created_at?: string;
 }

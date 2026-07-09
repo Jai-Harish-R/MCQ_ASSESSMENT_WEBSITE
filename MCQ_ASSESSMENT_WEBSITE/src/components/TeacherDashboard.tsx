@@ -22,6 +22,7 @@ interface Test {
   access_code: string;
   teacher_email: string;
   questions: Question[];
+  duration?: number;
   created_at: string;
 }
 
@@ -65,6 +66,7 @@ export default function TeacherDashboard({ user, isDemo, onLogout }: TeacherDash
   // Test form state
   const [testTitle, setTestTitle] = useState('');
   const [accessCode, setAccessCode] = useState('');
+  const [duration, setDuration] = useState(10);
   const [questions, setQuestions] = useState<Array<{
     text: string;
     options: string[];
@@ -378,6 +380,7 @@ export default function TeacherDashboard({ user, isDemo, onLogout }: TeacherDash
           id: testId!,
           title: testTitle,
           access_code: accessCode,
+          duration: duration,
           teacher_email: user.email,
           questions: formattedQuestions,
           created_at: new Date().toISOString()
@@ -406,7 +409,8 @@ export default function TeacherDashboard({ user, isDemo, onLogout }: TeacherDash
             title: testTitle,
             access_code: accessCode,
             questions: formattedQuestions,
-            type: 'test'
+            type: 'test',
+            duration: duration
           })
           .select()
           .single();
@@ -1041,7 +1045,7 @@ export default function TeacherDashboard({ user, isDemo, onLogout }: TeacherDash
                                 : 'N/A';
                                 
                               return (
-                                <div key={st.id} style={{ display: 'grid', gridTemplateColumns: '60px 2fr 1fr 1fr 1fr', padding: '16px', borderBottom: '1px solid #f1f5f9', alignItems: 'center', transition: 'background-color 0.2s' }}>
+                                <div key={st.id} title={`Student Marks: ${st.score} / ${st.total_questions}`} style={{ display: 'grid', cursor: 'help', gridTemplateColumns: '60px 2fr 1fr 1fr 1fr', padding: '16px', borderBottom: '1px solid #f1f5f9', alignItems: 'center', transition: 'background-color 0.2s' }}>
                                   <div style={{ textAlign: 'center', fontSize: medal ? '20px' : '14px', fontWeight: '700', color: medal ? 'inherit' : '#0f172a' }}>
                                     {medal || rank}
                                   </div>
