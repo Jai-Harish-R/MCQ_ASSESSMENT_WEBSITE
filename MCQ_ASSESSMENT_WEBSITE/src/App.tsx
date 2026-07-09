@@ -4,6 +4,8 @@ import AuthGate from './components/AuthGate';
 import TeacherDashboard from './components/TeacherDashboard';
 import StudentPortal from './components/StudentPortal';
 
+import { ErrorBoundary } from './components/ErrorBoundary';
+
 interface UserState {
   id: string;
   email: string;
@@ -130,9 +132,13 @@ export default function App() {
   return (
     <>
       {user.role === 'teacher' ? (
-        <TeacherDashboard user={user} isDemo={isDemo} onLogout={handleLogout} />
+        <ErrorBoundary name="TeacherDashboard">
+          <TeacherDashboard user={user} isDemo={isDemo} onLogout={handleLogout} />
+        </ErrorBoundary>
       ) : (
-        <StudentPortal user={user} isDemo={isDemo} onLogout={handleLogout} />
+        <ErrorBoundary name="StudentPortal">
+          <StudentPortal user={user} isDemo={isDemo} onLogout={handleLogout} />
+        </ErrorBoundary>
       )}
     </>
   );
