@@ -24,6 +24,8 @@ interface Test {
   questions: Question[];
   duration?: number;
   total_students?: number;
+  access_start?: string | null;
+  access_end?: string | null;
   created_at: string;
 }
 
@@ -398,7 +400,9 @@ export default function TeacherDashboard({ user, isDemo, onLogout }: TeacherDash
           total_students: totalStudents,
           teacher_email: user.email,
           questions: formattedQuestions,
-          created_at: new Date().toISOString()
+          created_at: new Date().toISOString(),
+          access_start: accessStart ? new Date(accessStart).toISOString() : null,
+          access_end: accessEnd ? new Date(accessEnd).toISOString() : null
         };
 
         const localTests = JSON.parse(localStorage.getItem('demo_tests') || '[]');
@@ -426,7 +430,9 @@ export default function TeacherDashboard({ user, isDemo, onLogout }: TeacherDash
             questions: formattedQuestions,
             type: 'test',
             duration: duration,
-            total_students: totalStudents
+            total_students: totalStudents,
+            access_start: accessStart ? new Date(accessStart).toISOString() : null,
+            access_end: accessEnd ? new Date(accessEnd).toISOString() : null
           })
           .select()
           .single();
