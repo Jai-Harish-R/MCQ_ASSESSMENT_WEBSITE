@@ -2055,6 +2055,7 @@ Content-Type: text/html; charset=UTF-8
                               setSelectedDate(new Date(year, month, displayNum));
                             }
                           }}
+                          title={dayAttempts.length > 0 ? dayAttempts.map(a => a.test_title || 'Unknown Test').join(', ') : undefined}
                           style={{ 
                             position: 'relative', height: '64px', fontSize: '14px', fontWeight: '700', 
                             color: isCurrentMonth ? (isSelected ? '#ea580c' : '#0f172a') : '#cbd5e1',
@@ -2143,7 +2144,7 @@ Content-Type: text/html; charset=UTF-8
                         let scoreColor = pct >= 70 ? '#16a34a' : pct >= 40 ? '#d97706' : '#dc2626';
 
                         return (
-                          <div key={attempt.id} onClick={() => handleReviewPastAttempt(attempt)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #f1f5f9', boxShadow: '0 2px 4px rgba(0,0,0,0.02)', cursor: 'pointer', transition: 'transform 0.1s' }}>
+                          <div key={attempt.id} onClick={() => handleReviewPastAttempt(attempt)} title={`Score: ${attempt.score}/${attempt.total_questions} (${pct}%) - Click to review`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #f1f5f9', boxShadow: '0 2px 4px rgba(0,0,0,0.02)', cursor: 'pointer', transition: 'transform 0.1s' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                               <div style={{ width: '48px', height: '48px', borderRadius: '12px', backgroundColor: bg, color: color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                 <Icon size={24} />
