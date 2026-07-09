@@ -4,7 +4,8 @@ import {
   LayoutDashboard, PlusCircle, LogOut, 
   Trash2, Users, Award, AlertCircle, BookOpen, 
   Check, Send, GraduationCap, RefreshCw,
-  Upload, Download, Image, ClipboardList
+  Upload, Download, Image, ClipboardList,
+  Trophy, ClipboardEdit, ChevronDown, BarChart3, ShieldCheck
 } from 'lucide-react';
 import animeAvatar from '../assets/anime_avatar.png';
 
@@ -34,6 +35,7 @@ interface Attempt {
   completed_at: string;
   allowed_retry: boolean;
   test_title?: string;
+  time_taken_seconds?: number;
   profiles?: {
     full_name: string;
   } | null;
@@ -403,7 +405,8 @@ export default function TeacherDashboard({ user, isDemo, onLogout }: TeacherDash
             teacher_email: user.email,
             title: testTitle,
             access_code: accessCode,
-            questions: formattedQuestions
+            questions: formattedQuestions,
+            type: 'test'
           })
           .select()
           .single();
@@ -970,97 +973,179 @@ export default function TeacherDashboard({ user, isDemo, onLogout }: TeacherDash
           )}
 
           {/* TAB 4: TEACHER CLASS RANKINGS LEADERBOARD VIEW */}
-          {activeTab === 'leaderboard' && (
+          {activeTab === 'leaderboard' && (() => {
+            const selectedTest = tests.find(t => t.id === selectedLeaderboardTestId);
+
+            return (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-              
-              {/* Header Title */}
               <div>
-                <h1 style={{ fontSize: '24px', fontWeight: '700' }}>Class Leaderboard Rankings</h1>
-                <p style={{ color: 'var(--color-on-surface-variant)', fontSize: '13px', marginTop: '4px' }}>
+                <h1 style={{ fontSize: '28px', fontWeight: '800', color: '#0f172a', letterSpacing: '-0.02em' }}>Class Leaderboard Rankings</h1>
+                <p style={{ color: '#64748b', fontSize: '15px', marginTop: '6px', fontWeight: '500' }}>
                   Analyze student grade distribution and verified rankings.
                 </p>
               </div>
 
-              {/* Selector Card */}
-              <div className="card">
-                <label className="input-label">Select Published Test</label>
-                <select
-                  className="input-field"
-                  value={selectedLeaderboardTestId}
-                  onChange={(e) => setSelectedLeaderboardTestId(e.target.value)}
-                >
-                  <option value="">-- Choose a test --</option>
-                  {tests.map(t => (
-                    <option key={t.id} value={t.id}>{t.title} (PIN: {t.access_code})</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Leaderboard Table display */}
-              {selectedLeaderboardTestId && (
-                <div className="card">
-                  <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '16px' }}>Rankings Table</h3>
+              <div style={{ display: 'grid', gridTemplateColumns: '2.5fr 1fr', gap: '24px', alignItems: 'start' }}>
+                
+                {/* Left: Leaderboard Display */}
+                <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', padding: '32px', border: '1px solid #f1f5f9', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
                   
-                  {leaderboardAttempts.length === 0 ? (
-                    <div style={{ textAlign: 'center', padding: '32px', color: 'var(--color-on-surface-variant)' }}>
-                      No submissions recorded for this test yet.
-                    </div>
-                  ) : (
-                    <div className="table-container">
-                      <table className="density-table">
-                        <thead>
-                          <tr>
-                            <th>Rank</th>
-                            <th>Student</th>
-                            <th>Status</th>
-                            <th>Points</th>
-                            <th>Score</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {leaderboardAttempts.map((att, index) => {
-                            const rank = index + 1;
-                            const pct = Math.round((att.score / att.total_questions) * 100);
-                            const points = Math.round((att.score / att.total_questions) * 2480);
-                            const displayEmail = att.student_email.split('@')[0];
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+                    <Trophy size={28} color="#8b5cf6" />
+                    <h2 style={{ fontSize: '22px', fontWeight: '800', color: '#0f172a', margin: 0 }}>Leaderboard</h2>
+                  </div>
+                  <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '24px' }}>Rankings are based on marks scored in the selected test.</p>
 
-                            return (
-                              <tr key={att.id}>
-                                <td>
-                                  {rank === 1 && <span className="medal-badge medal-gold">1st</span>}
-                                  {rank === 2 && <span className="medal-badge medal-silver">2nd</span>}
-                                  {rank === 3 && <span className="medal-badge medal-bronze">3rd</span>}
-                                  {rank > 3 && <strong>#{rank}</strong>}
-                                </td>
-                                <td>
-                                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=80" style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover' }} alt="" />
-                                    <span style={{ fontWeight: '500' }}>
-                                      {att.student_email.toLowerCase().includes('harish') 
-                                        ? 'Harish' 
-                                        : (att.student_name || displayEmail)}
-                                    </span>
+                  {selectedTest ? (
+                    <>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 24px', backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', marginBottom: '24px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                          <div style={{ width: '48px', height: '48px', backgroundColor: '#3b82f6', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
+                            <ClipboardEdit size={24} />
+                          </div>
+                          <div>
+                            <div style={{ fontSize: '15px', fontWeight: '700', color: '#0f172a' }}>{selectedTest.title}</div>
+                            <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>{selectedTest.questions?.length || 0} Questions • MCQ Test</div>
+                          </div>
+                        </div>
+                        <div style={{ width: '1px', height: '40px', backgroundColor: '#e2e8f0' }}></div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <Users size={20} color="#64748b" />
+                          <div>
+                            <div style={{ fontSize: '12px', color: '#64748b' }}>Total Students</div>
+                            <div style={{ fontSize: '15px', fontWeight: '800', color: '#0f172a', marginTop: '2px' }}>{leaderboardAttempts.length}</div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Leaderboard Table */}
+                      <div style={{ width: '100%' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '60px 2fr 1fr 1fr 1fr', padding: '16px', borderBottom: '1px solid #e2e8f0', fontSize: '12px', fontWeight: '700', color: '#64748b', alignItems: 'center' }}>
+                          <div style={{ textAlign: 'center' }}>Rank</div>
+                          <div>Student</div>
+                          <div style={{ textAlign: 'center' }}>Marks Obtained</div>
+                          <div style={{ textAlign: 'center' }}>Percentage</div>
+                          <div style={{ textAlign: 'right' }}>Time Taken</div>
+                        </div>
+
+                        {leaderboardAttempts.length === 0 ? (
+                           <div style={{ padding: '32px', textAlign: 'center', color: '#64748b' }}>No attempts yet.</div>
+                        ) : (
+                          <>
+                            {leaderboardAttempts.map((st, i) => {
+                              const rank = i + 1;
+                              const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : null;
+                              const pct = Math.round((st.score / st.total_questions) * 100);
+                              const durationText = st.time_taken_seconds
+                                ? `${Math.floor(st.time_taken_seconds / 60)}m ${st.time_taken_seconds % 60}s`
+                                : 'N/A';
+                                
+                              return (
+                                <div key={st.id} style={{ display: 'grid', gridTemplateColumns: '60px 2fr 1fr 1fr 1fr', padding: '16px', borderBottom: '1px solid #f1f5f9', alignItems: 'center', transition: 'background-color 0.2s' }}>
+                                  <div style={{ textAlign: 'center', fontSize: medal ? '20px' : '14px', fontWeight: '700', color: medal ? 'inherit' : '#0f172a' }}>
+                                    {medal || rank}
                                   </div>
-                                </td>
-                                <td>
-                                  <span className="chip chip-success" style={{ fontSize: '10px', padding: '2px 8px' }}>
-                                    Verified
-                                  </span>
-                                </td>
-                                <td style={{ fontFamily: 'monospace' }}>{points.toLocaleString()}</td>
-                                <td style={{ fontWeight: '700' }}>{pct}%</td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                    <div style={{ width: '36px', height: '36px', borderRadius: '50%', backgroundColor: '#e2e8f0', overflow: 'hidden' }}>
+                                      <img src={"https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=80"} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                    </div>
+                                    <div>
+                                      <div style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>{st.student_name || st.student_email.split('@')[0]}</div>
+                                      <div style={{ fontSize: '12px', color: '#64748b' }}>{st.student_email}</div>
+                                    </div>
+                                  </div>
+                                  <div style={{ textAlign: 'center', fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>{st.score}</div>
+                                  <div style={{ textAlign: 'center', fontSize: '14px', fontWeight: '800', color: '#10b981' }}>{pct}%</div>
+                                  <div style={{ textAlign: 'right', fontSize: '13px', fontWeight: '600', color: '#0f172a' }}>{durationText}</div>
+                                </div>
+                              );
+                            })}
+                          </>
+                        )}
+                      </div>
+                    </>
+                  ) : (
+                    <div style={{ padding: '48px', textAlign: 'center', color: '#64748b' }}>
+                      Please select a published test from the right panel to view its leaderboard.
                     </div>
                   )}
                 </div>
-              )}
+
+                {/* Right: Filter & About */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                  
+                  {/* Filter Card */}
+                  <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', padding: '24px', border: '1px solid #f1f5f9', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
+                    <h3 style={{ fontSize: '16px', fontWeight: '800', color: '#0f172a', margin: '0 0 6px 0' }}>Filter Leaderboard</h3>
+                    <p style={{ fontSize: '13px', color: '#64748b', marginBottom: '20px' }}>Select the test to view real-time rankings.</p>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+
+                      <div>
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: '700', color: '#0f172a', marginBottom: '6px' }}>Published Test</label>
+                        <div style={{ position: 'relative' }}>
+                          <div style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', width: '24px', height: '24px', backgroundColor: '#3b82f6', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
+                            <ClipboardEdit size={14} />
+                          </div>
+                          <select 
+                            value={selectedLeaderboardTestId}
+                            onChange={(e) => setSelectedLeaderboardTestId(e.target.value)}
+                            style={{ width: '100%', padding: '10px 12px 10px 44px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '13px', color: '#0f172a', appearance: 'none', outline: 'none', height: '44px', backgroundColor: '#fff' }}
+                          >
+                            <option value="">-- Choose a test --</option>
+                            {tests.map(t => (
+                              <option key={t.id} value={t.id}>{t.title} (PIN: {t.access_code})</option>
+                            ))}
+                          </select>
+                          <ChevronDown size={16} color="#64748b" style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+                        </div>
+                      </div>
+
+                    </div>
+                  </div>
+
+                  {/* About Card */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    <h3 style={{ fontSize: '15px', fontWeight: '800', color: '#0f172a', margin: 0 }}>About Leaderboard</h3>
+                    
+                    <div style={{ display: 'flex', gap: '16px' }}>
+                      <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: '#f3e8ff', color: '#8b5cf6', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <Trophy size={20} />
+                      </div>
+                      <div>
+                        <div style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a' }}>Rank is based on marks</div>
+                        <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px', lineHeight: '1.4' }}>Higher marks in the selected test get a higher rank.</div>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '16px' }}>
+                      <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: '#dcfce7', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <BarChart3 size={20} />
+                      </div>
+                      <div>
+                        <div style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a' }}>Ties are broken by time</div>
+                        <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px', lineHeight: '1.4' }}>If marks are same, faster attempt gets the higher rank.</div>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '16px' }}>
+                      <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: '#eff6ff', color: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <ShieldCheck size={20} />
+                      </div>
+                      <div>
+                        <div style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a' }}>Real-time rankings</div>
+                        <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px', lineHeight: '1.4' }}>Rankings dynamically update as soon as students submit.</div>
+                      </div>
+                    </div>
+
+                  </div>
+
+                </div>
+              </div>
 
             </div>
-          )}
+            );
+          })()}
 
         </div>
       </main>
