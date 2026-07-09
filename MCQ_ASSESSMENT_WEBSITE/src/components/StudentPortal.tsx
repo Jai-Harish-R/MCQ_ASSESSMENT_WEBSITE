@@ -586,6 +586,15 @@ export default function StudentPortal({ user, isDemo, onLogout }: StudentPortalP
 
         if (testErr) throw testErr;
         test = testData;
+        
+        // Safety parse for JSON string (fixes the blank page crash)
+        if (test && typeof test.questions === 'string') {
+          try {
+            test.questions = JSON.parse(test.questions);
+          } catch (e) {
+            console.error('Failed to parse questions', e);
+          }
+        }
 
         if (test) {
           const { data: attemptData, error: attemptErr } = await supabase
@@ -909,10 +918,14 @@ Content-Type: text/html; charset=UTF-8
       <div style={{ backgroundColor: 'var(--color-background)', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
         <header className="edu-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: 'var(--color-primary)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <GraduationCap size={18} />
+            <div style={{
+              width: '32px', height: '32px', borderRadius: '8px', backgroundColor: '#ea580c',
+              color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontWeight: '800', fontSize: '18px'
+            }}>
+              C
             </div>
-            <h2 style={{ fontSize: '15px', fontWeight: '700' }}>EduVerify Pro - Timed Exam Portal</h2>
+            <h2 style={{ fontSize: '15px', fontWeight: '700' }}>CodersFun - Timed Exam Portal</h2>
           </div>
           <div style={{ fontSize: '13px', fontWeight: '500' }}>{user.email}</div>
         </header>
@@ -943,7 +956,7 @@ Content-Type: text/html; charset=UTF-8
                 </div>
               </div>
 
-              <div className="card" style={{ padding: '32px', minHeight: '300px' }}>
+              <div className="mcq-card-enhanced" style={{ minHeight: '300px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                   <span style={{ fontFamily: 'var(--font-headlines)', fontWeight: '600', color: 'var(--color-on-surface-variant)', fontSize: '13px' }}>
                     QUESTION {currentQIdx + 1} OF {activeTest.questions.length}
@@ -1026,7 +1039,7 @@ Content-Type: text/html; charset=UTF-8
           {/* EXAM SUBMISSION GRADE RESULT */}
           {viewState === 'result' && activeTest && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-              <div className="card" style={{ textAlign: 'center', padding: '40px', border: '2px solid #1c4e80' }}>
+              <div className="mcq-card-enhanced" style={{ minHeight: '300px', textAlign: 'center', padding: '40px', border: '2px solid #1c4e80' }}>
                 <CheckCircle2 size={48} style={{ color: 'var(--color-success)', margin: '0 auto 16px' }} />
                 <h2 style={{ fontSize: '24px', fontWeight: '700' }}>Exam Submitted!</h2>
                 <p style={{ color: 'var(--color-on-surface-variant)', fontSize: '14px', marginTop: '4px' }}>Your results have been verified and graded.</p>
