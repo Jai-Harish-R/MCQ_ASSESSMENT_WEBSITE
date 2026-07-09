@@ -242,6 +242,71 @@ export default function StudentPortal({ user, isDemo, onLogout }: StudentPortalP
   const [availableTests, setAvailableTests] = useState<Test[]>([]);
 
   const [, setIsLoadingData] = useState(true);
+  // Leaderboard dynamically fetched states
+  const [leaderboardSelectedTestId, setLeaderboardSelectedTestId] = useState<string>('');
+  const [leaderboardAttempts, setLeaderboardAttempts] = useState<Attempt[]>([]);
+  const [leaderboardLoading, setLeaderboardLoading] = useState(false);
+
+  const fetchLeaderboardForTest = useCallback(async (testId: string) => {
+    if (!testId) {
+      setLeaderboardAttempts([]);
+      return;
+    }
+    setLeaderboardLoading(true);
+    try {
+      if (isDemo) {
+        const localAttempts = JSON.parse(localStorage.getItem('demo_attempts') || '[]');
+        const forTest = localAttempts.filter((a: any) => a.test_id === testId);
+        const sorted = forTest.sort((a: any, b: any) => {
+          if (b.score !== a.score) return b.score - a.score;
+          return (a.time_taken_seconds || Infinity) - (b.time_taken_seconds || Infinity);
+        });
+        setLeaderboardAttempts(sorted);
+      } else {
+        const { data, error } = await supabase
+          .from('test_attempts')
+          .select('*')
+          .eq('test_id', testId);
+        
+        if (error) throw error;
+        
+        const sorted = (data || []).sort((a: any, b: any) => {
+          if (b.score !== a.score) return b.score - a.score;
+          return (a.time_taken_seconds || Infinity) - (b.time_taken_seconds || Infinity);
+        });
+        setLeaderboardAttempts(sorted);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLeaderboardLoading(false);
+    }
+  }, [isDemo]);
+
+  useEffect(() => {
+    fetchLeaderboardForTest(leaderboardSelectedTestId);
+  }, [leaderboardSelectedTestId, fetchLeaderboardForTest]);
+  
+  // Realtime subscription for leaderboard
+  useEffect(() => {
+    if (isDemo || !leaderboardSelectedTestId) return;
+    
+    const channel = supabase
+      .channel('leaderboard-realtime')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'test_attempts', filter: `test_id=eq.${leaderboardSelectedTestId}` },
+        () => {
+          fetchLeaderboardForTest(leaderboardSelectedTestId);
+        }
+      )
+      .subscribe();
+      
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [leaderboardSelectedTestId, isDemo, fetchLeaderboardForTest]);
+
 
   // Interactive Calendar and Popover states
   const [selectedDate, setSelectedDate] = useState<Date>(new Date(2025, 5, 7));
@@ -2203,7 +2268,12 @@ Content-Type: text/html; charset=UTF-8
           )}
 
           {/* TAB 4: LEADERBOARD */}
-          {activeTab === 'leaderboard' && (
+          {activeTab === 'leaderboard' && (() => {
+            const selectedTest = availableTests.find(t => t.id === leaderboardSelectedTestId);
+            const myRankIndex = leaderboardAttempts.findIndex(a => a.student_email === user.email);
+            const myAttempt = myRankIndex >= 0 ? leaderboardAttempts[myRankIndex] : null;
+
+            return (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
               <div>
                 <h1 style={{ fontSize: '28px', fontWeight: '800', color: '#0f172a', letterSpacing: '-0.02em' }}>Leaderboard</h1>
@@ -2223,117 +2293,82 @@ Content-Type: text/html; charset=UTF-8
                   </div>
                   <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '24px' }}>Rankings are based on marks scored in the selected test.</p>
 
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 24px', backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', marginBottom: '24px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                      <div style={{ width: '48px', height: '48px', backgroundColor: '#3b82f6', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
-                        <ClipboardEdit size={24} />
-                      </div>
-                      <div>
-                        <div style={{ fontSize: '15px', fontWeight: '700', color: '#0f172a' }}>Physics Quiz</div>
-                        <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>25 Questions • MCQ Test</div>
-                      </div>
-                    </div>
-                    <div style={{ width: '1px', height: '40px', backgroundColor: '#e2e8f0' }}></div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <Calendar size={20} color="#3b82f6" />
-                      <div>
-                        <div style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>7 June 2025</div>
-                        <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>09:00 AM - 10:00 AM</div>
-                      </div>
-                    </div>
-                    <div style={{ width: '1px', height: '40px', backgroundColor: '#e2e8f0' }}></div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <Users size={20} color="#64748b" />
-                      <div>
-                        <div style={{ fontSize: '12px', color: '#64748b' }}>Total Students</div>
-                        <div style={{ fontSize: '15px', fontWeight: '800', color: '#0f172a', marginTop: '2px' }}>48</div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Leaderboard Table */}
-                  <div style={{ width: '100%' }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: '60px 2fr 1fr 1fr 1fr', padding: '16px', borderBottom: '1px solid #e2e8f0', fontSize: '12px', fontWeight: '700', color: '#64748b', alignItems: 'center' }}>
-                      <div style={{ textAlign: 'center' }}>Rank</div>
-                      <div>Student</div>
-                      <div style={{ textAlign: 'center' }}>Marks Obtained<br/><span style={{ fontSize: '10px', fontWeight: '500' }}>(out of 25)</span></div>
-                      <div style={{ textAlign: 'center' }}>Percentage</div>
-                      <div style={{ textAlign: 'right' }}>Time Taken</div>
-                    </div>
-
-                    {/* Ranks 1 to 5 */}
-                    {[
-                      { rank: 1, name: 'Aryan Sharma', email: 'aryan.sharma@demo.com', marks: 23, pct: '92.0%', time: '18m 24s', medal: '🥇' },
-                      { rank: 2, name: 'Diya Patel', email: 'diya.patel@demo.com', marks: 22, pct: '88.0%', time: '20m 11s', medal: '🥈' },
-                      { rank: 3, name: 'Rohan Verma', email: 'rohan.verma@demo.com', marks: 21, pct: '84.0%', time: '15m 45s', medal: '🥉' },
-                      { rank: 4, name: 'Ananya Singh', email: 'ananya.singh@demo.com', marks: 20, pct: '80.0%', time: '22m 03s', medal: null },
-                      { rank: 5, name: 'Ishaan Mehta', email: 'ishaan.mehta@demo.com', marks: 19, pct: '76.0%', time: '19m 17s', medal: null }
-                    ].map(st => (
-                      <div key={st.rank} style={{ display: 'grid', gridTemplateColumns: '60px 2fr 1fr 1fr 1fr', padding: '16px', borderBottom: '1px solid #f1f5f9', alignItems: 'center', transition: 'background-color 0.2s' }}>
-                        <div style={{ textAlign: 'center', fontSize: st.medal ? '20px' : '14px', fontWeight: '700', color: st.medal ? 'inherit' : '#0f172a' }}>
-                          {st.medal || st.rank}
-                        </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                          <div style={{ width: '36px', height: '36px', borderRadius: '50%', backgroundColor: '#e2e8f0', overflow: 'hidden' }}>
-                            <img src={studentAvatar} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  {selectedTest ? (
+                    <>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 24px', backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', marginBottom: '24px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                          <div style={{ width: '48px', height: '48px', backgroundColor: '#3b82f6', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
+                            <ClipboardEdit size={24} />
                           </div>
                           <div>
-                            <div style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>{st.name}</div>
-                            <div style={{ fontSize: '12px', color: '#64748b' }}>{st.email}</div>
+                            <div style={{ fontSize: '15px', fontWeight: '700', color: '#0f172a' }}>{selectedTest.title}</div>
+                            <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>{selectedTest.questions?.length || 0} Questions • MCQ Test</div>
                           </div>
                         </div>
-                        <div style={{ textAlign: 'center', fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>{st.marks}</div>
-                        <div style={{ textAlign: 'center', fontSize: '14px', fontWeight: '800', color: '#10b981' }}>{st.pct}</div>
-                        <div style={{ textAlign: 'right', fontSize: '13px', fontWeight: '600', color: '#0f172a' }}>{st.time}</div>
-                      </div>
-                    ))}
-
-                    {/* Current User Rank */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '60px 2fr 1fr 1fr 1fr', padding: '16px', backgroundColor: '#f5f3ff', borderLeft: '4px solid #8b5cf6', borderRadius: '4px', alignItems: 'center', margin: '8px 0' }}>
-                      <div style={{ textAlign: 'center', fontSize: '14px', fontWeight: '800', color: '#8b5cf6' }}>23</div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <div style={{ width: '36px', height: '36px', borderRadius: '50%', backgroundColor: '#e2e8f0', overflow: 'hidden' }}>
-                          <img src={studentAvatar} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                        </div>
-                        <div>
-                          <div style={{ fontSize: '14px', fontWeight: '800', color: '#8b5cf6' }}>jhgno.official (You)</div>
-                          <div style={{ fontSize: '12px', color: '#6366f1' }}>jhgno.official@demo.com</div>
-                        </div>
-                      </div>
-                      <div style={{ textAlign: 'center', fontSize: '14px', fontWeight: '800', color: '#8b5cf6' }}>15</div>
-                      <div style={{ textAlign: 'center', fontSize: '14px', fontWeight: '800', color: '#8b5cf6' }}>60.0%</div>
-                      <div style={{ textAlign: 'right', fontSize: '13px', fontWeight: '700', color: '#8b5cf6' }}>21m 32s</div>
-                    </div>
-
-                    {/* Ranks 24, 25 */}
-                    {[
-                      { rank: 24, name: 'Kartik Malhotra', email: 'kartik.malhotra@demo.com', marks: 14, pct: '56.0%', time: '23m 10s', color: '#ef4444' },
-                      { rank: 25, name: 'Meera Nair', email: 'meera.nair@demo.com', marks: 13, pct: '52.0%', time: '24m 05s', color: '#ef4444' }
-                    ].map(st => (
-                      <div key={st.rank} style={{ display: 'grid', gridTemplateColumns: '60px 2fr 1fr 1fr 1fr', padding: '16px', borderBottom: '1px solid #f1f5f9', alignItems: 'center' }}>
-                        <div style={{ textAlign: 'center', fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>{st.rank}</div>
+                        <div style={{ width: '1px', height: '40px', backgroundColor: '#e2e8f0' }}></div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                          <div style={{ width: '36px', height: '36px', borderRadius: '50%', backgroundColor: '#e2e8f0', overflow: 'hidden' }}>
-                            <img src={studentAvatar} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                          </div>
+                          <Users size={20} color="#64748b" />
                           <div>
-                            <div style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>{st.name}</div>
-                            <div style={{ fontSize: '12px', color: '#64748b' }}>{st.email}</div>
+                            <div style={{ fontSize: '12px', color: '#64748b' }}>Total Students</div>
+                            <div style={{ fontSize: '15px', fontWeight: '800', color: '#0f172a', marginTop: '2px' }}>{leaderboardAttempts.length}</div>
                           </div>
                         </div>
-                        <div style={{ textAlign: 'center', fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>{st.marks}</div>
-                        <div style={{ textAlign: 'center', fontSize: '14px', fontWeight: '800', color: st.color }}>{st.pct}</div>
-                        <div style={{ textAlign: 'right', fontSize: '13px', fontWeight: '600', color: '#0f172a' }}>{st.time}</div>
                       </div>
-                    ))}
 
-                    <div style={{ textAlign: 'center', marginTop: '24px' }}>
-                      <button style={{ border: 'none', backgroundColor: 'transparent', color: '#8b5cf6', fontSize: '14px', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', margin: '0 auto' }}>
-                        View Full Leaderboard <ArrowRight size={16} />
-                      </button>
+                      {/* Leaderboard Table */}
+                      <div style={{ width: '100%' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '60px 2fr 1fr 1fr 1fr', padding: '16px', borderBottom: '1px solid #e2e8f0', fontSize: '12px', fontWeight: '700', color: '#64748b', alignItems: 'center' }}>
+                          <div style={{ textAlign: 'center' }}>Rank</div>
+                          <div>Student</div>
+                          <div style={{ textAlign: 'center' }}>Marks Obtained</div>
+                          <div style={{ textAlign: 'center' }}>Percentage</div>
+                          <div style={{ textAlign: 'right' }}>Time Taken</div>
+                        </div>
+
+                        {leaderboardLoading ? (
+                           <div style={{ padding: '32px', textAlign: 'center', color: '#64748b' }}>Loading leaderboard...</div>
+                        ) : leaderboardAttempts.length === 0 ? (
+                           <div style={{ padding: '32px', textAlign: 'center', color: '#64748b' }}>No attempts yet.</div>
+                        ) : (
+                          <>
+                            {leaderboardAttempts.map((st, i) => {
+                              const rank = i + 1;
+                              const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : null;
+                              const isMe = st.student_email === user.email;
+                              const pct = Math.round((st.score / st.total_questions) * 100);
+                              const durationText = st.time_taken_seconds
+                                ? `${Math.floor(st.time_taken_seconds / 60)}m ${st.time_taken_seconds % 60}s`
+                                : 'N/A';
+                                
+                              return (
+                                <div key={st.id} style={{ display: 'grid', gridTemplateColumns: '60px 2fr 1fr 1fr 1fr', padding: '16px', borderBottom: '1px solid #f1f5f9', backgroundColor: isMe ? '#f5f3ff' : 'transparent', borderLeft: isMe ? '4px solid #8b5cf6' : '4px solid transparent', alignItems: 'center', transition: 'background-color 0.2s', margin: isMe ? '4px 0' : '0' }}>
+                                  <div style={{ textAlign: 'center', fontSize: medal ? '20px' : '14px', fontWeight: '700', color: medal ? 'inherit' : (isMe ? '#8b5cf6' : '#0f172a') }}>
+                                    {medal || rank}
+                                  </div>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                    <div style={{ width: '36px', height: '36px', borderRadius: '50%', backgroundColor: '#e2e8f0', overflow: 'hidden' }}>
+                                      <img src={studentAvatar as any} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                    </div>
+                                    <div>
+                                      <div style={{ fontSize: '14px', fontWeight: isMe ? '800' : '700', color: isMe ? '#8b5cf6' : '#0f172a' }}>{st.student_name || st.student_email.split('@')[0]} {isMe ? '(You)' : ''}</div>
+                                      <div style={{ fontSize: '12px', color: isMe ? '#6366f1' : '#64748b' }}>{st.student_email}</div>
+                                    </div>
+                                  </div>
+                                  <div style={{ textAlign: 'center', fontSize: '14px', fontWeight: isMe ? '800' : '700', color: isMe ? '#8b5cf6' : '#0f172a' }}>{st.score}</div>
+                                  <div style={{ textAlign: 'center', fontSize: '14px', fontWeight: '800', color: isMe ? '#8b5cf6' : '#10b981' }}>{pct}%</div>
+                                  <div style={{ textAlign: 'right', fontSize: '13px', fontWeight: isMe ? '700' : '600', color: isMe ? '#8b5cf6' : '#0f172a' }}>{durationText}</div>
+                                </div>
+                              );
+                            })}
+                          </>
+                        )}
+                      </div>
+                    </>
+                  ) : (
+                    <div style={{ padding: '48px', textAlign: 'center', color: '#64748b' }}>
+                      Please select a test from the right panel to view its leaderboard.
                     </div>
-
-                  </div>
+                  )}
                 </div>
 
                 {/* Right: Filter & About */}
@@ -2342,43 +2377,9 @@ Content-Type: text/html; charset=UTF-8
                   {/* Filter Card */}
                   <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', padding: '24px', border: '1px solid #f1f5f9', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
                     <h3 style={{ fontSize: '16px', fontWeight: '800', color: '#0f172a', margin: '0 0 6px 0' }}>Filter Leaderboard</h3>
-                    <p style={{ fontSize: '13px', color: '#64748b', marginBottom: '20px' }}>Select the test and details to view leaderboard.</p>
+                    <p style={{ fontSize: '13px', color: '#64748b', marginBottom: '20px' }}>Select the test to view real-time rankings.</p>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                      <div>
-                        <label style={{ display: 'block', fontSize: '13px', fontWeight: '700', color: '#0f172a', marginBottom: '6px' }}>Date</label>
-                        <div style={{ position: 'relative' }}>
-                          <Calendar size={16} color="#64748b" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
-                          <input type="text" defaultValue="7 June 2025" style={{ width: '100%', padding: '10px 12px 10px 36px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '13px', color: '#0f172a', outline: 'none' }} />
-                        </div>
-                      </div>
-                      
-                      <div>
-                        <label style={{ display: 'block', fontSize: '13px', fontWeight: '700', color: '#0f172a', marginBottom: '6px' }}>Time</label>
-                        <div style={{ position: 'relative' }}>
-                          <Clock size={16} color="#64748b" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
-                          <select style={{ width: '100%', padding: '10px 12px 10px 36px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '13px', color: '#0f172a', appearance: 'none', outline: 'none' }}>
-                            <option>09:00 AM - 10:00 AM</option>
-                          </select>
-                          <ChevronDown size={16} color="#64748b" style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
-                        </div>
-                      </div>
-
-                      <div>
-                        <label style={{ display: 'block', fontSize: '13px', fontWeight: '700', color: '#0f172a', marginBottom: '6px' }}>Teacher Email</label>
-                        <div style={{ position: 'relative' }}>
-                          <Mail size={16} color="#64748b" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
-                          <input type="email" defaultValue="teacher.demo@codersfun.com" style={{ width: '100%', padding: '10px 12px 10px 36px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '13px', color: '#0f172a', outline: 'none' }} />
-                        </div>
-                      </div>
-
-                      <div>
-                        <label style={{ display: 'block', fontSize: '13px', fontWeight: '700', color: '#0f172a', marginBottom: '6px' }}>Test Access Code (6-digit PIN)</label>
-                        <div style={{ position: 'relative' }}>
-                          <Lock size={16} color="#64748b" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
-                          <input type="text" defaultValue="123456" style={{ width: '100%', padding: '10px 12px 10px 36px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '13px', color: '#0f172a', outline: 'none' }} />
-                        </div>
-                      </div>
 
                       <div>
                         <label style={{ display: 'block', fontSize: '13px', fontWeight: '700', color: '#0f172a', marginBottom: '6px' }}>Test</label>
@@ -2386,16 +2387,20 @@ Content-Type: text/html; charset=UTF-8
                           <div style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', width: '24px', height: '24px', backgroundColor: '#3b82f6', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
                             <ClipboardEdit size={14} />
                           </div>
-                          <select style={{ width: '100%', padding: '10px 12px 10px 44px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '13px', color: '#0f172a', appearance: 'none', outline: 'none', height: '44px' }}>
-                            <option>Physics Quiz</option>
+                          <select 
+                            value={leaderboardSelectedTestId}
+                            onChange={(e) => setLeaderboardSelectedTestId(e.target.value)}
+                            style={{ width: '100%', padding: '10px 12px 10px 44px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '13px', color: '#0f172a', appearance: 'none', outline: 'none', height: '44px', backgroundColor: '#fff' }}
+                          >
+                            <option value="">-- Select a test --</option>
+                            {availableTests.map(t => (
+                              <option key={t.id} value={t.id}>{t.title}</option>
+                            ))}
                           </select>
                           <ChevronDown size={16} color="#64748b" style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
                         </div>
                       </div>
 
-                      <button style={{ width: '100%', padding: '12px', borderRadius: '8px', backgroundColor: '#6d28d9', color: '#ffffff', fontSize: '14px', fontWeight: '700', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginTop: '8px' }}>
-                        <Trophy size={16} /> View Leaderboard
-                      </button>
                     </div>
                   </div>
 
@@ -2428,8 +2433,8 @@ Content-Type: text/html; charset=UTF-8
                         <ShieldCheck size={20} />
                       </div>
                       <div>
-                        <div style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a' }}>Fair and accurate</div>
-                        <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px', lineHeight: '1.4' }}>Results are calculated instantly and fairly for all students.</div>
+                        <div style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a' }}>Real-time rankings</div>
+                        <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px', lineHeight: '1.4' }}>Rankings dynamically update as soon as students submit.</div>
                       </div>
                     </div>
 
@@ -2439,7 +2444,8 @@ Content-Type: text/html; charset=UTF-8
               </div>
 
             </div>
-          )}
+            );
+          })()}
 
         </div>
       </main>

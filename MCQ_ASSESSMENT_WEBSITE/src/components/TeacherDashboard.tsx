@@ -28,6 +28,7 @@ interface Attempt {
   id: string;
   test_id: string;
   student_email: string;
+  student_name?: string;
   score: number;
   total_questions: number;
   completed_at: string;
@@ -112,7 +113,7 @@ export default function TeacherDashboard({ user, isDemo, onLogout }: TeacherDash
           const testIds = testsData.map(t => t.id);
           const { data: attemptsData, error: attemptsErr } = await supabase
             .from('test_attempts')
-            .select('*, profiles:student_id(full_name)')
+            .select('*')
             .in('test_id', testIds)
             .order('completed_at', { ascending: false });
 
@@ -137,6 +138,33 @@ export default function TeacherDashboard({ user, isDemo, onLogout }: TeacherDash
 
   useEffect(() => {
     loadData();
+  }, [user.id, isDemo]);
+
+  // Supabase Realtime Subscription
+  useEffect(() => {
+    if (isDemo) return;
+
+    const channel = supabase
+      .channel(`teacher-realtime-${user.id}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'test_attempts' },
+        (payload) => {
+          loadData();
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'tests' },
+        (payload) => {
+          loadData();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [user.id, isDemo]);
 
   // Load leaderboard details when a test is selected in the tab
@@ -906,7 +934,7 @@ export default function TeacherDashboard({ user, isDemo, onLogout }: TeacherDash
                           // Determine display name
                           const studentName = att.student_email.toLowerCase().includes('harish')
                             ? 'Harish'
-                            : (att.profiles?.full_name || att.student_email.split('@')[0]);
+                            : (att.student_name || att.student_email.split('@')[0]);
 
                           return (
                             <tr key={att.id}>
@@ -1010,7 +1038,7 @@ export default function TeacherDashboard({ user, isDemo, onLogout }: TeacherDash
                                     <span style={{ fontWeight: '500' }}>
                                       {att.student_email.toLowerCase().includes('harish') 
                                         ? 'Harish' 
-                                        : (att.profiles?.full_name || displayEmail)}
+                                        : (att.student_name || displayEmail)}
                                     </span>
                                   </div>
                                 </td>
