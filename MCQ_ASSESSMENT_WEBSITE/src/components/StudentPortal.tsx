@@ -28,6 +28,7 @@ interface Test {
   access_start?: string;
   access_end?: string;
   type?: 'test' | 'assignment' | 'quiz' | 'live_exam';
+  allowed_emails?: string[] | null;
   created_at?: string;
 }
 
@@ -594,6 +595,15 @@ export default function StudentPortal({ user, isDemo, onLogout }: StudentPortalP
         ) || null;
 
         if (test) {
+          // Strict Validation (Demo)
+          if (test.allowed_emails !== null && test.allowed_emails !== undefined) {
+            const isAllowed = test.allowed_emails.some((e: string) => e.toLowerCase() === user.email.toLowerCase());
+            if (!isAllowed) {
+              setErrorMsg("Access Denied: Your email address is not authorized to take this test.");
+              setLoading(false);
+              return;
+            }
+          }
           const localAttempts = JSON.parse(localStorage.getItem('demo_attempts') || '[]');
           existingAttempt = localAttempts.find(
             (a: any) => a.test_id === test!.id && a.student_email === user.email
@@ -616,6 +626,16 @@ export default function StudentPortal({ user, isDemo, onLogout }: StudentPortalP
             test.questions = JSON.parse(test.questions);
           } catch (e) {
             console.error('Failed to parse questions', e);
+          }
+        }
+
+        // Strict Validation (Supabase)
+        if (test && test.allowed_emails !== null && test.allowed_emails !== undefined) {
+          const isAllowed = test.allowed_emails.some((e: string) => e.toLowerCase() === user.email.toLowerCase());
+          if (!isAllowed) {
+            setErrorMsg("Access Denied: Your email address is not authorized to take this test.");
+            setLoading(false);
+            return;
           }
         }
 
