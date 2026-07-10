@@ -8,6 +8,7 @@ import {
   Trophy, ClipboardEdit, ChevronDown, BarChart3, ShieldCheck
 } from 'lucide-react';
 import animeAvatar from '../assets/anime_avatar.png';
+import studentAvatar from '../assets/student_avatar.png';
 import ProfileModal from './ProfileModal';
 
 const getLocalDateStr = (d: Date | string | number) => {
@@ -53,6 +54,13 @@ interface Attempt {
   profiles?: {
     full_name: string;
   } | null;
+}
+
+interface Profile {
+  id: string;
+  email: string;
+  full_name: string | null;
+  avatar_url: string | null;
 }
 
 interface TeacherDashboardProps {
@@ -144,6 +152,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
   
   const [currentName, setCurrentName] = useState(teacherDisplayName);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [allProfiles, setAllProfiles] = useState<Profile[]>([]);
   const [currentAvatar, setCurrentAvatar] = useState(user.user_metadata?.avatar_url || animeAvatar as any);
 
   const getTestStatus = (t: Test) => {
@@ -160,6 +169,9 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
     setMsg(null);
     try {
       
+        const { data: profilesData } = await supabase.from('profiles').select('*');
+        if (profilesData) setAllProfiles(profilesData);
+
         const { data: testsData, error: testsErr } = await supabase
           .from('tests')
           .select('*')
@@ -1250,8 +1262,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                     <table className="density-table">
                       <thead>
                         <tr>
-                          <th>Examinee Name</th>
-                          <th>Examinee Email</th>
+                          <th>Examinee Profile</th>
                           <th>Test Title</th>
                           <th>Score</th>
                           <th>Percentage</th>
@@ -1304,8 +1315,17 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
 
                           return (
                             <tr key={att.id}>
-                              <td style={{ fontWeight: '600' }}>{att.display_name}</td>
-                              <td>{att.student_email}</td>
+                              <td>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                  <div style={{ width: '36px', height: '36px', borderRadius: '50%', backgroundColor: '#e2e8f0', overflow: 'hidden' }}>
+                                    <img src={allProfiles.find(p => p.email === att.student_email)?.avatar_url || studentAvatar as any} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                  </div>
+                                  <div>
+                                    <div style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>{att.display_name}</div>
+                                    <div style={{ fontSize: '12px', color: '#64748b' }}>{att.student_email}</div>
+                                  </div>
+                                </div>
+                              </td>
                               <td>{att.test_title}</td>
                               <td style={{ fontWeight: '700' }}>{att.score} / {att.total_questions}</td>
                               <td>{pct}%</td>
@@ -1415,10 +1435,10 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                                   </div>
                                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                     <div style={{ width: '36px', height: '36px', borderRadius: '50%', backgroundColor: '#e2e8f0', overflow: 'hidden' }}>
-                                      <img src={"https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=80"} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                      <img src={allProfiles.find(p => p.email === st.student_email)?.avatar_url || studentAvatar as any} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                     </div>
                                     <div>
-                                      <div style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>{st.student_name || st.student_email.split('@')[0]}</div>
+                                      <div style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>{allProfiles.find(p => p.email === st.student_email)?.full_name || st.student_name || st.student_email.split('@')[0]}</div>
                                       <div style={{ fontSize: '12px', color: '#64748b' }}>{st.student_email}</div>
                                     </div>
                                   </div>

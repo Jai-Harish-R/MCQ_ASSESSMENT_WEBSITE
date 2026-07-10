@@ -56,6 +56,13 @@ const getLocalDateStr = (d: Date | string | number) => {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 };
 
+interface Profile {
+  id: string;
+  email: string;
+  full_name: string | null;
+  avatar_url: string | null;
+}
+
 interface StudentPortalProps {
   user: { id: string; email: string; user_metadata?: { full_name?: string; avatar_url?: string } };
 
@@ -70,6 +77,7 @@ export default function StudentPortal({ user, onLogout }: StudentPortalProps) {
   // Attempts and tests states (for dashboard and leaderboard verification)
   const [myAttempts, setMyAttempts] = useState<Attempt[]>([]);
   const [availableTests, setAvailableTests] = useState<Test[]>([]);
+  const [allProfiles, setAllProfiles] = useState<Profile[]>([]);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [currentAvatar, setCurrentAvatar] = useState(user.user_metadata?.avatar_url || studentAvatar as any);
 
@@ -221,6 +229,9 @@ export default function StudentPortal({ user, onLogout }: StudentPortalProps) {
     setIsLoadingData(true);
     try {
       
+        const { data: profilesData } = await supabase.from('profiles').select('*');
+        if (profilesData) setAllProfiles(profilesData);
+
         // Load attempts from Supabase
         const { data: attemptsData, error: attemptsErr } = await supabase
           .from('test_attempts')
@@ -2184,6 +2195,11 @@ Content-Type: text/html; charset=UTF-8
                               const rank = i + 1;
                               const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : null;
                               const isMe = st.student_email === user.email;
+                              
+                              const profile = allProfiles.find(p => p.email === st.student_email);
+                              const displayName = profile?.full_name || st.student_name || st.student_email.split('@')[0];
+                              const displayAvatar = profile?.avatar_url || currentAvatar;
+                              
                               const pct = Math.round((st.score / st.total_questions) * 100);
                               const durationText = st.time_taken_seconds
                                 ? `${Math.floor(st.time_taken_seconds / 60)}m ${st.time_taken_seconds % 60}s`
@@ -2196,11 +2212,11 @@ Content-Type: text/html; charset=UTF-8
                                   </div>
                                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                     <div style={{ width: '36px', height: '36px', borderRadius: '50%', backgroundColor: '#e2e8f0', overflow: 'hidden' }}>
-                                      <img src={currentAvatar} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                      <img src={displayAvatar} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                     </div>
                                     <div>
-                                      <div style={{ fontSize: '14px', fontWeight: isMe ? '800' : '700', color: isMe ? '#8b5cf6' : '#0f172a' }}>{st.student_name || st.student_email.split('@')[0]} {isMe ? '(You)' : ''}</div>
-                                      <div style={{ fontSize: '12px', color: isMe ? '#6366f1' : '#64748b' }}>{st.student_email}</div>
+                                      <div style={{ fontSize: '14px', fontWeight: isMe ? '800' : '700', color: isMe ? '#8b5cf6' : '#0f172a' }}>{displayName} {isMe ? '(You)' : ''}</div>
+                                      <div style={{ fontSize: '11px', color: '#64748b' }}>Examinee</div>
                                     </div>
                                   </div>
                                   <div style={{ textAlign: 'center', fontSize: '14px', fontWeight: isMe ? '800' : '700', color: isMe ? '#8b5cf6' : '#0f172a' }}>{st.score}</div>
