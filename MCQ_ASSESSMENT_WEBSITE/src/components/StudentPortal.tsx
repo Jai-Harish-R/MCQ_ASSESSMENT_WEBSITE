@@ -32,6 +32,7 @@ interface Test {
   created_at?: string;
   pass_percentage?: number;
   max_attempts?: number;
+  short_id?: number;
 }
 
 interface Attempt {
@@ -168,13 +169,13 @@ export default function StudentPortal({ user, onLogout }: StudentPortalProps) {
 
 
   // Lobby Inputs
-  const [teacherEmail, setTeacherEmail] = useState('');
+  const [testIdStr, setTestIdStr] = useState('');
   const [accessCode, setAccessCode] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const [loading, setLoading] = useState(false);
 
   // Leaderboard Access Inputs & Verified Rank State
-  const [leaderboardTeacherEmail, setLeaderboardTeacherEmail] = useState('teacher.demo@codersfun.com');
+  const [leaderboardTestId, setLeaderboardTestId] = useState('');
   const [leaderboardAccessCode, setLeaderboardAccessCode] = useState('123456');
   const [leaderboardError, setLeaderboardError] = useState('');
   const [verifiedLeaderboard, setVerifiedLeaderboard] = useState<{
@@ -228,12 +229,12 @@ export default function StudentPortal({ user, onLogout }: StudentPortalProps) {
           const testIds = attemptsData.map((a: any) => a.test_id);
           const { data: testsData } = await supabase
             .from('tests')
-            .select('id, title, type')
+            .select('id, title, type, short_id')
             .in('id', testIds);
 
           const mapped = (attemptsData || []).map((att: any) => {
             const t = (testsData || []).find((x: any) => x.id === att.test_id);
-            return { ...att, test_title: t ? t.title : 'Assessment', test_type: t ? t.type : 'test' };
+            return { ...att, test_title: t ? (t.short_id ? `${t.title} - ${t.short_id}` : t.title) : 'Assessment', test_type: t ? t.type : 'test' };
           });
           setMyAttempts(mapped);
         } else {
@@ -245,7 +246,7 @@ export default function StudentPortal({ user, onLogout }: StudentPortalProps) {
           const testIds = attemptsData.map((a: any) => a.test_id);
           const { data: takenTests } = await supabase
             .from('tests')
-            .select('id, title, access_code, teacher_email, type, duration, total_students, created_at, questions, pass_percentage, max_attempts')
+            .select('id, title, access_code, teacher_email, type, duration, total_students, created_at, questions, pass_percentage, max_attempts, short_id')
             .in('id', testIds)
             .order('created_at', { ascending: false });
           if (takenTests) {
@@ -368,16 +369,16 @@ export default function StudentPortal({ user, onLogout }: StudentPortalProps) {
   };
 
   // Check and Enter Test
-  const handleEnterTest = async (e: React.FormEvent, customEmail?: string, customPIN?: string) => {
+  const handleEnterTest = async (e: React.FormEvent, customTestIdStr?: string, customPIN?: string) => {
     if (e) e.preventDefault();
     setErrorMsg('');
     setLoading(true);
 
-    const emailInput = customEmail || teacherEmail;
+    const testIdInput = customTestIdStr || testIdStr;
     const pinInput = customPIN || accessCode;
 
-    if (!emailInput || !pinInput) {
-      setErrorMsg('Please enter both teacher email and access code PIN.');
+    if (!testIdInput || !pinInput) {
+      setErrorMsg('Please enter both Test ID and access code PIN.');
       setLoading(false);
       return;
     }
@@ -390,7 +391,7 @@ export default function StudentPortal({ user, onLogout }: StudentPortalProps) {
         const { data: testData, error: testErr } = await supabase
           .from('tests')
           .select('*')
-          .ilike('teacher_email', emailInput.trim())
+          .eq('short_id', parseInt(testIdInput.trim(), 10))
           .eq('access_code', pinInput.trim())
           .order('created_at', { ascending: false })
           .limit(1);
@@ -432,7 +433,7 @@ export default function StudentPortal({ user, onLogout }: StudentPortalProps) {
       
 
       if (!test) {
-        setErrorMsg('No test found matching this teacher email and access code PIN.');
+        setErrorMsg('No test found matching this Test ID and access code PIN.');
         setLoading(false);
         return;
       }
@@ -578,7 +579,7 @@ Content-Type: text/html; charset=UTF-8
     setVerifiedLeaderboard(null);
     setLoading(true);
 
-    if (!leaderboardTeacherEmail || !leaderboardAccessCode) {
+    if (!leaderboardTestId || !leaderboardAccessCode) {
       setLeaderboardError('Please fill in both fields.');
       setLoading(false);
       return;
@@ -593,7 +594,7 @@ Content-Type: text/html; charset=UTF-8
         const { data: testData } = await supabase
           .from('tests')
           .select('*')
-          .eq('teacher_email', leaderboardTeacherEmail.trim())
+          .eq('short_id', parseInt(leaderboardTestId.trim(), 10))
           .eq('access_code', leaderboardAccessCode.trim())
           .order('created_at', { ascending: false })
           .limit(1);
@@ -787,7 +788,7 @@ Content-Type: text/html; charset=UTF-8
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#ffffff', border: '1px solid var(--color-outline-variant)', borderRadius: 'var(--radius-default)', padding: '16px 24px' }}>
                 <div>
                   <span style={{ fontSize: '11px', color: 'var(--color-on-surface-variant)', fontWeight: '600', textTransform: 'uppercase' }}>Active Exam</span>
-                  <h3 style={{ fontSize: '18px', fontWeight: '700', color: 'var(--color-primary)', marginTop: '2px' }}>{activeTest.title}</h3>
+                  <h3 style={{ fontSize: '18px', fontWeight: '700', color: 'var(--color-primary)', marginTop: '2px' }}>{activeTest.title} {activeTest.short_id ? `- ${activeTest.short_id}` : ''}</h3>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: secondsLeft < 60 ? 'var(--color-error-container)' : 'var(--color-surface-container)', color: secondsLeft < 60 ? 'var(--color-on-error-container)' : 'var(--color-on-surface)', padding: '8px 16px', borderRadius: 'var(--radius-sm)', fontWeight: '700', fontFamily: 'monospace', fontSize: '16px' }}>
                   <Clock size={16} />
@@ -1543,14 +1544,14 @@ Content-Type: text/html; charset=UTF-8
                       )}
                       
                       <div>
-                        <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#475569', marginBottom: '8px' }}>Teacher Email Address</label>
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#475569', marginBottom: '8px' }}>Test ID</label>
                         <div style={{ position: 'relative' }}>
-                          <span style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', fontSize: '16px' }}>✉️</span>
+                          <span style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', fontSize: '16px' }}>🆔</span>
                           <input
-                            type="email"
-                            placeholder="Enter teacher email address"
-                            value={teacherEmail}
-                            onChange={(e) => setTeacherEmail(e.target.value)}
+                            type="text"
+                            placeholder="Enter the test ID"
+                            value={testIdStr}
+                            onChange={(e) => setTestIdStr(e.target.value)}
                             required
                             style={{
                               width: '100%', padding: '12px 16px 12px 42px', borderRadius: '12px', border: '1px solid #e2e8f0',
@@ -1617,8 +1618,8 @@ Content-Type: text/html; charset=UTF-8
                         <span style={{ fontSize: '18px' }}>✉️</span>
                       </div>
                       <div>
-                        <div style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>Get teacher email</div>
-                        <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px', lineHeight: '1.4' }}>Obtain the email from your teacher</div>
+                        <div style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>Get the Test ID</div>
+                        <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px', lineHeight: '1.4' }}>Obtain the ID from your teacher</div>
                       </div>
                     </div>
 
@@ -2119,7 +2120,7 @@ Content-Type: text/html; charset=UTF-8
                             <ClipboardEdit size={24} />
                           </div>
                           <div>
-                            <div style={{ fontSize: '15px', fontWeight: '700', color: '#0f172a' }}>{selectedTest.title}</div>
+                            <div style={{ fontSize: '15px', fontWeight: '700', color: '#0f172a' }}>{selectedTest.title} {selectedTest.short_id ? `- ${selectedTest.short_id}` : ''}</div>
                             <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>{selectedTest.questions?.length || 0} Questions • MCQ Test</div>
                           </div>
                         </div>
@@ -2212,7 +2213,7 @@ Content-Type: text/html; charset=UTF-8
                           >
                             <option value="">-- Select a test --</option>
                             {availableTests.map(t => (
-                              <option key={t.id} value={t.id}>{t.title}</option>
+                              <option key={t.id} value={t.id}>{t.title} {t.short_id ? `- ${t.short_id}` : ''}</option>
                             ))}
                           </select>
                           <ChevronDown size={16} color="#64748b" style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />

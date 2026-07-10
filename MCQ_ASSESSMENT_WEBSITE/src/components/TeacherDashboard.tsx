@@ -35,6 +35,7 @@ interface Test {
   created_at: string;
   pass_percentage?: number;
   max_attempts?: number;
+  short_id?: number;
 }
 
 interface Attempt {
@@ -482,7 +483,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
 
         if (answersErr) throw answersErr;
 
-        setMsg({ type: 'success', text: `Test "${testTitle}" created successfully! Access Code PIN: ${accessCode}` });
+        setMsg({ type: 'success', text: `Test "${testTitle}" created successfully! Share Test ID: ${testData.short_id} and PIN: ${accessCode}` });
         
         setTestTitle('');
         setAccessCode('');
@@ -729,7 +730,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                     {tests.map(test => (
                       <div key={test.id} style={{ display: 'flex', justifySelf: 'stretch', justifyContent: 'space-between', alignItems: 'center', padding: '16px', border: '1px solid var(--color-outline-variant)', borderRadius: 'var(--radius-default)' }}>
                         <div>
-                          <h4 style={{ fontSize: '15px', fontWeight: '600' }}>{test.title}</h4>
+                          <h4 style={{ fontSize: '15px', fontWeight: '600' }}>{test.title} {test.short_id ? `- ${test.short_id}` : ''}</h4>
                           <div style={{ display: 'flex', gap: '16px', marginTop: '4px', fontSize: '12px', color: 'var(--color-on-surface-variant)' }}>
                             <span>PIN Code: <strong style={{ color: 'var(--color-primary)' }}>{test.access_code}</strong></span>
                             <span>Questions: <strong>{test.questions ? test.questions.length : 0}</strong></span>
@@ -1200,7 +1201,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                   >
                     <option value="">-- Choose a test --</option>
                     {tests.map(t => (
-                      <option key={t.id} value={t.id}>{t.title}</option>
+                      <option key={t.id} value={t.id}>{t.title} {t.short_id ? `- ${t.short_id}` : ''}</option>
                     ))}
                   </select>
                 </div>
@@ -1367,7 +1368,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                             <ClipboardEdit size={24} />
                           </div>
                           <div>
-                            <div style={{ fontSize: '15px', fontWeight: '700', color: '#0f172a' }}>{selectedTest.title}</div>
+                            <div style={{ fontSize: '15px', fontWeight: '700', color: '#0f172a' }}>{selectedTest.title} {selectedTest.short_id ? `- ${selectedTest.short_id}` : ''}</div>
                             <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>{selectedTest.questions?.length || 0} Questions • MCQ Test</div>
                           </div>
                         </div>
@@ -1457,7 +1458,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                           >
                             <option value="">-- Choose a test --</option>
                             {tests.map(t => (
-                              <option key={t.id} value={t.id}>{t.title} (PIN: {t.access_code})</option>
+                              <option key={t.id} value={t.id}>{t.title} {t.short_id ? `- ${t.short_id}` : ''} (PIN: {t.access_code})</option>
                             ))}
                           </select>
                           <ChevronDown size={16} color="#64748b" style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
