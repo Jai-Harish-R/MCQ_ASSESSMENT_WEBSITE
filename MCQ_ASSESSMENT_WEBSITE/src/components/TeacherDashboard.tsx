@@ -26,6 +26,7 @@ interface Test {
   total_students?: number;
   access_start?: string | null;
   access_end?: string | null;
+  allowed_emails?: string[] | null;
   created_at: string;
 }
 
@@ -73,6 +74,7 @@ export default function TeacherDashboard({ user, isDemo, onLogout }: TeacherDash
   const [totalStudents, setTotalStudents] = useState(50);
   const [accessStart, setAccessStart] = useState('');
   const [accessEnd, setAccessEnd] = useState('');
+  const [allowedEmailsInput, setAllowedEmailsInput] = useState('');
   const [questions, setQuestions] = useState<Array<{
     text: string;
     options: string[];
@@ -407,7 +409,8 @@ export default function TeacherDashboard({ user, isDemo, onLogout }: TeacherDash
           questions: formattedQuestions,
           created_at: new Date().toISOString(),
           access_start: accessStart ? new Date(accessStart).toISOString() : null,
-          access_end: accessEnd ? new Date(accessEnd).toISOString() : null
+          access_end: accessEnd ? new Date(accessEnd).toISOString() : null,
+          allowed_emails: allowedEmailsInput.trim() ? allowedEmailsInput.split(',').map(e => e.trim()).filter(e => e) : null
         };
 
         const localTests = JSON.parse(localStorage.getItem('demo_tests') || '[]');
@@ -437,7 +440,8 @@ export default function TeacherDashboard({ user, isDemo, onLogout }: TeacherDash
             duration: duration,
             total_students: totalStudents,
             access_start: accessStart ? new Date(accessStart).toISOString() : null,
-            access_end: accessEnd ? new Date(accessEnd).toISOString() : null
+            access_end: accessEnd ? new Date(accessEnd).toISOString() : null,
+            allowed_emails: allowedEmailsInput.trim() ? allowedEmailsInput.split(',').map(e => e.trim()).filter(e => e) : null
           })
           .select()
           .single();
