@@ -772,6 +772,9 @@ export default function StudentPortal({ user, isDemo, onLogout }: StudentPortalP
     };
 
     try {
+      if (window.location.hostname !== 'localhost') {
+        throw new Error('Skipping local Spring Boot fetch in production to prevent CORS error');
+      }
       const response = await fetch('http://localhost:8080/api/test/evaluate', {
         method: 'POST',
         headers: {

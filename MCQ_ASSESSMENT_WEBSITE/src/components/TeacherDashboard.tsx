@@ -439,7 +439,7 @@ export default function TeacherDashboard({ user, isDemo, onLogout }: TeacherDash
           created_at: new Date().toISOString(),
           access_start: accessStart ? new Date(accessStart).toISOString() : null,
           access_end: accessEnd ? new Date(accessEnd).toISOString() : null,
-          allowed_emails: (strictValidation && allowedEmailsInput.trim()) ? allowedEmailsInput.split(',').map(e => e.trim()).filter(e => e) : null
+          allowed_emails: strictValidation ? (allowedEmailsInput.trim() ? allowedEmailsInput.split(',').map(e => e.trim()).filter(e => e) : []) : null
         };
 
         const localTests = JSON.parse(localStorage.getItem('demo_tests') || '[]');
@@ -470,7 +470,7 @@ export default function TeacherDashboard({ user, isDemo, onLogout }: TeacherDash
             total_students: totalStudents,
             access_start: accessStart ? new Date(accessStart).toISOString() : null,
             access_end: accessEnd ? new Date(accessEnd).toISOString() : null,
-            allowed_emails: (strictValidation && allowedEmailsInput.trim()) ? allowedEmailsInput.split(',').map(e => e.trim()).filter(e => e) : null
+            allowed_emails: strictValidation ? (allowedEmailsInput.trim() ? allowedEmailsInput.split(',').map(e => e.trim()).filter(e => e) : []) : null
           })
           .select()
           .single();
