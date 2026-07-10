@@ -10,6 +10,7 @@ interface UserState {
   id: string;
   email: string;
   role: 'teacher' | 'student';
+  user_metadata?: any;
 }
 
 export default function App() {
