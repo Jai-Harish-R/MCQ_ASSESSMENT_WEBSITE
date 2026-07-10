@@ -39,13 +39,15 @@ export default function App() {
             setUser({
               id: session.user.id,
               email: session.user.email || '',
-              role: metadataRole as 'teacher' | 'student'
+              role: metadataRole as 'teacher' | 'student',
+              user_metadata: session.user.user_metadata
             });
           } else {
             setUser({
               id: session.user.id,
               email: session.user.email || '',
-              role: profile.role as 'teacher' | 'student'
+              role: profile.role as 'teacher' | 'student',
+              user_metadata: session.user.user_metadata
             });
           }
         }
@@ -72,7 +74,8 @@ export default function App() {
           setUser({
             id: session.user.id,
             email: session.user.email || '',
-            role: resolvedRole as 'teacher' | 'student'
+            role: resolvedRole as 'teacher' | 'student',
+            user_metadata: session.user.user_metadata
           });
         } catch (e) {
           console.error("Auth state change sync role error", e);
