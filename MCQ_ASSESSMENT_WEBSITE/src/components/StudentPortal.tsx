@@ -472,11 +472,13 @@ export default function StudentPortal({ user, onLogout }: StudentPortalProps) {
 
     try {
       
+        const timeTakenSeconds = ((activeTest.duration || 10) * 60) - secondsLeft;
         const { data, error } = await supabase.rpc('submit_test_attempt', {
           p_test_id: activeTest.id,
           p_student_id: user.id,
           p_student_email: user.email,
-          p_answers: answers
+          p_answers: answers,
+          p_time_taken_seconds: timeTakenSeconds
         });
 
         if (error) throw error;

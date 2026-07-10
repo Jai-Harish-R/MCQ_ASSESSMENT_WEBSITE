@@ -449,6 +449,8 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
             access_code: accessCode,
             questions: formattedQuestions,
             type: 'test',
+            target_year: targetYear || null,
+            target_class: targetClass || null,
             duration: duration,
             total_students: totalStudents,
             access_start: accessStart ? new Date(accessStart).toISOString() : null,
