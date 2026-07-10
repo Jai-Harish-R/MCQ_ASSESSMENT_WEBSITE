@@ -677,43 +677,57 @@ Content-Type: text/html; charset=UTF-8
 
 
   const assessmentsOverview = React.useMemo(() => {
-    const total = availableTests.length;
-    let tests = 0, quizzes = 0, assignments = 0, live_exams = 0;
-    availableTests.forEach(t => {
-      const type = t.type || 'test';
-      if (type === 'test') tests++;
-      if (type === 'quiz') quizzes++;
-      if (type === 'assignment') assignments++;
-      if (type === 'live_exam') live_exams++;
-    });
+    const testIds = Array.from(new Set(myAttempts.map(a => a.test_id)));
+    const total = testIds.length;
+    let score100 = 0, score80 = 0, score50 = 0, score45 = 0, scoreBelow45 = 0;
     
-    // Generate donut chart conic gradient
+    testIds.forEach(testId => {
+      const attempts = myAttempts.filter(a => a.test_id === testId);
+      const maxPct = Math.max(...attempts.map(a => Math.round((a.score / a.total_questions) * 100)));
+      if (maxPct === 100) score100++;
+      else if (maxPct >= 80) score80++;
+      else if (maxPct >= 50) score50++;
+      else if (maxPct >= 45) score45++;
+      else scoreBelow45++;
+    });
+
     let currentPct = 0;
     const gradients = [];
-    if (tests > 0) { const p = (tests/total)*100; gradients.push(`#3b82f6 ${currentPct}% ${currentPct + p}%`); currentPct += p; }
-    if (quizzes > 0) { const p = (quizzes/total)*100; gradients.push(`#a855f7 ${currentPct}% ${currentPct + p}%`); currentPct += p; }
-    if (assignments > 0) { const p = (assignments/total)*100; gradients.push(`#f59e0b ${currentPct}% ${currentPct + p}%`); currentPct += p; }
-    if (live_exams > 0) { const p = (live_exams/total)*100; gradients.push(`#ef4444 ${currentPct}% ${currentPct + p}%`); currentPct += p; }
+    if (score100 > 0) { const p = (score100/total)*100; gradients.push(`#3b82f6 ${currentPct}% ${currentPct + p}%`); currentPct += p; }
+    if (score80 > 0) { const p = (score80/total)*100; gradients.push(`#10b981 ${currentPct}% ${currentPct + p}%`); currentPct += p; }
+    if (score50 > 0) { const p = (score50/total)*100; gradients.push(`#f59e0b ${currentPct}% ${currentPct + p}%`); currentPct += p; }
+    if (score45 > 0) { const p = (score45/total)*100; gradients.push(`#f97316 ${currentPct}% ${currentPct + p}%`); currentPct += p; }
+    if (scoreBelow45 > 0) { const p = (scoreBelow45/total)*100; gradients.push(`#ef4444 ${currentPct}% ${currentPct + p}%`); currentPct += p; }
     
     const bg = gradients.length > 0 ? `conic-gradient(${gradients.join(', ')})` : 'conic-gradient(#f1f5f9 0% 100%)';
 
     return {
       total,
       bg,
-      tests: { count: tests, pct: total ? Math.round((tests/total)*100) : 0 },
-      quizzes: { count: quizzes, pct: total ? Math.round((quizzes/total)*100) : 0 },
-      assignments: { count: assignments, pct: total ? Math.round((assignments/total)*100) : 0 },
-      live_exams: { count: live_exams, pct: total ? Math.round((live_exams/total)*100) : 0 },
+      score100: { count: score100, pct: total ? Math.round((score100/total)*100) : 0 },
+      score80: { count: score80, pct: total ? Math.round((score80/total)*100) : 0 },
+      score50: { count: score50, pct: total ? Math.round((score50/total)*100) : 0 },
+      score45: { count: score45, pct: total ? Math.round((score45/total)*100) : 0 },
+      scoreBelow45: { count: scoreBelow45, pct: total ? Math.round((scoreBelow45/total)*100) : 0 },
     };
-  }, [availableTests]);
+  }, [myAttempts]);
 
   const performanceTrend = React.useMemo(() => {
-    // Get last 4 attempts
-    const recent = [...myAttempts].sort((a, b) => new Date(a.completed_at).getTime() - new Date(b.completed_at).getTime()).slice(-4);
-    while (recent.length < 4) {
-      recent.unshift({ score: 0, total_questions: 1 } as any); // padding
+    const testIds = Array.from(new Set(myAttempts.map(a => a.test_id)));
+    const testStats = testIds.map(testId => {
+      const attempts = myAttempts.filter(a => a.test_id === testId).sort((a, b) => new Date(a.completed_at).getTime() - new Date(b.completed_at).getTime());
+      const maxPct = Math.max(...attempts.map(a => Math.round((a.score / a.total_questions) * 100)));
+      return { maxPct, date: new Date(attempts[0].completed_at), testId };
+    });
+    testStats.sort((a, b) => a.date.getTime() - b.date.getTime());
+    
+    let recent = testStats.slice(-5);
+    if (recent.length === 0) {
+      recent = [{ maxPct: 0, date: new Date(), testId: '' }, { maxPct: 0, date: new Date(), testId: '' }];
+    } else if (recent.length === 1) {
+      recent = [{ maxPct: 0, date: new Date(), testId: '' }, recent[0]];
     }
-    return recent.map(att => Math.round((att.score / att.total_questions) * 100));
+    return recent;
   }, [myAttempts]);
 
   // Active Exam View hides sidebar
@@ -1236,10 +1250,11 @@ Content-Type: text/html; charset=UTF-8
                         
                         {/* List */}
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', flex: 1, paddingLeft: '24px' }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', fontWeight: '600' }}><span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width:'8px',height:'8px',borderRadius:'50%',backgroundColor:'#3b82f6' }}></div> Tests</span> <span>{assessmentsOverview.tests.count} ({assessmentsOverview.tests.pct}%)</span></div>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', fontWeight: '600' }}><span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width:'8px',height:'8px',borderRadius:'50%',backgroundColor:'#a855f7' }}></div> Quizzes</span> <span>{assessmentsOverview.quizzes.count} ({assessmentsOverview.quizzes.pct}%)</span></div>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', fontWeight: '600' }}><span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width:'8px',height:'8px',borderRadius:'50%',backgroundColor:'#f59e0b' }}></div> Assignments</span> <span>{assessmentsOverview.assignments.count} ({assessmentsOverview.assignments.pct}%)</span></div>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', fontWeight: '600' }}><span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width:'8px',height:'8px',borderRadius:'50%',backgroundColor:'#ef4444' }}></div> Live Exams</span> <span>{assessmentsOverview.live_exams.count} ({assessmentsOverview.live_exams.pct}%)</span></div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', fontWeight: '600' }}><span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width:'8px',height:'8px',borderRadius:'50%',backgroundColor:'#3b82f6' }}></div> 100% Score</span> <span>{assessmentsOverview.score100.count} ({assessmentsOverview.score100.pct}%)</span></div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', fontWeight: '600' }}><span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width:'8px',height:'8px',borderRadius:'50%',backgroundColor:'#10b981' }}></div> 80% & Above</span> <span>{assessmentsOverview.score80.count} ({assessmentsOverview.score80.pct}%)</span></div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', fontWeight: '600' }}><span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width:'8px',height:'8px',borderRadius:'50%',backgroundColor:'#f59e0b' }}></div> 50% & Above</span> <span>{assessmentsOverview.score50.count} ({assessmentsOverview.score50.pct}%)</span></div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', fontWeight: '600' }}><span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width:'8px',height:'8px',borderRadius:'50%',backgroundColor:'#f97316' }}></div> 45% & Above</span> <span>{assessmentsOverview.score45.count} ({assessmentsOverview.score45.pct}%)</span></div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', fontWeight: '600' }}><span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width:'8px',height:'8px',borderRadius:'50%',backgroundColor:'#ef4444' }}></div> Below 45%</span> <span>{assessmentsOverview.scoreBelow45.count} ({assessmentsOverview.scoreBelow45.pct}%)</span></div>
                         </div>
                       </div>
                     </div>
@@ -1256,7 +1271,7 @@ Content-Type: text/html; charset=UTF-8
                         </select>
                       </div>
                       
-                      {/* Fake Line Chart SVG using SVG path for visual */}
+                      {/* Dynamic Line Chart SVG */}
                       <div style={{ position: 'relative', height: '140px', width: '100%', marginTop: '10px' }}>
                         <svg width="100%" height="100%" viewBox="0 0 300 120" preserveAspectRatio="none">
                           {/* Grid lines */}
@@ -1265,22 +1280,32 @@ Content-Type: text/html; charset=UTF-8
                           <line x1="0" y1="80" x2="300" y2="80" stroke="#f1f5f9" strokeWidth="1" />
                           <line x1="0" y1="110" x2="300" y2="110" stroke="#f1f5f9" strokeWidth="1" />
                           
-                          {/* Line and Area */}
-                          <path d={`M 0 110 L 50 ${110 - performanceTrend[0] * 0.9} L 120 ${110 - performanceTrend[1] * 0.9} L 200 ${110 - performanceTrend[2] * 0.9} L 300 ${110 - performanceTrend[3] * 0.9} L 300 110 Z`} fill="rgba(234, 88, 12, 0.1)" />
-                          <path d={`M 0 110 L 50 ${110 - performanceTrend[0] * 0.9} L 120 ${110 - performanceTrend[1] * 0.9} L 200 ${110 - performanceTrend[2] * 0.9} L 300 ${110 - performanceTrend[3] * 0.9}`} fill="none" stroke="#ea580c" strokeWidth="3" />
-                          
-                          {/* Points */}
-                          <circle cx="50" cy={110 - (performanceTrend[0] * 0.9)} r="4" fill="#ea580c" />
-                          <circle cx="120" cy={110 - (performanceTrend[1] * 0.9)} r="4" fill="#ea580c" />
-                          <circle cx="200" cy={110 - (performanceTrend[2] * 0.9)} r="4" fill="#ea580c" />
-                          <circle cx="300" cy={110 - (performanceTrend[3] * 0.9)} r="4" fill="#ea580c" />
+                          {(() => {
+                            const pts = performanceTrend.map((pt, i) => {
+                              const x = (i / (performanceTrend.length - 1)) * 300;
+                              const y = 110 - (pt.maxPct * 0.9);
+                              return { x, y };
+                            });
+                            const pathDataArea = `M 0 110 ` + pts.map(p => `L ${p.x} ${p.y}`).join(' ') + ` L 300 110 Z`;
+                            const pathDataLine = `M ${pts[0].x} ${pts[0].y} ` + pts.slice(1).map(p => `L ${p.x} ${p.y}`).join(' ');
+
+                            return (
+                              <>
+                                <path d={pathDataArea} fill="rgba(234, 88, 12, 0.1)" />
+                                <path d={pathDataLine} fill="none" stroke="#ea580c" strokeWidth="3" />
+                                {pts.map((p, i) => (
+                                  <circle key={i} cx={p.x} cy={p.y} r="4" fill="#ea580c" />
+                                ))}
+                              </>
+                            );
+                          })()}
                         </svg>
+                        
                         {/* Axis Labels */}
                         <div style={{ position: 'absolute', bottom: '-15px', display: 'flex', justifyContent: 'space-between', width: '100%', fontSize: '10px', color: '#94a3b8', fontWeight: '600' }}>
-                          <span style={{ marginLeft: '40px' }}>Week 1</span>
-                          <span>Week 2</span>
-                          <span>Week 3</span>
-                          <span style={{ marginRight: '10px' }}>Week 4</span>
+                          {performanceTrend.map((pt, i) => (
+                            <span key={i}>{pt.testId ? `Test ${i+1}` : ''}</span>
+                          ))}
                         </div>
                       </div>
                     </div>
