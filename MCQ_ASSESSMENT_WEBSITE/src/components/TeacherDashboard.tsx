@@ -131,7 +131,7 @@ export default function TeacherDashboard({ user, isDemo, onLogout }: TeacherDash
   // Extract display name
   const teacherDisplayName = user.email.toLowerCase().includes('jai') 
     ? 'Jai' 
-    : (user.user_metadata?.full_name || user.email.split('@')[0]);
+    : (user.user_metadata?.full_name || 'Educator');
 
   // Load stats and tables
   const loadData = async () => {
@@ -470,6 +470,7 @@ export default function TeacherDashboard({ user, isDemo, onLogout }: TeacherDash
         setTargetClass('');
         setQuestions([{ text: '', options: ['', '', '', ''], correctIndex: 0, imageUrl: '' }]);
         loadData();
+        setActiveTab('exams');
       } else {
         const { data: testData, error: testErr } = await supabase
           .from('tests')
@@ -506,6 +507,7 @@ export default function TeacherDashboard({ user, isDemo, onLogout }: TeacherDash
         setAccessCode('');
         setQuestions([{ text: '', options: ['', '', '', ''], correctIndex: 0, imageUrl: '' }]);
         loadData();
+        setActiveTab('exams');
       }
     } catch (err: any) {
       console.error(err);
@@ -1102,7 +1104,7 @@ export default function TeacherDashboard({ user, isDemo, onLogout }: TeacherDash
               {/* Hero Banner Header */}
               <div style={{ position: 'relative', width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#f8fafc', padding: '24px 32px', borderRadius: '16px', overflow: 'hidden' }}>
                 <div style={{ zIndex: 10 }}>
-                  <h1 style={{ fontSize: '28px', fontWeight: '800', color: '#0f172a', letterSpacing: '-0.02em', margin: '0 0 8px 0' }}>Examinee Performance Reports</h1>
+                  <h1 style={{ fontSize: '28px', fontWeight: '800', color: '#0f172a', letterSpacing: '-0.02em', margin: '0 0 4px 0' }}>Examinee Performance Reports</h1>
                   <p style={{ color: '#475569', fontSize: '15px', margin: 0 }}>
                     Review high-density logs of examinee outcomes and retry options.
                   </p>
