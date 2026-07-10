@@ -152,8 +152,8 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
   
   const [currentName, setCurrentName] = useState(teacherDisplayName);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
-  const [allProfiles, setAllProfiles] = useState<Profile[]>([]);
   const [currentAvatar, setCurrentAvatar] = useState(user.user_metadata?.avatar_url || animeAvatar as any);
+  const [allProfiles, setAllProfiles] = useState<Profile[]>([]);
 
   const getTestStatus = (t: Test) => {
     if (!t.access_start && !t.access_end) return 'Live';
@@ -169,9 +169,6 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
     setMsg(null);
     try {
       
-        const { data: profilesData } = await supabase.from('profiles').select('*');
-        if (profilesData) setAllProfiles(profilesData);
-
         const { data: testsData, error: testsErr } = await supabase
           .from('tests')
           .select('*')
@@ -180,6 +177,9 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
 
         if (testsErr) throw testsErr;
         setTests(testsData || []);
+
+        const { data: profilesData } = await supabase.from('profiles').select('*');
+        if (profilesData) setAllProfiles(profilesData);
 
         if (testsData && testsData.length > 0) {
           const testIds = testsData.map(t => t.id);
@@ -1262,7 +1262,8 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                     <table className="density-table">
                       <thead>
                         <tr>
-                          <th>Examinee Profile</th>
+                          <th>Examinee Name</th>
+                          <th>Examinee Email</th>
                           <th>Test Title</th>
                           <th>Score</th>
                           <th>Percentage</th>
@@ -1290,11 +1291,11 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                            }
                            return Array.from(grouped.values())
                              .map(att => {
-                               const studentName = att.student_email.toLowerCase().includes('harish')
-                                 ? 'Harish'
-                                 : (att.student_name || att.student_email.split('@')[0]);
-                               return { ...att, display_name: studentName };
-                             })
+                                const profile = allProfiles.find(p => p.email === att.student_email);
+                                const displayName = profile?.full_name || att.student_name || att.student_email.split('@')[0];
+                                const displayAvatar = profile?.avatar_url || studentAvatar as any;
+                                return { ...att, display_name: displayName, display_avatar: displayAvatar };
+                              })
                              .sort((a, b) => {
                                if (sortConfig === 'name_asc') return a.display_name.localeCompare(b.display_name);
                                if (sortConfig === 'name_desc') return b.display_name.localeCompare(a.display_name);
@@ -1315,17 +1316,13 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
 
                           return (
                             <tr key={att.id}>
-                              <td>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                  <div style={{ width: '36px', height: '36px', borderRadius: '50%', backgroundColor: '#e2e8f0', overflow: 'hidden' }}>
-                                    <img src={allProfiles.find(p => p.email === att.student_email)?.avatar_url || studentAvatar as any} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                  </div>
-                                  <div>
-                                    <div style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>{att.display_name}</div>
-                                    <div style={{ fontSize: '12px', color: '#64748b' }}>{att.student_email}</div>
-                                  </div>
+                              <td style={{ fontWeight: '600' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                  <img src={(att as any).display_avatar} alt="avatar" style={{ width: '24px', height: '24px', borderRadius: '50%', objectFit: 'cover' }} />
+                                  <span>{att.display_name}</span>
                                 </div>
                               </td>
+                              <td>{att.student_email}</td>
                               <td>{att.test_title}</td>
                               <td style={{ fontWeight: '700' }}>{att.score} / {att.total_questions}</td>
                               <td>{pct}%</td>
@@ -1427,7 +1424,10 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                               const durationText = st.time_taken_seconds
                                 ? `${Math.floor(st.time_taken_seconds / 60)}m ${st.time_taken_seconds % 60}s`
                                 : 'N/A';
-                                
+                              const profile = allProfiles.find(p => p.email === st.student_email);
+                              const displayName = profile?.full_name || st.student_name || st.student_email.split('@')[0];
+                              const displayAvatar = profile?.avatar_url || studentAvatar as any;
+
                               return (
                                 <div key={st.id} title={`Student Marks: ${st.score} / ${st.total_questions}`} style={{ display: 'grid', cursor: 'help', gridTemplateColumns: '60px 2fr 1fr 1fr 1fr', padding: '16px', borderBottom: '1px solid #f1f5f9', alignItems: 'center', transition: 'background-color 0.2s' }}>
                                   <div style={{ textAlign: 'center', fontSize: medal ? '20px' : '14px', fontWeight: '700', color: medal ? 'inherit' : '#0f172a' }}>
@@ -1435,10 +1435,10 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                                   </div>
                                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                     <div style={{ width: '36px', height: '36px', borderRadius: '50%', backgroundColor: '#e2e8f0', overflow: 'hidden' }}>
-                                      <img src={allProfiles.find(p => p.email === st.student_email)?.avatar_url || studentAvatar as any} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                      <img src={displayAvatar} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                     </div>
                                     <div>
-                                      <div style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>{allProfiles.find(p => p.email === st.student_email)?.full_name || st.student_name || st.student_email.split('@')[0]}</div>
+                                      <div style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>{displayName}</div>
                                       <div style={{ fontSize: '12px', color: '#64748b' }}>{st.student_email}</div>
                                     </div>
                                   </div>
