@@ -392,10 +392,11 @@ export default function StudentPortal({ user, onLogout }: StudentPortalProps) {
           .select('*')
           .ilike('teacher_email', emailInput.trim())
           .eq('access_code', pinInput.trim())
-          .maybeSingle();
+          .order('created_at', { ascending: false })
+          .limit(1);
 
         if (testErr) throw testErr;
-        test = testData;
+        test = (testData && testData.length > 0) ? testData[0] : null;
         
         // Safety parse for JSON string (fixes the blank page crash)
         if (test && typeof test.questions === 'string') {
@@ -422,10 +423,11 @@ export default function StudentPortal({ user, onLogout }: StudentPortalProps) {
             .select('*')
             .eq('test_id', test.id)
             .eq('student_id', user.id)
-            .maybeSingle();
+            .order('completed_at', { ascending: false })
+            .limit(1);
 
           if (attemptErr) throw attemptErr;
-          existingAttempt = attemptData;
+          existingAttempt = (attemptData && attemptData.length > 0) ? attemptData[0] : null;
         }
       
 
@@ -593,9 +595,10 @@ Content-Type: text/html; charset=UTF-8
           .select('*')
           .eq('teacher_email', leaderboardTeacherEmail.trim())
           .eq('access_code', leaderboardAccessCode.trim())
-          .maybeSingle();
+          .order('created_at', { ascending: false })
+          .limit(1);
 
-        test = testData;
+        test = (testData && testData.length > 0) ? testData[0] : null;
 
         if (test) {
           // Fetch all attempts
