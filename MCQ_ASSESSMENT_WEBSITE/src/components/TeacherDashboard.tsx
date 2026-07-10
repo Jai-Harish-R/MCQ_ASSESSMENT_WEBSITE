@@ -73,6 +73,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
   
   const [selectedLeaderboardTestId, setSelectedLeaderboardTestId] = useState<string>('');
   const [selectedReportTestId, setSelectedReportTestId] = useState<string>('');
+  const [sortConfig, setSortConfig] = useState<'name_asc' | 'name_desc' | 'mark_asc' | 'mark_desc' | ''>('');
   const [leaderboardAttempts, setLeaderboardAttempts] = useState<Attempt[]>([]);
 
   // Test form state
@@ -131,6 +132,14 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
   const teacherDisplayName = user.email.toLowerCase().includes('jai') 
     ? 'Jai' 
     : (user.user_metadata?.full_name || 'Educator');
+
+  const getTestStatus = (t: Test) => {
+    if (!t.access_start && !t.access_end) return 'Live';
+    const now = new Date().getTime();
+    if (t.access_start && now < new Date(t.access_start).getTime()) return 'Not Started';
+    if (t.access_end && now > new Date(t.access_end).getTime()) return 'Ended';
+    return 'Live';
+  };
 
   // Load stats and tables
   const loadData = async () => {
@@ -452,7 +461,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
 
         if (answersErr) throw answersErr;
 
-        setMsg({ type: 'success', text: `Test "${testTitle}" published successfully! Access Code PIN: ${accessCode}` });
+        setMsg({ type: 'success', text: `Test "${testTitle}" created successfully! Access Code PIN: ${accessCode}` });
         
         setTestTitle('');
         setAccessCode('');
@@ -1065,11 +1074,14 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                 <div style={{ position: 'absolute', right: '-40px', top: '-40px', width: '200px', height: '200px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(59,130,246,0.1) 0%, rgba(255,255,255,0) 70%)', zIndex: 1 }}></div>
               </div>
 
-              {/* Custom Styled Select Dropdown (Matches Image Perfectly) */}
-              <div style={{ width: '100%', marginTop: '8px' }}>
-                <label style={{ display: 'block', fontSize: '14px', fontWeight: '800', color: '#0f172a', marginBottom: '12px' }}>Select Conducted Test</label>
+              {/* Dropdowns Container */}
+              <div style={{ display: 'flex', gap: '24px', marginTop: '24px', alignItems: 'flex-end', flexWrap: 'wrap' }}>
                 
-                <div style={{ position: 'relative', width: '100%', border: '1px solid #3b82f6', borderRadius: '12px', padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#fff', boxShadow: '0 4px 12px rgba(59,130,246,0.08)', transition: 'all 0.2s ease', cursor: 'pointer' }} className="custom-select-container">
+                {/* Select Conducted Test */}
+                <div style={{ flex: '1', minWidth: '300px' }}>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: '800', color: '#0f172a', marginBottom: '12px' }}>Select Conducted Test</label>
+                  
+                  <div style={{ position: 'relative', width: '100%', border: '1px solid #3b82f6', borderRadius: '12px', padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#fff', boxShadow: '0 4px 12px rgba(59,130,246,0.08)', transition: 'all 0.2s ease', cursor: 'pointer' }} className="custom-select-container">
                   
                   <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                     <div style={{ width: '40px', height: '40px', backgroundColor: '#3b82f6', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', flexShrink: 0 }}>
@@ -1081,11 +1093,17 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                   </div>
 
                   <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                    {selectedReportTestId && (
-                      <span style={{ backgroundColor: '#dcfce7', color: '#16a34a', padding: '6px 14px', borderRadius: '9999px', fontSize: '12px', fontWeight: '700', letterSpacing: '0.02em' }}>
-                        Published
-                      </span>
-                    )}
+                    {selectedReportTestId && tests.find(t => t.id === selectedReportTestId) && (() => {
+                      const status = getTestStatus(tests.find(t => t.id === selectedReportTestId)!);
+                      let bg = '#dcfce7', color = '#16a34a', dot = '🟢';
+                      if (status === 'Not Started') { bg = '#fee2e2'; color = '#ef4444'; dot = '🔴'; }
+                      if (status === 'Ended') { bg = '#f1f5f9'; color = '#64748b'; dot = '⚪'; }
+                      return (
+                        <span style={{ backgroundColor: bg, color: color, padding: '6px 14px', borderRadius: '9999px', fontSize: '12px', fontWeight: '700', letterSpacing: '0.02em', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          {dot} {status}
+                        </span>
+                      );
+                    })()}
                     <ChevronDown size={20} color="#0f172a" style={{ opacity: 0.6 }} />
                   </div>
 
@@ -1101,9 +1119,38 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                     ))}
                   </select>
                 </div>
+                </div>
+
+                {/* Sort By Dropdown */}
+                <div style={{ flex: '0 0 250px' }}>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: '800', color: '#0f172a', marginBottom: '12px' }}>Sort By</label>
+                  
+                  <div style={{ position: 'relative', width: '100%', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#fff', boxShadow: '0 2px 4px rgba(0,0,0,0.02)', cursor: 'pointer' }}>
+                    <span style={{ fontSize: '14px', fontWeight: '600', color: '#0f172a' }}>
+                      {sortConfig === 'name_asc' ? 'Student Name (A-Z)' : 
+                       sortConfig === 'name_desc' ? 'Student Name (Z-A)' : 
+                       sortConfig === 'mark_asc' ? 'Mark (Low-High)' : 
+                       sortConfig === 'mark_desc' ? 'Mark (High-Low)' : 
+                       'Default (Date)'}
+                    </span>
+                    <ChevronDown size={20} color="#0f172a" style={{ opacity: 0.6 }} />
+                    <select 
+                      value={sortConfig}
+                      onChange={(e) => setSortConfig(e.target.value as any)}
+                      style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer', appearance: 'none' }}
+                    >
+                      <option value="">Default (Date)</option>
+                      <option value="name_asc">Student Name (A-Z)</option>
+                      <option value="name_desc">Student Name (Z-A)</option>
+                      <option value="mark_asc">Mark (Low-High)</option>
+                      <option value="mark_desc">Mark (High-Low)</option>
+                    </select>
+                  </div>
+                </div>
+
               </div>
 
-              <div className="card">
+              <div className="card" style={{ marginTop: '24px' }}>
                 {attempts.length === 0 ? (
                   <div style={{ textAlign: 'center', padding: '32px', color: 'var(--color-on-surface-variant)' }}>
                     No attempts submitted yet.
@@ -1118,40 +1165,54 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                           <th>Test Title</th>
                           <th>Score</th>
                           <th>Percentage</th>
+                          <th>Status</th>
                           <th>Submitted Date</th>
+                          <th>Submitted Time</th>
                           <th>Actions</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {attempts.filter(att => selectedReportTestId ? att.test_id === selectedReportTestId : true).map(att => {
+                        {attempts
+                          .filter(att => selectedReportTestId ? att.test_id === selectedReportTestId : true)
+                          .map(att => {
+                            const studentName = att.student_email.toLowerCase().includes('harish')
+                              ? 'Harish'
+                              : (att.student_name || att.student_email.split('@')[0]);
+                            return { ...att, display_name: studentName };
+                          })
+                          .sort((a, b) => {
+                            if (sortConfig === 'name_asc') return a.display_name.localeCompare(b.display_name);
+                            if (sortConfig === 'name_desc') return b.display_name.localeCompare(a.display_name);
+                            if (sortConfig === 'mark_asc') return a.score - b.score;
+                            if (sortConfig === 'mark_desc') return b.score - a.score;
+                            return new Date(b.completed_at).getTime() - new Date(a.completed_at).getTime(); // default
+                          })
+                          .map(att => {
                           const pct = Math.round((att.score / att.total_questions) * 100);
                           const isPassing = pct >= 50;
-                          
-                          // Determine display name
-                          const studentName = att.student_email.toLowerCase().includes('harish')
-                            ? 'Harish'
-                            : (att.student_name || att.student_email.split('@')[0]);
 
                           return (
                             <tr key={att.id}>
-                              <td style={{ fontWeight: '600' }}>{studentName}</td>
+                              <td style={{ fontWeight: '600' }}>{att.display_name}</td>
                               <td>{att.student_email}</td>
                               <td>{att.test_title}</td>
                               <td style={{ fontWeight: '700' }}>{att.score} / {att.total_questions}</td>
+                              <td>{pct}%</td>
                               <td>
                                 <span className={`chip ${isPassing ? 'chip-success' : 'chip-error'}`}>
-                                  {pct}% {isPassing ? 'Passed' : 'Failed'}
+                                  {isPassing ? 'Pass' : 'Fail'}
                                 </span>
                               </td>
                               <td>{new Date(att.completed_at).toLocaleDateString()}</td>
+                              <td>{new Date(att.completed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
                               <td>
                                 <button
                                   onClick={() => handleToggleRetry(att.id, att.allowed_retry)}
                                   disabled={syncing}
-                                  className={`btn ${att.allowed_retry ? 'btn-success' : 'btn-secondary'}`}
+                                  className={`btn ${att.allowed_retry ? 'btn-danger' : 'btn-outline'}`}
                                   style={{ padding: '6px 12px', fontSize: '12px' }}
                                 >
-                                  {att.allowed_retry ? 'Retry Allowed' : 'Allow Retry'}
+                                  {att.allowed_retry ? 'Revoke Retry' : 'Allow Retry'}
                                 </button>
                               </td>
                             </tr>
@@ -1259,7 +1320,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                     </>
                   ) : (
                     <div style={{ padding: '48px', textAlign: 'center', color: '#64748b' }}>
-                      Please select a published test from the right panel to view its leaderboard.
+                      Please select a test from the right panel to view its leaderboard.
                     </div>
                   )}
                 </div>
@@ -1275,7 +1336,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
 
                       <div>
-                        <label style={{ display: 'block', fontSize: '13px', fontWeight: '700', color: '#0f172a', marginBottom: '6px' }}>Published Test</label>
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: '700', color: '#0f172a', marginBottom: '6px' }}>Select Test</label>
                         <div style={{ position: 'relative' }}>
                           <div style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', width: '24px', height: '24px', backgroundColor: '#3b82f6', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
                             <ClipboardEdit size={14} />
