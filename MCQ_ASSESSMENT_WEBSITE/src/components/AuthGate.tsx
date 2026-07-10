@@ -360,7 +360,7 @@ export default function AuthGate({ onAuthSuccess }: AuthGateProps) {
                   </div>
 
                   <div>
-                    <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#475569', marginBottom: '8px' }}>I am from</label>
+                    <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#475569', marginBottom: '8px' }}>Select Organization Type</label>
                     <select
                       style={{ 
                         width: '100%', padding: '14px 16px', borderRadius: '12px', 

@@ -665,9 +665,8 @@ export default function TeacherDashboard({ user, isDemo, onLogout }: TeacherDash
         
         {/* Simple Top Bar */}
         <header className="edu-header">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '13px', fontWeight: '500', color: 'var(--color-on-surface-variant)' }}>
-              CodersFun Administrator Panel
+          <div className="header-title-row">
+            <span style={{ fontSize: '15px', fontWeight: '800', color: '#0f172a', letterSpacing: '0.02em', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '8px' }}>
             </span>
           </div>
           <div className="header-actions">
