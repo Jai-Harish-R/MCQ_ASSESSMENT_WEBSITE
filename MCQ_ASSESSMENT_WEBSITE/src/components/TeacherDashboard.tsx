@@ -65,6 +65,7 @@ export default function TeacherDashboard({ user, isDemo, onLogout }: TeacherDash
 
   // Selected test ID for the Leaderboard tab
   const [selectedLeaderboardTestId, setSelectedLeaderboardTestId] = useState<string>('');
+  const [selectedReportTestId, setSelectedReportTestId] = useState<string>('');
   const [leaderboardAttempts, setLeaderboardAttempts] = useState<Attempt[]>([]);
 
   // Test form state
@@ -539,7 +540,7 @@ export default function TeacherDashboard({ user, isDemo, onLogout }: TeacherDash
 
   // Delete Test
   const handleDeleteTest = async (testId: string) => {
-    if (!confirm('Are you sure you want to delete this test? All student results will be deleted.')) return;
+    if (!confirm('Are you sure you want to delete this test? All Examinees results will be deleted.')) return;
     setLoading(true);
     try {
       if (isDemo) {
@@ -631,7 +632,7 @@ export default function TeacherDashboard({ user, isDemo, onLogout }: TeacherDash
                 className={`sidebar-item-btn ${activeTab === 'students' ? 'active' : ''}`}
               >
                 <ClipboardList size={18} />
-                Student Results
+                Examinees Results
               </button>
             </li>
             <li>
@@ -704,7 +705,7 @@ export default function TeacherDashboard({ user, isDemo, onLogout }: TeacherDash
               <div>
                 <h1 style={{ fontSize: '24px', fontWeight: '700' }}>Teacher Dashboard</h1>
                 <p style={{ color: 'var(--color-on-surface-variant)', fontSize: '13px', marginTop: '4px' }}>
-                  Overview of active assessments and student outcomes.
+                  Overview of active assessments and Examinees outcomes.
                 </p>
               </div>
 
@@ -890,7 +891,7 @@ export default function TeacherDashboard({ user, isDemo, onLogout }: TeacherDash
                     />
                   </div>
                   <div>
-                    <label className="input-label">Total No of Students</label>
+                    <label className="input-label">Total Examinees</label>
                     <input
                       type="number"
                       className="input-field"
@@ -923,10 +924,10 @@ export default function TeacherDashboard({ user, isDemo, onLogout }: TeacherDash
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
                     <div>
                       <label className="form-label" style={{ display: 'block', marginBottom: '4px', fontSize: '15px', color: '#0f172a' }}>
-                        Strict Email Validation
+                        Authorized Email Access
                       </label>
                       <p style={{ fontSize: '12px', color: '#64748b', margin: 0 }}>
-                        When enabled, only students with the specified emails can access this test.
+                        When enabled, only Examinee with the specified emails can access this test.
                       </p>
                     </div>
                     
@@ -954,7 +955,7 @@ export default function TeacherDashboard({ user, isDemo, onLogout }: TeacherDash
                       
                       <textarea
                         className="input-field"
-                        placeholder="student1@example.com, student2@example.com"
+                        placeholder="examinee@example.com, examinee2@example.com"
                         value={allowedEmailsInput}
                         onChange={(e) => setAllowedEmailsInput(e.target.value)}
                         style={{ minHeight: '100px', width: '100%', padding: '12px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '14px', resize: 'vertical' }}
@@ -1091,10 +1092,30 @@ export default function TeacherDashboard({ user, isDemo, onLogout }: TeacherDash
           {activeTab === 'students' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
               <div>
-                <h1 style={{ fontSize: '24px', fontWeight: '700' }}>Student Performance Reports</h1>
+                <h1 style={{ fontSize: '24px', fontWeight: '700' }}>Examinee Performance Reports</h1>
                 <p style={{ color: 'var(--color-on-surface-variant)', fontSize: '13px', marginTop: '4px' }}>
-                  High-density logs of student outcomes and retry options.
+                  High-density logs of Examinee outcomes and retry options.
                 </p>
+              </div>
+
+              {/* Published Test Filter for Reports */}
+              <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', padding: '16px', border: '1px solid #f1f5f9', width: '100%', maxWidth: '400px' }}>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: '700', color: '#0f172a', marginBottom: '8px' }}>Published Test</label>
+                <div style={{ position: 'relative' }}>
+                  <div style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', width: '24px', height: '24px', backgroundColor: '#3b82f6', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
+                    <ClipboardEdit size={14} />
+                  </div>
+                  <select 
+                    value={selectedReportTestId}
+                    onChange={(e) => setSelectedReportTestId(e.target.value)}
+                    style={{ width: '100%', padding: '10px 12px 10px 44px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '13px', color: '#0f172a', appearance: 'none', outline: 'none', height: '44px', backgroundColor: '#fff' }}
+                  >
+                    <option value="">-- Choose a test --</option>
+                    {tests.map(t => (
+                      <option key={t.id} value={t.id}>{t.title} (PIN: {t.access_code})</option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
               <div className="card">
@@ -1107,8 +1128,8 @@ export default function TeacherDashboard({ user, isDemo, onLogout }: TeacherDash
                     <table className="density-table">
                       <thead>
                         <tr>
-                          <th>Student Name</th>
-                          <th>Student Email</th>
+                          <th>Examinee Name</th>
+                          <th>Examinee Email</th>
                           <th>Test Title</th>
                           <th>Score</th>
                           <th>Percentage</th>
@@ -1117,7 +1138,7 @@ export default function TeacherDashboard({ user, isDemo, onLogout }: TeacherDash
                         </tr>
                       </thead>
                       <tbody>
-                        {attempts.map(att => {
+                        {attempts.filter(att => selectedReportTestId ? att.test_id === selectedReportTestId : true).map(att => {
                           const pct = Math.round((att.score / att.total_questions) * 100);
                           const isPassing = pct >= 50;
                           
@@ -1166,7 +1187,7 @@ export default function TeacherDashboard({ user, isDemo, onLogout }: TeacherDash
             return (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
               <div>
-                <h1 style={{ fontSize: '28px', fontWeight: '800', color: '#0f172a', letterSpacing: '-0.02em' }}>Class Leaderboard Rankings</h1>
+                <h1 style={{ fontSize: '28px', fontWeight: '800', color: '#0f172a', letterSpacing: '-0.02em' }}>Assessment Leaderboard Rankings</h1>
                 <p style={{ color: '#64748b', fontSize: '15px', marginTop: '6px', fontWeight: '500' }}>
                   Analyze student grade distribution and verified rankings.
                 </p>
