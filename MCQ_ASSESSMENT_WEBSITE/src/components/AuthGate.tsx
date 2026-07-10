@@ -180,7 +180,11 @@ if (countryCode === '+966' && cleanPhone.length !== 9) {
       }
     } catch (err: any) {
       console.error("Auth error:", err);
-      setErrorMsg(err.message || 'An error occurred during authentication.');
+      let msg = err.message || 'An error occurred during authentication.';
+      if (msg === '{}' || msg === '"{}"') {
+        msg = 'Database error: Please ensure you have run the latest Supabase database update script.';
+      }
+      setErrorMsg(msg);
     } finally {
       setLoading(false);
     }
