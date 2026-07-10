@@ -63,6 +63,48 @@ export default function AuthGate({ onAuthSuccess }: AuthGateProps) {
         setLoading(false);
         return;
       }
+
+      if (countryCode === '+61' && cleanPhone.length !== 9) {
+        setErrorMsg('Australian phone numbers must be exactly 9 digits.');
+  setLoading(false);
+  return;
+}
+
+if (countryCode === '+971' && cleanPhone.length !== 9) {
+  setErrorMsg('UAE phone numbers must be exactly 9 digits.');
+  setLoading(false);
+  return;
+}
+
+if (countryCode === '+65' && cleanPhone.length !== 8) {
+  setErrorMsg('Singapore phone numbers must be exactly 8 digits.');
+  setLoading(false);
+  return;
+}
+
+if (countryCode === '+49' && (cleanPhone.length < 10 || cleanPhone.length > 11)) {
+  setErrorMsg('German phone numbers must be 10 or 11 digits.');
+  setLoading(false);
+  return;
+}
+
+if (countryCode === '+60' && (cleanPhone.length < 9 || cleanPhone.length > 10)) {
+  setErrorMsg('Malaysian phone numbers must be 9 or 10 digits.');
+  setLoading(false);
+  return;
+}
+
+if (countryCode === '+81' && cleanPhone.length !== 10) {
+  setErrorMsg('Japanese phone numbers must be exactly 10 digits.');
+  setLoading(false);
+  return;
+}
+
+if (countryCode === '+966' && cleanPhone.length !== 9) {
+  setErrorMsg('Saudi Arabian phone numbers must be exactly 9 digits.');
+  setLoading(false);
+  return;
+}
     }
 
     try {
@@ -371,6 +413,13 @@ export default function AuthGate({ onAuthSuccess }: AuthGateProps) {
                         <option value="+91">IND +91</option>
                         <option value="+1">USA +1</option>
                         <option value="+44">UK +44</option>
+                        <option value="+61">AUS +61</option>
+                        <option value="+971">UAE +971</option>
+                        <option value="+65">SGP +65</option>
+                        <option value="+49">GER +49</option>
+                        <option value="+60">MYS +60</option>
+                        <option value="+81">JPN +81</option>
+                        <option value="+966">KSA +966</option>
                       </select>
                       <div style={{ width: '1px', height: '24px', backgroundColor: '#cbd5e1', margin: '0 8px' }}></div>
                       <input
