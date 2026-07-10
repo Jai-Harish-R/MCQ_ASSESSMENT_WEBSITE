@@ -130,6 +130,7 @@ export default function StudentPortal({ user, onLogout }: StudentPortalProps) {
 
   // Interactive Calendar and Popover states
   const [selectedDate, setSelectedDate] = useState<Date>(new Date(2025, 5, 7));
+  const [expandedReviewTestId, setExpandedReviewTestId] = useState<string | null>(null);
   const [showPin, setShowPin] = useState(false); // Default to June 7, 2025
 
   // Popover States
@@ -1861,51 +1862,88 @@ Content-Type: text/html; charset=UTF-8
                   </div>
                   
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', flex: 1, overflowY: 'auto' }}>
-                    {myAttempts
-                      .filter(att => getLocalDateStr(att.completed_at) === getLocalDateStr(selectedDate))
-                      .map((attempt) => {
-                        const pct = Math.round((attempt.score / attempt.total_questions) * 100);
-                        const testDetails = availableTests.find(t => t.id === attempt.test_id);
-                        const passThreshold = testDetails?.pass_percentage || 80;
-                        const isPassing = pct >= passThreshold;
-                        let Icon = FileText;
-                        let color = '#3b82f6', bg = '#eff6ff';
-                        if (attempt.test_type === 'quiz') { color = '#a855f7'; bg = '#f3e8ff'; Icon = Trophy; }
-                        if (attempt.test_type === 'assignment') { color = '#ea580c'; bg = '#fff7ed'; Icon = ClipboardEdit; }
-                        if (attempt.test_type === 'live_exam') { color = '#ef4444'; bg = '#fef2f2'; Icon = Target; }
-                        
-                        let scoreColor = isPassing ? '#16a34a' : '#dc2626';
-
+                    {(() => {
+                      const dateAttempts = myAttempts.filter(att => getLocalDateStr(att.completed_at) === getLocalDateStr(selectedDate));
+                      if (dateAttempts.length === 0) {
                         return (
-                          <div key={attempt.id} onClick={() => handleReviewPastAttempt(attempt)} title={`Score: ${attempt.score}/${attempt.total_questions} (${pct}%) - Click to review`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #f1f5f9', boxShadow: '0 2px 4px rgba(0,0,0,0.02)', cursor: 'pointer', transition: 'transform 0.1s' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                              <div style={{ width: '48px', height: '48px', borderRadius: '12px', backgroundColor: bg, color: color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <Icon size={24} />
-                              </div>
-                              <div>
-                                <h4 style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a', margin: '0 0 4px 0' }}>{attempt.test_title || 'Assessment'}</h4>
-                                <div style={{ fontSize: '12px', color: '#64748b', fontWeight: '500' }}>
-                                  {new Date(attempt.completed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                </div>
-                              </div>
-                            </div>
-
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
-                              <div style={{ textAlign: 'center' }}>
-                                <div style={{ fontSize: '16px', fontWeight: '800', color: scoreColor }}>{pct}%</div>
-                                <div style={{ fontSize: '11px', color: '#64748b', fontWeight: '600' }}>Score</div>
-                              </div>
-                              <ArrowRight size={16} color="#94a3b8" />
-                            </div>
+                          <div style={{ textAlign: 'center', color: '#94a3b8', fontSize: '14px', padding: '40px 0' }}>
+                            No tests attempted on this date.
                           </div>
                         );
-                    })}
-                    
-                    {myAttempts.filter(att => getLocalDateStr(att.completed_at) === getLocalDateStr(selectedDate)).length === 0 && (
-                      <div style={{ textAlign: 'center', color: '#94a3b8', fontSize: '14px', padding: '40px 0' }}>
-                        No tests attempted on this date.
-                      </div>
-                    )}
+                      }
+
+                      const testIds = Array.from(new Set(dateAttempts.map(a => a.test_id)));
+
+                      return testIds.map(testId => {
+                        const testAttempts = dateAttempts.filter(a => a.test_id === testId);
+                        const isExpanded = expandedReviewTestId === testId;
+                        const latestAttempt = testAttempts[0];
+                        let Icon = FileText;
+                        let color = '#3b82f6', bg = '#eff6ff';
+                        if (latestAttempt.test_type === 'quiz') { color = '#a855f7'; bg = '#f3e8ff'; Icon = Trophy; }
+                        if (latestAttempt.test_type === 'assignment') { color = '#ea580c'; bg = '#fff7ed'; Icon = ClipboardEdit; }
+                        if (latestAttempt.test_type === 'live_exam') { color = '#ef4444'; bg = '#fef2f2'; Icon = Target; }
+                        
+                        return (
+                          <div key={testId} style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '16px', backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #f1f5f9', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                                <div style={{ width: '48px', height: '48px', borderRadius: '12px', backgroundColor: bg, color: color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                  <Icon size={24} />
+                                </div>
+                                <div>
+                                  <h4 style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a', margin: '0 0 4px 0' }}>{latestAttempt.test_title || 'Assessment'}</h4>
+                                  <div style={{ fontSize: '12px', color: '#64748b', fontWeight: '500' }}>
+                                    {testAttempts.length} Attempt{testAttempts.length !== 1 ? 's' : ''}
+                                  </div>
+                                </div>
+                              </div>
+                              <button 
+                                onClick={() => setExpandedReviewTestId(isExpanded ? null : testId)}
+                                className="btn btn-outline"
+                                style={{ padding: '6px 12px', fontSize: '12px', flexShrink: 0 }}
+                              >
+                                {isExpanded ? 'Hide Attempts' : 'Review Attempts'}
+                              </button>
+                            </div>
+                            
+                            {isExpanded && (
+                              <div style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                {testAttempts.map((attempt, idx) => {
+                                  const pct = Math.round((attempt.score / attempt.total_questions) * 100);
+                                  const testDetails = availableTests.find(t => t.id === attempt.test_id);
+                                  const passThreshold = testDetails?.pass_percentage || 80;
+                                  const isPassing = pct >= passThreshold;
+                                  const scoreColor = isPassing ? '#16a34a' : '#dc2626';
+
+                                  return (
+                                    <div 
+                                      key={attempt.id} 
+                                      onClick={() => handleReviewPastAttempt(attempt)} 
+                                      title={`Score: ${attempt.score}/${attempt.total_questions} (${pct}%) - Click to review`} 
+                                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', backgroundColor: '#f8fafc', borderRadius: '8px', cursor: 'pointer', border: '1px solid #e2e8f0' }}
+                                    >
+                                      <div style={{ fontSize: '13px', fontWeight: '600', color: '#334155' }}>
+                                        Attempt {testAttempts.length - idx}
+                                      </div>
+                                      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                                        <div style={{ fontSize: '12px', color: '#64748b' }}>
+                                          {new Date(attempt.completed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                        </div>
+                                        <div style={{ fontSize: '13px', fontWeight: '800', color: scoreColor }}>
+                                          {pct}% Score
+                                        </div>
+                                        <ArrowRight size={14} color="#94a3b8" />
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      });
+                    })()}
                   </div>
                 </div>
               </div>
