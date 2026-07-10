@@ -86,7 +86,8 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
   const [accessCode, setAccessCode] = useState('');
 
   // Advanced config state
-  const [advancedConfigEnabled, setAdvancedConfigEnabled] = useState(false);
+  const [passPercentageEnabled, setPassPercentageEnabled] = useState(false);
+  const [maxAttemptsEnabled, setMaxAttemptsEnabled] = useState(false);
   const [passPercentage, setPassPercentage] = useState<number>(80);
   const [maxAttempts, setMaxAttempts] = useState<number>(3);
   const [duration, setDuration] = useState(10);
@@ -453,8 +454,8 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
             access_start: accessStart ? new Date(accessStart).toISOString() : null,
             access_end: accessEnd ? new Date(accessEnd).toISOString() : null,
             allowed_emails: strictValidation ? (allowedEmailsInput.trim() ? allowedEmailsInput.split(',').map(e => e.trim()).filter(e => e) : []) : null,
-            pass_percentage: advancedConfigEnabled ? passPercentage : 80,
-            max_attempts: advancedConfigEnabled ? maxAttempts : 3
+            pass_percentage: passPercentageEnabled ? passPercentage : 80,
+            max_attempts: maxAttemptsEnabled ? maxAttempts : 3
           })
           .select()
           .single();
@@ -475,7 +476,8 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
         setTestTitle('');
         setAccessCode('');
         setQuestions([{ text: '', options: ['', '', '', ''], correctIndex: 0, imageUrl: '' }]);
-        setAdvancedConfigEnabled(false);
+        setPassPercentageEnabled(false);
+        setMaxAttemptsEnabled(false);
         setPassPercentage(80);
         setMaxAttempts(3);
         loadData();
@@ -931,19 +933,18 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
               <div className="card">
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--color-outline-variant)', paddingBottom: '12px', marginBottom: '20px' }}>
                   <div>
-                    <h3 style={{ fontSize: '16px', fontWeight: '600' }}>Advanced Rules</h3>
-                    <p style={{ fontSize: '13px', color: 'var(--color-on-surface-variant)', marginTop: '4px' }}>Set custom pass percentage and maximum attempt limits.</p>
+                    <h3 style={{ fontSize: '16px', fontWeight: '600' }}>Set Pass Percentage</h3>
+                    <p style={{ fontSize: '13px', color: 'var(--color-on-surface-variant)', marginTop: '4px' }}>Set the minimum passing percentage required.</p>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <div style={{ position: 'relative', width: '44px', height: '24px', backgroundColor: advancedConfigEnabled ? '#3b82f6' : '#cbd5e1', borderRadius: '12px', cursor: 'pointer', transition: 'background-color 0.2s' }} onClick={() => setAdvancedConfigEnabled(!advancedConfigEnabled)}>
-                      <div style={{ position: 'absolute', top: '2px', left: advancedConfigEnabled ? '22px' : '2px', width: '20px', height: '20px', backgroundColor: '#fff', borderRadius: '50%', transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }}></div>
+                    <div style={{ position: 'relative', width: '44px', height: '24px', backgroundColor: passPercentageEnabled ? '#3b82f6' : '#cbd5e1', borderRadius: '12px', cursor: 'pointer', transition: 'background-color 0.2s' }} onClick={() => setPassPercentageEnabled(!passPercentageEnabled)}>
+                      <div style={{ position: 'absolute', top: '2px', left: passPercentageEnabled ? '22px' : '2px', width: '20px', height: '20px', backgroundColor: '#fff', borderRadius: '50%', transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }}></div>
                     </div>
                   </div>
                 </div>
 
-                {advancedConfigEnabled && (
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px' }}>
-                    <div>
+                {passPercentageEnabled && (
+                  <div style={{ marginBottom: '10px' }}>
                       <label className="input-label">Set Pass Percentage (%)</label>
                       <input 
                         type="number" 
@@ -953,8 +954,25 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                         onChange={(e) => setPassPercentage(parseInt(e.target.value) || 80)} 
                         placeholder="e.g. 80" 
                       />
+                  </div>
+                )}
+              </div>
+
+              <div className="card">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--color-outline-variant)', paddingBottom: '12px', marginBottom: '20px' }}>
+                  <div>
+                    <h3 style={{ fontSize: '16px', fontWeight: '600' }}>Set Attempt Limit</h3>
+                    <p style={{ fontSize: '13px', color: 'var(--color-on-surface-variant)', marginTop: '4px' }}>Set the maximum number of attempts allowed.</p>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <div style={{ position: 'relative', width: '44px', height: '24px', backgroundColor: maxAttemptsEnabled ? '#3b82f6' : '#cbd5e1', borderRadius: '12px', cursor: 'pointer', transition: 'background-color 0.2s' }} onClick={() => setMaxAttemptsEnabled(!maxAttemptsEnabled)}>
+                      <div style={{ position: 'absolute', top: '2px', left: maxAttemptsEnabled ? '22px' : '2px', width: '20px', height: '20px', backgroundColor: '#fff', borderRadius: '50%', transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }}></div>
                     </div>
-                    <div>
+                  </div>
+                </div>
+
+                {maxAttemptsEnabled && (
+                  <div style={{ marginBottom: '10px' }}>
                       <label className="input-label">Set Max Attempts</label>
                       <input 
                         type="number" 
@@ -964,7 +982,6 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                         onChange={(e) => setMaxAttempts(parseInt(e.target.value) || 3)} 
                         placeholder="e.g. 3" 
                       />
-                    </div>
                   </div>
                 )}
               </div>
