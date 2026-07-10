@@ -30,6 +30,8 @@ interface Test {
   type?: 'test' | 'assignment' | 'quiz' | 'live_exam';
   allowed_emails?: string[] | null;
   created_at?: string;
+  pass_percentage?: number;
+  max_attempts?: number;
 }
 
 interface Attempt {
@@ -231,7 +233,7 @@ export default function StudentPortal({ user, onLogout }: StudentPortalProps) {
           const testIds = attemptsData.map((a: any) => a.test_id);
           const { data: takenTests } = await supabase
             .from('tests')
-            .select('id, title, access_code, teacher_email, type, duration, total_students, created_at, questions')
+            .select('id, title, access_code, teacher_email, type, duration, total_students, created_at, questions, pass_percentage, max_attempts')
             .in('id', testIds)
             .order('created_at', { ascending: false });
           if (takenTests) {
@@ -1861,13 +1863,16 @@ Content-Type: text/html; charset=UTF-8
                       .filter(att => getLocalDateStr(att.completed_at) === getLocalDateStr(selectedDate))
                       .map((attempt) => {
                         const pct = Math.round((attempt.score / attempt.total_questions) * 100);
+                        const testDetails = availableTests.find(t => t.id === attempt.test_id);
+                        const passThreshold = testDetails?.pass_percentage || 80;
+                        const isPassing = pct >= passThreshold;
                         let Icon = FileText;
                         let color = '#3b82f6', bg = '#eff6ff';
                         if (attempt.test_type === 'quiz') { color = '#a855f7'; bg = '#f3e8ff'; Icon = Trophy; }
                         if (attempt.test_type === 'assignment') { color = '#ea580c'; bg = '#fff7ed'; Icon = ClipboardEdit; }
                         if (attempt.test_type === 'live_exam') { color = '#ef4444'; bg = '#fef2f2'; Icon = Target; }
                         
-                        let scoreColor = pct >= 70 ? '#16a34a' : pct >= 40 ? '#d97706' : '#dc2626';
+                        let scoreColor = isPassing ? '#16a34a' : '#dc2626';
 
                         return (
                           <div key={attempt.id} onClick={() => handleReviewPastAttempt(attempt)} title={`Score: ${attempt.score}/${attempt.total_questions} (${pct}%) - Click to review`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #f1f5f9', boxShadow: '0 2px 4px rgba(0,0,0,0.02)', cursor: 'pointer', transition: 'transform 0.1s' }}>

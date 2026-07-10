@@ -13,6 +13,7 @@ export default function AuthGate({ onAuthSuccess }: AuthGateProps) {
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [phoneNo, setPhoneNo] = useState('');
+  const [countryCode, setCountryCode] = useState('+91');
   const [profession, setProfession] = useState('');
   const [institutionName, setInstitutionName] = useState('');
   const [department, setDepartment] = useState('');
@@ -55,7 +56,7 @@ export default function AuthGate({ onAuthSuccess }: AuthGateProps) {
             data: {
               role: activeTab,
               full_name: fullName,
-              phone_no: activeTab === 'teacher' ? phoneNo : undefined,
+              phone_no: activeTab === 'teacher' ? `${countryCode} ${phoneNo}` : undefined,
               profession: activeTab === 'teacher' ? profession : undefined,
               institution_name: activeTab === 'teacher' ? institutionName : undefined,
               department: activeTab === 'teacher' ? department : undefined,
