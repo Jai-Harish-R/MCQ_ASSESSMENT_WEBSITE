@@ -666,20 +666,28 @@ Content-Type: text/html; charset=UTF-8
     return `${mins.toString().padStart(2, '0')}:${remainingSecs.toString().padStart(2, '0')}`;
   };
 
-  // Stats calculations
-  const totalCompleted = myAttempts.length;
+  // Stats calculations based on unique tests
+  const uniqueTestIds = Array.from(new Set(myAttempts.map(a => a.test_id)));
+  const uniqueAttempts = uniqueTestIds.map(testId => {
+    const attemptsForTest = myAttempts.filter(a => a.test_id === testId);
+    return attemptsForTest.reduce((best, curr) => 
+      (curr.score / curr.total_questions) > (best.score / best.total_questions) ? curr : best
+    );
+  });
+  const totalCompleted = uniqueAttempts.length;
+  
   const averageAccuracy = totalCompleted > 0
-    ? Math.round((myAttempts.reduce((sum, att) => sum + (att.score / att.total_questions), 0) / totalCompleted) * 100)
+    ? Math.round((uniqueAttempts.reduce((sum, att) => sum + (att.score / att.total_questions), 0) / totalCompleted) * 100)
     : 0;
 
   const averageImprovement = React.useMemo(() => {
-    if (myAttempts.length < 2) {
-      if (myAttempts.length === 1) {
-        return Math.round((myAttempts[0].score / myAttempts[0].total_questions) * 100);
+    if (uniqueAttempts.length < 2) {
+      if (uniqueAttempts.length === 1) {
+        return Math.round((uniqueAttempts[0].score / uniqueAttempts[0].total_questions) * 100);
       }
       return 0;
     }
-    const sorted = [...myAttempts].sort((a, b) => new Date(a.completed_at).getTime() - new Date(b.completed_at).getTime());
+    const sorted = [...uniqueAttempts].sort((a, b) => new Date(a.completed_at).getTime() - new Date(b.completed_at).getTime());
     let totalDiff = 0;
     for (let i = 1; i < sorted.length; i++) {
       const currentPct = (sorted[i].score / sorted[i].total_questions) * 100;
@@ -687,7 +695,7 @@ Content-Type: text/html; charset=UTF-8
       totalDiff += (currentPct - prevPct);
     }
     return Math.round(totalDiff / (sorted.length - 1));
-  }, [myAttempts]);
+  }, [uniqueAttempts]);
 
 
   const assessmentsOverview = React.useMemo(() => {
@@ -1128,8 +1136,8 @@ Content-Type: text/html; charset=UTF-8
                   </div>
                   <div>
                     <div style={{ fontSize: '13px', fontWeight: '600', color: '#64748b', marginBottom: '4px' }}>Tests Taken</div>
-                    <div style={{ fontSize: '28px', fontWeight: '800', color: '#0f172a', lineHeight: '1.2' }}>{myAttempts.length}</div>
-                    <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}><span style={{ color: '#ea580c', fontWeight: '600' }}>+{Math.min(myAttempts.length, 5)}</span> this month</div>
+                    <div style={{ fontSize: '28px', fontWeight: '800', color: '#0f172a', lineHeight: '1.2' }}>{totalCompleted}</div>
+                    <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}><span style={{ color: '#ea580c', fontWeight: '600' }}>+{Math.min(totalCompleted, 5)}</span> this month</div>
                   </div>
                 </div>
 
@@ -1150,7 +1158,7 @@ Content-Type: text/html; charset=UTF-8
                   </div>
                   <div>
                     <div style={{ fontSize: '13px', fontWeight: '600', color: '#64748b', marginBottom: '4px' }}>Tests Completed</div>
-                    <div style={{ fontSize: '28px', fontWeight: '800', color: '#0f172a', lineHeight: '1.2' }}>{myAttempts.length}</div>
+                    <div style={{ fontSize: '28px', fontWeight: '800', color: '#0f172a', lineHeight: '1.2' }}>{totalCompleted}</div>
                     <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}><span style={{ color: '#a855f7', fontWeight: '600' }}>+4</span> this month</div>
                   </div>
                 </div>
@@ -1652,8 +1660,8 @@ Content-Type: text/html; charset=UTF-8
                     </div>
                     <div>
                       <div style={{ fontSize: '13px', fontWeight: '600', color: '#64748b', marginBottom: '4px' }}>Tests Taken</div>
-                      <div style={{ fontSize: '28px', fontWeight: '800', color: '#0f172a', lineHeight: '1.2' }}>{myAttempts.length}</div>
-                      <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}><span style={{ color: '#3b82f6', fontWeight: '600' }}>+{Math.min(myAttempts.length, 5)}</span> this month</div>
+                      <div style={{ fontSize: '28px', fontWeight: '800', color: '#0f172a', lineHeight: '1.2' }}>{totalCompleted}</div>
+                      <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}><span style={{ color: '#3b82f6', fontWeight: '600' }}>+{Math.min(totalCompleted, 5)}</span> this month</div>
                     </div>
                   </div>
 
@@ -1674,7 +1682,7 @@ Content-Type: text/html; charset=UTF-8
                     </div>
                     <div>
                       <div style={{ fontSize: '13px', fontWeight: '600', color: '#64748b', marginBottom: '4px' }}>Tests Completed</div>
-                      <div style={{ fontSize: '28px', fontWeight: '800', color: '#0f172a', lineHeight: '1.2' }}>{myAttempts.length}</div>
+                      <div style={{ fontSize: '28px', fontWeight: '800', color: '#0f172a', lineHeight: '1.2' }}>{totalCompleted}</div>
                       <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}><span style={{ color: '#a855f7', fontWeight: '600' }}>+4</span> this month</div>
                     </div>
                   </div>
