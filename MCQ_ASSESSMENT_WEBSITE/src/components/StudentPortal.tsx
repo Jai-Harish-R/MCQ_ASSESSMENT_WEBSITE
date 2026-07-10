@@ -1922,40 +1922,6 @@ Content-Type: text/html; charset=UTF-8
                       );
                     })}
                   </div>
-                  
-                  {/* Legend */}
-                  <div style={{ display: 'flex', gap: '24px', justifyContent: 'center', marginTop: '24px', fontSize: '12px', fontWeight: '600', color: '#475569', flexWrap: 'wrap' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <div style={{ width: '14px', height: '14px', borderRadius: '4px', backgroundColor: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#3b82f6' }}></div>
-                      </div>
-                      Test
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <div style={{ width: '14px', height: '14px', borderRadius: '4px', backgroundColor: '#fff7ed', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#ea580c' }}></div>
-                      </div>
-                      Assignment
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <div style={{ width: '14px', height: '14px', borderRadius: '4px', backgroundColor: '#f3e8ff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#a855f7' }}></div>
-                      </div>
-                      Quiz
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <div style={{ width: '14px', height: '14px', borderRadius: '4px', backgroundColor: '#dcfce7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#22c55e' }}></div>
-                      </div>
-                      Result
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <div style={{ width: '14px', height: '14px', borderRadius: '4px', backgroundColor: '#fef2f2', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#ef4444' }}></div>
-                      </div>
-                      Live Exam
-                    </div>
-                  </div>
                 </div>
 
                 {/* Right: Selected Date Tests */}
@@ -2024,6 +1990,9 @@ Content-Type: text/html; charset=UTF-8
                                   const passThreshold = testDetails?.pass_percentage || 80;
                                   const isPassing = pct >= passThreshold;
                                   const scoreColor = isPassing ? '#16a34a' : '#dc2626';
+                                  const allAttemptsForTest = myAttempts.filter(a => a.test_id === testId);
+                                  const attemptIndex = allAttemptsForTest.findIndex(a => a.id === attempt.id);
+                                  const globalAttemptNumber = attemptIndex >= 0 ? allAttemptsForTest.length - attemptIndex : testAttempts.length - idx;
 
                                   return (
                                     <div 
@@ -2033,7 +2002,7 @@ Content-Type: text/html; charset=UTF-8
                                       style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', backgroundColor: '#f8fafc', borderRadius: '8px', cursor: 'pointer', border: '1px solid #e2e8f0' }}
                                     >
                                       <div style={{ fontSize: '13px', fontWeight: '600', color: '#334155' }}>
-                                        Attempt {testAttempts.length - idx}
+                                        Attempt {globalAttemptNumber}
                                       </div>
                                       <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                                         <div style={{ fontSize: '12px', color: '#64748b' }}>
