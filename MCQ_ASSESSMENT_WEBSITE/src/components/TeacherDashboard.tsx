@@ -1147,8 +1147,11 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                 <div style={{ position: 'absolute', right: '-40px', top: '-40px', width: '200px', height: '200px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(59,130,246,0.1) 0%, rgba(255,255,255,0) 70%)', zIndex: 1 }}></div>
               </div>
 
-              {/* Dropdowns Container */}
-              <div style={{ display: 'flex', gap: '24px', marginTop: '24px', alignItems: 'flex-end', flexWrap: 'wrap' }}>
+              {/* Content Wrapper for alignment with Hero Banner Text */}
+              <div style={{ padding: '0 32px', display: 'flex', flexDirection: 'column', gap: '32px' }}>
+                
+                {/* Dropdowns Container */}
+                <div style={{ display: 'flex', gap: '24px', alignItems: 'flex-end', flexWrap: 'wrap' }}>
                 
                 {/* Select Conducted Test */}
                 <div style={{ flex: '1', minWidth: '300px' }}>
@@ -1223,7 +1226,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
 
               </div>
 
-              <div className="card" style={{ marginTop: '24px' }}>
+              <div className="card" style={{ }}>
                 {attempts.length === 0 ? (
                   <div style={{ textAlign: 'center', padding: '32px', color: 'var(--color-on-surface-variant)' }}>
                     No attempts submitted yet.
@@ -1304,6 +1307,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                     </table>
                   </div>
                 )}
+              </div>
               </div>
             </div>
           )}
