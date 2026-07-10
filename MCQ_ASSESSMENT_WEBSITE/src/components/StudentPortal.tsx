@@ -2151,7 +2151,7 @@ Content-Type: text/html; charset=UTF-8
                   
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', flex: 1, overflowY: 'auto' }}>
                     {myAttempts
-                      .filter(att => new Date(att.completed_at).toISOString().split('T')[0] === new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate()).toISOString().split('T')[0])
+                      .filter(att => getLocalDateStr(att.completed_at) === getLocalDateStr(selectedDate))
                       .map((attempt) => {
                         const pct = Math.round((attempt.score / attempt.total_questions) * 100);
                         let Icon = FileText;
