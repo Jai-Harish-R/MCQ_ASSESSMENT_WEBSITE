@@ -2,12 +2,17 @@ import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../utils/supabase';
 import { 
   LayoutDashboard, PlusCircle, LogOut, 
-  Trash2, Users, Award, AlertCircle, BookOpen, 
+  Trash2, Users, Award, AlertCircle, BookOpen, ChevronLeft, ChevronRight, Calendar, FileText, 
   Check, Send, GraduationCap, RefreshCw,
   Upload, Download, Image, ClipboardList,
   Trophy, ClipboardEdit, ChevronDown, BarChart3, ShieldCheck
 } from 'lucide-react';
 import animeAvatar from '../assets/anime_avatar.png';
+
+const getLocalDateStr = (d: Date | string | number) => {
+  const date = new Date(d);
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+};
 
 interface Question {
   id: string;
@@ -64,6 +69,9 @@ export default function TeacherDashboard({ user, isDemo, onLogout }: TeacherDash
   const [msg, setMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   // Selected test ID for the Leaderboard tab
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
+  
   const [selectedLeaderboardTestId, setSelectedLeaderboardTestId] = useState<string>('');
   const [selectedReportTestId, setSelectedReportTestId] = useState<string>('');
   const [leaderboardAttempts, setLeaderboardAttempts] = useState<Attempt[]>([]);
@@ -1125,7 +1133,7 @@ export default function TeacherDashboard({ user, isDemo, onLogout }: TeacherDash
               </div>
 
               {/* Custom Styled Select Dropdown (Matches Image Perfectly) */}
-              <div style={{ width: '100%', maxWidth: '800px', marginTop: '8px' }}>
+              <div style={{ width: '100%', marginTop: '8px' }}>
                 <label style={{ display: 'block', fontSize: '14px', fontWeight: '800', color: '#0f172a', marginBottom: '12px' }}>Select Conducted Test</label>
                 
                 <div style={{ position: 'relative', width: '100%', border: '1px solid #3b82f6', borderRadius: '12px', padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#fff', boxShadow: '0 4px 12px rgba(59,130,246,0.08)', transition: 'all 0.2s ease', cursor: 'pointer' }} className="custom-select-container">

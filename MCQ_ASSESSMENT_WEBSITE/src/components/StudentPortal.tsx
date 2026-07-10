@@ -47,6 +47,11 @@ interface Attempt {
   answers?: Record<string, number>;
 }
 
+const getLocalDateStr = (d: Date | string | number) => {
+  const date = new Date(d);
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+};
+
 interface StudentPortalProps {
   user: { id: string; email: string; user_metadata?: { full_name?: string } };
   isDemo: boolean;
@@ -1465,10 +1470,10 @@ Content-Type: text/html; charset=UTF-8
                           displayNum = dateNum - daysInMonth;
                         }
                         
-                        const currentDateString = new Date(year, isCurrentMonth ? month : (dateNum <= 0 ? month - 1 : month + 1), displayNum).toISOString().split('T')[0];
+                        const currentDateString = getLocalDateStr(new Date(year, isCurrentMonth ? month : (dateNum <= 0 ? month - 1 : month + 1), displayNum));
                         
                         // Check if any tests were taken on this day
-                        const dayAttempts = myAttempts.filter(att => new Date(att.completed_at).toISOString().split('T')[0] === currentDateString);
+                        const dayAttempts = myAttempts.filter(att => getLocalDateStr(att.completed_at) === currentDateString);
                         const isToday = isCurrentMonth && displayNum === today.getDate();
                         
                         return (
@@ -2057,8 +2062,8 @@ Content-Type: text/html; charset=UTF-8
                         displayNum = dateNum - daysInMonth;
                       }
                       
-                      const currentDateString = new Date(year, isCurrentMonth ? month : (dateNum <= 0 ? month - 1 : month + 1), displayNum).toISOString().split('T')[0];
-                      const dayAttempts = myAttempts.filter(att => new Date(att.completed_at).toISOString().split('T')[0] === currentDateString);
+                      const currentDateString = getLocalDateStr(new Date(year, isCurrentMonth ? month : (dateNum <= 0 ? month - 1 : month + 1), displayNum));
+                      const dayAttempts = myAttempts.filter(att => getLocalDateStr(att.completed_at) === currentDateString);
                       const isSelected = isCurrentMonth && displayNum === selectedDate.getDate();
                       
                       return (
@@ -2140,7 +2145,7 @@ Content-Type: text/html; charset=UTF-8
                     </h3>
                     
                     <div style={{ backgroundColor: '#f3e8ff', color: '#a855f7', padding: '4px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '700' }}>
-                      {myAttempts.filter(att => new Date(att.completed_at).toISOString().split('T')[0] === new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate()).toISOString().split('T')[0]).length} Attempts
+                      {myAttempts.filter(att => getLocalDateStr(att.completed_at) === getLocalDateStr(selectedDate)).length} Attempts
                     </div>
                   </div>
                   
@@ -2182,7 +2187,7 @@ Content-Type: text/html; charset=UTF-8
                         );
                     })}
                     
-                    {myAttempts.filter(att => new Date(att.completed_at).toISOString().split('T')[0] === new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate()).toISOString().split('T')[0]).length === 0 && (
+                    {myAttempts.filter(att => getLocalDateStr(att.completed_at) === getLocalDateStr(selectedDate)).length === 0 && (
                       <div style={{ textAlign: 'center', color: '#94a3b8', fontSize: '14px', padding: '40px 0' }}>
                         No tests attempted on this date.
                       </div>
