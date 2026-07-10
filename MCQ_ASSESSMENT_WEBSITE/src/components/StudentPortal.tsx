@@ -9,6 +9,7 @@ import { Bell, ChevronDown, Clock3,
    Lock, Calendar
 , Users, Mail} from 'lucide-react';
 import studentAvatar from '../assets/student_avatar.png';
+import ProfileModal from './ProfileModal';
 
 interface Question {
   id: string;
@@ -56,7 +57,7 @@ const getLocalDateStr = (d: Date | string | number) => {
 };
 
 interface StudentPortalProps {
-  user: { id: string; email: string; user_metadata?: { full_name?: string } };
+  user: { id: string; email: string; user_metadata?: { full_name?: string; avatar_url?: string } };
 
   onLogout: () => void;
 }
@@ -69,8 +70,11 @@ export default function StudentPortal({ user, onLogout }: StudentPortalProps) {
   // Attempts and tests states (for dashboard and leaderboard verification)
   const [myAttempts, setMyAttempts] = useState<Attempt[]>([]);
   const [availableTests, setAvailableTests] = useState<Test[]>([]);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [currentAvatar, setCurrentAvatar] = useState(user.user_metadata?.avatar_url || studentAvatar as any);
 
   const [, setIsLoadingData] = useState(true);
+  const [dashboardTimeFilter, setDashboardTimeFilter] = useState('This Month');
   // Leaderboard dynamically fetched states
   const [leaderboardSelectedTestId, setLeaderboardSelectedTestId] = useState<string>('');
   const [leaderboardAttempts, setLeaderboardAttempts] = useState<Attempt[]>([]);
@@ -206,9 +210,11 @@ export default function StudentPortal({ user, onLogout }: StudentPortalProps) {
   const [emailLogs, setEmailLogs] = useState<string>('');
 
   // Extract display name
-  const studentDisplayName = user.email.toLowerCase().includes('harish') 
-    ? 'Harish' 
-    : (user.user_metadata?.full_name || user.email.split('@')[0]);
+  const studentDisplayName = user.email.toLowerCase().includes('harish')
+    ? 'Harish Kumar'
+    : (user.user_metadata?.full_name || user.email.split('@')[0] || 'Student');
+  
+  const [currentName, setCurrentName] = useState(studentDisplayName);
 
   // Load student statistics & available tests (memoized for stable realtime subscription)
   const loadPortalData = useCallback(async () => {
@@ -668,9 +674,35 @@ Content-Type: text/html; charset=UTF-8
   };
 
   // Stats calculations based on unique tests
-  const uniqueTestIds = Array.from(new Set(myAttempts.map(a => a.test_id)));
+  const filteredMyAttempts = React.useMemo(() => {
+    return myAttempts.filter(a => {
+      if (dashboardTimeFilter === 'All Time') return true;
+      
+      const date = new Date(a.completed_at);
+      const now = new Date();
+      
+      if (dashboardTimeFilter === 'This Year') {
+        return date.getFullYear() === now.getFullYear();
+      }
+      if (dashboardTimeFilter === 'This Month') {
+        return date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth();
+      }
+      if (dashboardTimeFilter === 'This Week') {
+        const diff = now.getTime() - date.getTime();
+        return diff <= 7 * 24 * 60 * 60 * 1000;
+      }
+      if (dashboardTimeFilter === 'Last 6 Months') {
+        const sixMonthsAgo = new Date();
+        sixMonthsAgo.setMonth(now.getMonth() - 6);
+        return date >= sixMonthsAgo;
+      }
+      return true;
+    });
+  }, [myAttempts, dashboardTimeFilter]);
+
+  const uniqueTestIds = Array.from(new Set(filteredMyAttempts.map(a => a.test_id)));
   const uniqueAttempts = uniqueTestIds.map(testId => {
-    const attemptsForTest = myAttempts.filter(a => a.test_id === testId);
+    const attemptsForTest = filteredMyAttempts.filter(a => a.test_id === testId);
     return attemptsForTest.reduce((best, curr) => 
       (curr.score / curr.total_questions) > (best.score / best.total_questions) ? curr : best
     );
@@ -1008,17 +1040,18 @@ Content-Type: text/html; charset=UTF-8
         {/* Profile Card Widget at the Top */}
         <div style={{ marginBottom: '32px', padding: '0 8px' }}>
           <div 
-            style={{ 
-              display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', 
-              borderRadius: '12px', backgroundColor: '#ffffff',
+            onClick={() => setIsProfileModalOpen(true)}
+            style={{
+              display: 'flex', alignItems: 'center', gap: '12px', marginTop: '12px', padding: '12px',
+              backgroundColor: '#ffffff', borderRadius: '12px',
               boxShadow: '0 2px 10px rgba(0,0,0,0.05)', border: '1px solid #f1f5f9',
               cursor: 'pointer'
             }}
           >
-            <img src={studentAvatar as any} alt="Student" style={{ width: '40px', height: '40px', borderRadius: '50%', border: '2px solid #e2e8f0' }} />
+            <img src={currentAvatar} alt="Student" style={{ width: '40px', height: '40px', borderRadius: '50%', border: '2px solid #e2e8f0', objectFit: 'cover' }} />
             <div style={{ flex: 1, overflow: 'hidden' }}>
-              <div style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{studentDisplayName || 'jhgno.official'}</div>
-              <div style={{ fontSize: '12px', color: '#64748b', fontWeight: '500' }}>Student</div>
+              <div style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{currentName || 'jhgno.official'}</div>
+              <div style={{ fontSize: '12px', color: '#64748b', fontWeight: '700', letterSpacing: '0.05em' }}>EXAMINEE</div>
             </div>
             <ChevronDown size={16} color="#94a3b8" />
           </div>
@@ -1109,7 +1142,7 @@ Content-Type: text/html; charset=UTF-8
           padding: '24px 40px', gap: '24px', backgroundColor: 'transparent'
         }}>
           {/* Header Avatar */}
-          <img src={studentAvatar as any} alt="User" style={{ width: '40px', height: '40px', borderRadius: '50%', cursor: 'pointer', border: '2px solid #ffffff', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }} />
+          <img src={currentAvatar} alt="User" style={{ width: '40px', height: '40px', borderRadius: '50%', cursor: 'pointer', border: '2px solid #ffffff', boxShadow: '0 2px 4px rgba(0,0,0,0.1)', objectFit: 'cover' }} />
         </header>
 
         {/* Content Area */}
@@ -1122,7 +1155,7 @@ Content-Type: text/html; charset=UTF-8
               {/* Welcome Section */}
               <div>
                 <h1 style={{ fontSize: '32px', fontWeight: '800', color: '#0f172a', letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  Welcome back, {studentDisplayName || 'jhgno.official'}! 👋
+                  Welcome back, {currentName || 'jhgno.official'}! 👋
                 </h1>
                 <p style={{ color: '#64748b', fontSize: '15px', marginTop: '6px', fontWeight: '500' }}>
                   Track your progress, learn consistently, and achieve your goals.
@@ -1289,33 +1322,57 @@ Content-Type: text/html; charset=UTF-8
                           <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#0f172a', margin: '0 0 4px 0' }}>Performance Trend</h3>
                           <p style={{ fontSize: '13px', color: '#64748b', margin: '0 0 24px 0' }}>Your average score over time</p>
                         </div>
-                        <select style={{ padding: '6px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc', fontSize: '12px', fontWeight: '600', color: '#475569', outline: 'none' }}>
-                          <option>This Month</option>
+                        <select 
+                          value={dashboardTimeFilter}
+                          onChange={(e) => setDashboardTimeFilter(e.target.value)}
+                          style={{ padding: '6px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc', fontSize: '12px', fontWeight: '600', color: '#475569', outline: 'none' }}
+                        >
+                          <option value="All Time">All Time</option>
+                          <option value="This Year">This Year</option>
+                          <option value="Last 6 Months">Last 6 Months</option>
+                          <option value="This Month">This Month</option>
+                          <option value="This Week">This Week</option>
                         </select>
                       </div>
                       
                       {/* Dynamic Line Chart SVG */}
                       <div style={{ position: 'relative', height: '140px', width: '100%', marginTop: '10px' }}>
                         <svg width="100%" height="100%" viewBox="0 0 300 120" preserveAspectRatio="none">
+                          {/* Y-Axis Labels */}
+                          <text x="0" y="24" fontSize="10" fill="#94a3b8" fontWeight="600">100%</text>
+                          <text x="0" y="47" fontSize="10" fill="#94a3b8" fontWeight="600">75%</text>
+                          <text x="0" y="69" fontSize="10" fill="#94a3b8" fontWeight="600">50%</text>
+                          <text x="0" y="92" fontSize="10" fill="#94a3b8" fontWeight="600">25%</text>
+                          
                           {/* Grid lines */}
-                          <line x1="0" y1="20" x2="300" y2="20" stroke="#f1f5f9" strokeWidth="1" />
-                          <line x1="0" y1="50" x2="300" y2="50" stroke="#f1f5f9" strokeWidth="1" />
-                          <line x1="0" y1="80" x2="300" y2="80" stroke="#f1f5f9" strokeWidth="1" />
-                          <line x1="0" y1="110" x2="300" y2="110" stroke="#f1f5f9" strokeWidth="1" />
+                          <line x1="25" y1="20" x2="300" y2="20" stroke="#f1f5f9" strokeWidth="1" />
+                          <line x1="25" y1="42.5" x2="300" y2="42.5" stroke="#f1f5f9" strokeWidth="1" />
+                          <line x1="25" y1="65" x2="300" y2="65" stroke="#f1f5f9" strokeWidth="1" />
+                          <line x1="25" y1="87.5" x2="300" y2="87.5" stroke="#f1f5f9" strokeWidth="1" />
+                          <line x1="25" y1="110" x2="300" y2="110" stroke="#f1f5f9" strokeWidth="1" />
                           
                           {(() => {
+                            if (performanceTrend.length === 0) return null;
                             const pts = performanceTrend.map((pt, i) => {
-                              const x = (i / (performanceTrend.length - 1)) * 300;
+                              const x = performanceTrend.length > 1 ? 25 + (i / (performanceTrend.length - 1)) * 275 : 162.5;
                               const y = 110 - (pt.maxPct * 0.9);
                               return { x, y };
                             });
-                            const pathDataArea = `M 0 110 ` + pts.map(p => `L ${p.x} ${p.y}`).join(' ') + ` L 300 110 Z`;
-                            const pathDataLine = `M ${pts[0].x} ${pts[0].y} ` + pts.slice(1).map(p => `L ${p.x} ${p.y}`).join(' ');
+                            
+                            let pathDataArea = '';
+                            let pathDataLine = '';
+                            if (pts.length > 1) {
+                              pathDataArea = `M 25 110 ` + pts.map(p => `L ${p.x} ${p.y}`).join(' ') + ` L 300 110 Z`;
+                              pathDataLine = `M ${pts[0].x} ${pts[0].y} ` + pts.slice(1).map(p => `L ${p.x} ${p.y}`).join(' ');
+                            } else {
+                              pathDataArea = `M 25 110 L ${pts[0].x} ${pts[0].y} L 300 110 Z`;
+                              pathDataLine = `M ${pts[0].x} ${pts[0].y} L ${pts[0].x} ${pts[0].y}`;
+                            }
 
                             return (
                               <>
-                                <path d={pathDataArea} fill="rgba(234, 88, 12, 0.1)" />
-                                <path d={pathDataLine} fill="none" stroke="#ea580c" strokeWidth="3" />
+                                {pts.length > 1 && <path d={pathDataArea} fill="rgba(234, 88, 12, 0.1)" />}
+                                <path d={pathDataLine} fill="none" stroke="#ea580c" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
                                 {pts.map((p, i) => (
                                   <circle key={i} cx={p.x} cy={p.y} r="4" fill="#ea580c" />
                                 ))}
@@ -1325,10 +1382,14 @@ Content-Type: text/html; charset=UTF-8
                         </svg>
                         
                         {/* Axis Labels */}
-                        <div style={{ position: 'absolute', bottom: '-15px', display: 'flex', justifyContent: 'space-between', width: '100%', fontSize: '10px', color: '#94a3b8', fontWeight: '600' }}>
-                          {performanceTrend.map((pt, i) => (
-                            <span key={i}>{pt.testId ? `Test ${i+1}` : ''}</span>
-                          ))}
+                        <div style={{ position: 'absolute', bottom: '-15px', left: '25px', display: 'flex', justifyContent: performanceTrend.length > 1 ? 'space-between' : 'center', width: 'calc(100% - 25px)', fontSize: '10px', color: '#94a3b8', fontWeight: '600' }}>
+                          {performanceTrend.length === 0 ? (
+                            <span>No tests yet</span>
+                          ) : (
+                            performanceTrend.map((pt, i) => (
+                              <span key={i}>{pt.testId ? `Test ${i+1}` : ''}</span>
+                            ))
+                          )}
                         </div>
                       </div>
                     </div>
@@ -2166,7 +2227,7 @@ Content-Type: text/html; charset=UTF-8
                                   </div>
                                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                     <div style={{ width: '36px', height: '36px', borderRadius: '50%', backgroundColor: '#e2e8f0', overflow: 'hidden' }}>
-                                      <img src={studentAvatar as any} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                      <img src={currentAvatar} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                     </div>
                                     <div>
                                       <div style={{ fontSize: '14px', fontWeight: isMe ? '800' : '700', color: isMe ? '#8b5cf6' : '#0f172a' }}>{st.student_name || st.student_email.split('@')[0]} {isMe ? '(You)' : ''}</div>
@@ -2269,7 +2330,15 @@ Content-Type: text/html; charset=UTF-8
         </div>
       </main>
 
+      <ProfileModal 
+        user={user}
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
+        onUpdate={(newName, newAvatar) => {
+          if (newName) setCurrentName(newName);
+          if (newAvatar) setCurrentAvatar(newAvatar);
+        }}
+      />
     </div>
   );
 }
-

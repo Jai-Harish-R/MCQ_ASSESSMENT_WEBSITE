@@ -1,54 +1,46 @@
 const fs = require('fs');
-let p = 'src/components/AuthGate.tsx';
-let c = fs.readFileSync(p, 'utf8');
 
-// 1. Inject state variables
-const stateTarget = `const [fullName, setFullName] = useState('');`;
-const stateReplace = `const [fullName, setFullName] = useState('');
-  const [phoneNo, setPhoneNo] = useState('');
-  const [profession, setProfession] = useState('');
-  const [institutionName, setInstitutionName] = useState('');
-  const [department, setDepartment] = useState('');
-  const [className, setClassName] = useState('');
-  const [year, setYear] = useState('');`;
-c = c.replace(stateTarget, stateReplace);
+let content = fs.readFileSync('src/components/AuthGate.tsx', 'utf8');
 
-// 2. Inject into signUp payload
-const payloadTarget = `              full_name: fullName,
-            },`;
-const payloadReplace = `              full_name: fullName,
-              phone_no: activeTab === 'teacher' ? phoneNo : undefined,
-              profession: activeTab === 'teacher' ? profession : undefined,
-              institution_name: activeTab === 'teacher' ? institutionName : undefined,
-              department: activeTab === 'teacher' ? department : undefined,
-              class_name: activeTab === 'teacher' ? className : undefined,
-              year: activeTab === 'teacher' ? year : undefined,
-            },`;
-c = c.replace(payloadTarget, payloadReplace);
+// Add Country Code State
+content = content.replace(
+  "  const [phoneNo, setPhoneNo] = useState('');",
+  "  const [phoneNo, setPhoneNo] = useState('');\n  const [countryCode, setCountryCode] = useState('+91');"
+);
 
-// 3. Pass user_metadata to onAuthSuccess
-// There are two places: fallback and success.
-c = c.replace(/role: userRole as 'teacher' \| 'student',\s*}, false\);/g, 
-  "role: userRole as 'teacher' | 'student',\n              user_metadata: data.user.user_metadata,\n            }, false);");
+// Form submission validation logic
+const submitLogicTarget = `    if (isSignUp && activeTab === 'teacher') {
+      if (!fullName.trim()) return setErrorMsg("Please enter your full name.");
+      if (!phoneNo.trim()) return setErrorMsg("Please enter your phone number.");
+      if (!profession) return setErrorMsg("Please select your profession.");
+      if (!institutionName.trim()) return setErrorMsg("Please enter your organization name.");
+    }`;
 
-c = c.replace(/role: profile.role as 'teacher' \| 'student',\s*}, false\);/g, 
-  "role: profile.role as 'teacher' | 'student',\n              user_metadata: data.user.user_metadata,\n            }, false);");
+const submitLogicReplace = `    if (isSignUp && activeTab === 'teacher') {
+      if (!fullName.trim()) return setErrorMsg("Please enter your full name.");
+      if (!phoneNo.trim()) return setErrorMsg("Please enter your phone number.");
+      
+      // Phone Number Validation based on Country Code
+      const cleanPhone = phoneNo.replace(/\\D/g, '');
+      if (countryCode === '+91' && cleanPhone.length !== 10) return setErrorMsg("Indian phone numbers must be exactly 10 digits.");
+      if (countryCode === '+1' && cleanPhone.length !== 10) return setErrorMsg("US/Canada phone numbers must be exactly 10 digits.");
+      if (countryCode === '+44' && cleanPhone.length < 10) return setErrorMsg("UK phone numbers must be at least 10 digits.");
+      if (countryCode === '+61' && cleanPhone.length !== 9) return setErrorMsg("Australian phone numbers must be exactly 9 digits.");
 
-// 4. Inject UI fields
-const uiTarget = `                  </div>
-                </div>
-              )}
+      if (!profession) return setErrorMsg("Please select your profession.");
+      if (!institutionName.trim()) return setErrorMsg("Please enter your organization name.");
+    }`;
 
-              <div>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#475569', marginBottom: '8px' }}>Email Address</label>`;
+content = content.replace(submitLogicTarget, submitLogicReplace);
 
-const uiReplace = `                  </div>
-                </div>
-              )}
+// Update Supabase sign up payload to include country code
+content = content.replace(
+  "              phone_no: activeTab === 'teacher' ? phoneNo : undefined,",
+  "              phone_no: activeTab === 'teacher' ? \`\${countryCode} \${phoneNo}\` : undefined,"
+);
 
-              {isSignUp && activeTab === 'teacher' && (
-                <>
-                  <div>
+// Replace Phone No input with Country Code + Phone No
+const phoneInputTarget = `                  <div>
                     <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#475569', marginBottom: '8px' }}>Phone No</label>
                     <input
                       type="tel"
@@ -63,44 +55,46 @@ const uiReplace = `                  </div>
                       disabled={loading}
                       required
                     />
-                  </div>
+                  </div>`;
 
-                  <div>
-                    <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#475569', marginBottom: '8px' }}>I am from</label>
-                    <select
-                      style={{ 
-                        width: '100%', padding: '14px 16px', borderRadius: '12px', 
-                        border: '1px solid #e2e8f0', backgroundColor: '#f8fafc', fontSize: '15px', color: '#0f172a',
-                        outline: 'none', transition: 'border-color 0.2s', boxSizing: 'border-box',
-                        appearance: 'none', backgroundImage: 'url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3A%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3A%22292.4%22%20height%3A%22292.4%22%3E%3Cpath%20fill%3A%22%23475569%22%20d%3A%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 16px top 50%', backgroundSize: '12px auto'
-                      }}
-                      value={profession}
-                      onChange={(e) => setProfession(e.target.value)}
-                      disabled={loading}
-                      required
-                    >
-                      <option value="" disabled>Select...</option>
-                      <option value="School">🏫 School</option>
-                      <option value="College / University">🎓 College / University</option>
-                      <option value="Company">🏢 Company</option>
-                      <option value="Other">✨ Other</option>
-                    </select>
-                  </div>
+const phoneInputReplace = `                  <div>
+                    <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#475569', marginBottom: '8px' }}>Phone No</label>
+                    <div style={{ display: 'flex', gap: '12px' }}>
+                      <select
+                        style={{ 
+                          width: '100px', padding: '14px 12px', borderRadius: '12px', 
+                          border: '1px solid #e2e8f0', backgroundColor: '#f8fafc', fontSize: '14px', color: '#0f172a',
+                          outline: 'none', transition: 'border-color 0.2s', boxSizing: 'border-box', cursor: 'pointer'
+                        }}
+                        value={countryCode}
+                        onChange={(e) => setCountryCode(e.target.value)}
+                        disabled={loading}
+                      >
+                        <option value="+91">🇮🇳 +91</option>
+                        <option value="+1">🇺🇸 +1</option>
+                        <option value="+44">🇬🇧 +44</option>
+                        <option value="+61">🇦🇺 +61</option>
+                      </select>
+                      <input
+                        type="tel"
+                        style={{ 
+                          flex: 1, padding: '14px 16px', borderRadius: '12px', 
+                          border: '1px solid #e2e8f0', backgroundColor: '#f8fafc', fontSize: '15px', color: '#0f172a',
+                          outline: 'none', transition: 'border-color 0.2s', boxSizing: 'border-box'
+                        }}
+                        placeholder="Enter your phone number"
+                        value={phoneNo}
+                        onChange={(e) => setPhoneNo(e.target.value)}
+                        disabled={loading}
+                        required
+                      />
+                    </div>
+                  </div>`;
 
-                  {profession === 'College / University' && (
-                    <>
-                      <div>
-                        <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#475569', marginBottom: '8px' }}>College Name</label>
-                        <input type="text" style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc', fontSize: '15px', color: '#0f172a', outline: 'none', boxSizing: 'border-box' }} placeholder="Enter college name" value={institutionName} onChange={(e) => setInstitutionName(e.target.value)} disabled={loading} required />
-                      </div>
-                      <div>
-                        <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#475569', marginBottom: '8px' }}>Department</label>
-                        <input type="text" style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc', fontSize: '15px', color: '#0f172a', outline: 'none', boxSizing: 'border-box' }} placeholder="Enter department" value={department} onChange={(e) => setDepartment(e.target.value)} disabled={loading} required />
-                      </div>
-                    </>
-                  )}
+content = content.replace(phoneInputTarget, phoneInputReplace);
 
-                  {profession === 'Company' && (
+// Remove Department from Company profession block
+const companyBlockTarget = `                  {profession === 'Company' && (
                     <>
                       <div>
                         <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#475569', marginBottom: '8px' }}>Company Name</label>
@@ -110,24 +104,19 @@ const uiReplace = `                  </div>
                         <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#475569', marginBottom: '8px' }}>Department</label>
                         <input type="text" style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc', fontSize: '15px', color: '#0f172a', outline: 'none', boxSizing: 'border-box' }} placeholder="Enter department" value={department} onChange={(e) => setDepartment(e.target.value)} disabled={loading} required />
                       </div>
-                    </>
-                  )}
+                      <div>
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#475569', marginBottom: '8px' }}>Designation</label>`;
 
-                  {profession === 'School' && (
+const companyBlockReplace = `                  {profession === 'Company' && (
                     <>
                       <div>
-                        <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#475569', marginBottom: '8px' }}>School Name</label>
-                        <input type="text" style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc', fontSize: '15px', color: '#0f172a', outline: 'none', boxSizing: 'border-box' }} placeholder="Enter school name" value={institutionName} onChange={(e) => setInstitutionName(e.target.value)} disabled={loading} required />
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#475569', marginBottom: '8px' }}>Company Name</label>
+                        <input type="text" style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc', fontSize: '15px', color: '#0f172a', outline: 'none', boxSizing: 'border-box' }} placeholder="Enter company name" value={institutionName} onChange={(e) => setInstitutionName(e.target.value)} disabled={loading} required />
                       </div>
-                    </>
-                  )}
-                </>
-              )}
+                      <div>
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#475569', marginBottom: '8px' }}>Designation</label>`;
 
-              <div>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#475569', marginBottom: '8px' }}>Email Address</label>`;
+content = content.replace(companyBlockTarget, companyBlockReplace);
 
-c = c.replace(uiTarget, uiReplace);
-
-fs.writeFileSync(p, c);
-console.log('Successfully updated AuthGate.tsx');
+fs.writeFileSync('src/components/AuthGate.tsx', content);
+console.log('AuthGate updated successfully.');

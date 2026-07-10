@@ -8,6 +8,7 @@ import {
   Trophy, ClipboardEdit, ChevronDown, BarChart3, ShieldCheck
 } from 'lucide-react';
 import animeAvatar from '../assets/anime_avatar.png';
+import ProfileModal from './ProfileModal';
 
 const getLocalDateStr = (d: Date | string | number) => {
   const date = new Date(d);
@@ -55,7 +56,7 @@ interface Attempt {
 }
 
 interface TeacherDashboardProps {
-  user: { id: string; email: string; user_metadata?: { full_name?: string; profession?: string } };
+  user: { id: string; email: string; user_metadata?: { full_name?: string; profession?: string; avatar_url?: string } };
   onLogout: () => void;
 }
 
@@ -137,10 +138,13 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
   // File import ref
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Extract display name
   const teacherDisplayName = user.email.toLowerCase().includes('jai') 
     ? 'Jai' 
     : (user.user_metadata?.full_name || 'Educator');
+  
+  const [currentName, setCurrentName] = useState(teacherDisplayName);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [currentAvatar, setCurrentAvatar] = useState(user.user_metadata?.avatar_url || animeAvatar as any);
 
   const getTestStatus = (t: Test) => {
     if (!t.access_start && !t.access_end) return 'Live';
@@ -574,11 +578,11 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
           </div>
 
           {/* Profile Card */}
-          <div className="sidebar-profile">
-            <img className="sidebar-profile-avatar" src={animeAvatar as any} alt="Teacher Avatar" />
+          <div className="sidebar-profile" onClick={() => setIsProfileModalOpen(true)} style={{ cursor: 'pointer' }}>
+            <img className="sidebar-profile-avatar" src={currentAvatar} alt="Teacher Avatar" style={{ objectFit: 'cover' }} />
             <div className="sidebar-profile-info">
-              <span className="sidebar-profile-name">{teacherDisplayName}</span>
-              <span className="sidebar-profile-role">Educator Portal</span>
+              <span className="sidebar-profile-name">{currentName || 'jhgno.official'}</span>
+              <span className="sidebar-profile-role">EDUCATOR PORTAL</span>
             </div>
           </div>
 
@@ -650,7 +654,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
             <button onClick={loadData} className="header-icon-btn" title="Sync database data">
               <RefreshCwShim size={16} spinning={loading} />
             </button>
-            <img className="header-avatar" src={animeAvatar as any} alt="Teacher Avatar" />
+            <img className="header-avatar" src={currentAvatar} alt="Teacher Avatar" onClick={() => setIsProfileModalOpen(true)} style={{ cursor: 'pointer', objectFit: 'cover' }} />
           </div>
         </header>
 
@@ -1513,7 +1517,15 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
 
         </div>
       </main>
-
+      <ProfileModal 
+        user={user}
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
+        onUpdate={(newName, newAvatar) => {
+          if (newName) setCurrentName(newName);
+          if (newAvatar) setCurrentAvatar(newAvatar);
+        }}
+      />
     </div>
   );
 }
