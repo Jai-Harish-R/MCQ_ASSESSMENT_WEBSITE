@@ -233,7 +233,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
       const uniqueAttempts: any[] = [];
       const seenEmails = new Set();
       for (const att of sorted) {
-        const key = att.student_email || att.student_id;
+        const key = att.student_email || (att as any).student_id;
         if (!seenEmails.has(key)) {
           seenEmails.add(key);
           uniqueAttempts.push(att);
@@ -1324,6 +1324,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                               </td>
                             </tr>
                           );
+                        })
                         })()}
                       </tbody>
                     </table>
