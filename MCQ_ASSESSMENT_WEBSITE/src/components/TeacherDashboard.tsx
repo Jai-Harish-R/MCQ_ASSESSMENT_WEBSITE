@@ -230,7 +230,16 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
         const pctB = b.score / b.total_questions;
         return pctB - pctA;
       });
-      setLeaderboardAttempts(sorted);
+      const uniqueAttempts: any[] = [];
+      const seenEmails = new Set();
+      for (const att of sorted) {
+        const key = att.student_email || att.student_id;
+        if (!seenEmails.has(key)) {
+          seenEmails.add(key);
+          uniqueAttempts.push(att);
+        }
+      }
+      setLeaderboardAttempts(uniqueAttempts);
     } else {
       setLeaderboardAttempts([]);
     }
@@ -1249,22 +1258,35 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                         </tr>
                       </thead>
                       <tbody>
-                        {attempts
-                          .filter(att => selectedReportTestId ? att.test_id === selectedReportTestId : true)
-                          .map(att => {
-                            const studentName = att.student_email.toLowerCase().includes('harish')
-                              ? 'Harish'
-                              : (att.student_name || att.student_email.split('@')[0]);
-                            return { ...att, display_name: studentName };
-                          })
-                          .sort((a, b) => {
-                            if (sortConfig === 'name_asc') return a.display_name.localeCompare(b.display_name);
-                            if (sortConfig === 'name_desc') return b.display_name.localeCompare(a.display_name);
-                            if (sortConfig === 'mark_asc') return a.score - b.score;
-                            if (sortConfig === 'mark_desc') return b.score - a.score;
-                            return new Date(b.completed_at).getTime() - new Date(a.completed_at).getTime(); // default
-                          })
-                          .map(att => {
+                        {(() => {
+                           const filtered = attempts.filter(att => selectedReportTestId ? att.test_id === selectedReportTestId : true);
+                           const grouped = new Map();
+                           for (const att of filtered) {
+                             const key = `${att.test_id}-${att.student_email}`;
+                             if (!grouped.has(key)) {
+                               grouped.set(key, att);
+                             } else {
+                               const existing = grouped.get(key);
+                               if (new Date(att.completed_at).getTime() > new Date(existing.completed_at).getTime()) {
+                                 grouped.set(key, att);
+                               }
+                             }
+                           }
+                           return Array.from(grouped.values())
+                             .map(att => {
+                               const studentName = att.student_email.toLowerCase().includes('harish')
+                                 ? 'Harish'
+                                 : (att.student_name || att.student_email.split('@')[0]);
+                               return { ...att, display_name: studentName };
+                             })
+                             .sort((a, b) => {
+                               if (sortConfig === 'name_asc') return a.display_name.localeCompare(b.display_name);
+                               if (sortConfig === 'name_desc') return b.display_name.localeCompare(a.display_name);
+                               if (sortConfig === 'mark_asc') return a.score - b.score;
+                               if (sortConfig === 'mark_desc') return b.score - a.score;
+                               return new Date(b.completed_at).getTime() - new Date(a.completed_at).getTime(); // default
+                             })
+                             .map(att => {
                           const testDetails = tests.find(t => t.id === att.test_id);
                           const currentPassPct = testDetails?.pass_percentage || 80;
                           const currentMaxAttempts = testDetails?.max_attempts || 3;
@@ -1302,7 +1324,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                               </td>
                             </tr>
                           );
-                        })}
+                        })()}
                       </tbody>
                     </table>
                   </div>

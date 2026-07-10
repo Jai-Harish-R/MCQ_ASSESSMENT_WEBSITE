@@ -94,7 +94,18 @@ export default function StudentPortal({ user, onLogout }: StudentPortalProps) {
           if (b.score !== a.score) return b.score - a.score;
           return (a.time_taken_seconds || Infinity) - (b.time_taken_seconds || Infinity);
         });
-        setLeaderboardAttempts(sorted);
+        
+        const uniqueAttempts: any[] = [];
+        const seenEmails = new Set();
+        for (const att of sorted) {
+          const key = att.student_email || att.student_id;
+          if (!seenEmails.has(key)) {
+            seenEmails.add(key);
+            uniqueAttempts.push(att);
+          }
+        }
+        
+        setLeaderboardAttempts(uniqueAttempts);
       
     } catch (err) {
       console.error(err);
