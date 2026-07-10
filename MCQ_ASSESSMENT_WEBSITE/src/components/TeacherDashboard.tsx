@@ -901,7 +901,7 @@ export default function TeacherDashboard({ user, isDemo, onLogout }: TeacherDash
                     {/* Toggle Switch */}
                     <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
                       <div style={{ position: 'relative' }}>
-                        <input type="checkbox" style={{ opacity: 0, width: 0, height: 0 }} checked={strictValidation} onChange={() => setStrictValidation(!strictValidation)} />
+                        <input type="checkbox" style={{ position: 'absolute', opacity: 0, width: 0, height: 0, margin: 0, padding: 0 }} checked={strictValidation} onChange={() => setStrictValidation(!strictValidation)} />
                         <div style={{ display: 'block', width: '48px', height: '28px', backgroundColor: strictValidation ? '#ea580c' : '#cbd5e1', borderRadius: '9999px', transition: 'background-color 0.3s' }}></div>
                         <div style={{ position: 'absolute', left: strictValidation ? '22px' : '2px', top: '2px', backgroundColor: 'white', width: '24px', height: '24px', borderRadius: '50%', transition: 'left 0.3s', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}></div>
                       </div>

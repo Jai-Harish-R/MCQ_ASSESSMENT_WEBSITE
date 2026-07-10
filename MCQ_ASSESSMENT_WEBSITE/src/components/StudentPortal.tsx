@@ -817,7 +817,7 @@ Fallback mode: Activating In-App Email Sandbox & Simulation Portal.
 SMTP MIME-Message compiled:
 -------------------------------------------------------
 Date: ${new Date().toUTCString()}
-From: CodersFun <no-reply@codersfun.com>
+From: EduVerify Pro <jaiharishceoa@gmail.com>
 To: ${user.email}
 Subject: Results Review: ${testInfo.title} - Score: ${finalScore}/${total}
 Content-Type: text/html; charset=UTF-8
