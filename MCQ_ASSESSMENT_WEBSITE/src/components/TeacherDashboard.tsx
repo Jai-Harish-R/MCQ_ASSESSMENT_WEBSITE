@@ -927,7 +927,7 @@ export default function TeacherDashboard({ user, isDemo, onLogout }: TeacherDash
                         Authorized Email Access
                       </label>
                       <p style={{ fontSize: '12px', color: '#64748b', margin: 0 }}>
-                        When enabled, only Examinee with the specified emails can access this test.
+                        When enabled, only Examinees with the specified emails can access this test.
                       </p>
                     </div>
                     
@@ -1092,9 +1092,9 @@ export default function TeacherDashboard({ user, isDemo, onLogout }: TeacherDash
           {activeTab === 'students' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
               <div>
-                <h1 style={{ fontSize: '24px', fontWeight: '700' }}>Examinee Performance Reports</h1>
+                <h1 style={{ fontSize: '24px', fontWeight: '700' }}>Examinees Performance Reports</h1>
                 <p style={{ color: 'var(--color-on-surface-variant)', fontSize: '13px', marginTop: '4px' }}>
-                  High-density logs of Examinee outcomes and retry options.
+                  High-density logs of Examinees outcomes and retry options.
                 </p>
               </div>
 
