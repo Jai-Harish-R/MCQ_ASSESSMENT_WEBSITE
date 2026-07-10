@@ -811,13 +811,13 @@ export default function StudentPortal({ user, isDemo, onLogout }: StudentPortalP
       if (response.ok) {
         setEmailStatus('sent');
       } else {
-        throw new Error('Spring Boot returned error code: ' + response.status);
+        throw new Error('Serverless Email API returned error code: ' + response.status);
       }
     } catch (err: any) {
-      console.warn("Spring Boot Mail offline, launching Local Mail Sandbox simulator. Details:", err.message);
+      console.warn("Email API offline, launching Local Mail Sandbox simulator. Details:", err.message);
       setEmailStatus('fallback');
       const logText = `
-Connecting to SMTP Mail Server (Spring Mail)... [FAILED]
+Connecting to Serverless Email API... [FAILED]
 Fallback mode: Activating In-App Email Sandbox & Simulation Portal.
 SMTP MIME-Message compiled:
 -------------------------------------------------------
@@ -1156,7 +1156,7 @@ Content-Type: text/html; charset=UTF-8
                 </div>
                 {emailStatus === 'sending' && <div style={{ fontSize: '13px', color: 'var(--color-outline)' }}>Sending report to email...</div>}
                 {emailStatus === 'sent' && <div style={{ color: 'var(--color-success)', fontSize: '13px', fontWeight: '500' }}>Official receipt sent to: {user.email}</div>}
-                {emailStatus === 'fallback' && <div style={{ color: 'var(--color-warning)', fontSize: '13px', fontWeight: '500' }}>Spring Mail offline. Sandbox report rendered below.</div>}
+                {emailStatus === 'fallback' && <div style={{ color: 'var(--color-warning)', fontSize: '13px', fontWeight: '500' }}>Email API offline. Sandbox report rendered below.</div>}
               </div>
 
               {emailStatus === 'fallback' && (
