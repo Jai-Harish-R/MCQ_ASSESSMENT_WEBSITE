@@ -53,11 +53,10 @@ interface Attempt {
 
 interface TeacherDashboardProps {
   user: { id: string; email: string; user_metadata?: { full_name?: string; profession?: string } };
-  isDemo: boolean;
   onLogout: () => void;
 }
 
-export default function TeacherDashboard({ user, isDemo, onLogout }: TeacherDashboardProps) {
+export default function TeacherDashboard({ user, onLogout }: TeacherDashboardProps) {
   // Navigation tabs: 'dashboard' | 'exams' | 'students' | 'leaderboard'
   const [activeTab, setActiveTab] = useState<'dashboard' | 'exams' | 'students' | 'leaderboard'>('exams');
   
@@ -138,21 +137,7 @@ export default function TeacherDashboard({ user, isDemo, onLogout }: TeacherDash
     setLoading(true);
     setMsg(null);
     try {
-      if (isDemo) {
-        const localTests = JSON.parse(localStorage.getItem('demo_tests') || '[]');
-        const filteredTests = localTests.filter((t: any) => t.teacher_email === user.email);
-        setTests(filteredTests);
-
-        const localAttempts = JSON.parse(localStorage.getItem('demo_attempts') || '[]');
-        const mappedAttempts = localAttempts.map((att: any) => {
-          const t = localTests.find((x: any) => x.id === att.test_id);
-          return { ...att, test_title: t ? t.title : 'Deleted Test' };
-        }).filter((att: any) => {
-          const t = localTests.find((x: any) => x.id === att.test_id);
-          return t && t.teacher_email === user.email;
-        });
-        setAttempts(mappedAttempts);
-      } else {
+      
         const { data: testsData, error: testsErr } = await supabase
           .from('tests')
           .select('*')
@@ -180,7 +165,7 @@ export default function TeacherDashboard({ user, isDemo, onLogout }: TeacherDash
         } else {
           setAttempts([]);
         }
-      }
+      
     } catch (err: any) {
       console.error(err);
       setMsg({ type: 'error', text: err.message || 'Failed to sync database data.' });
@@ -191,12 +176,10 @@ export default function TeacherDashboard({ user, isDemo, onLogout }: TeacherDash
 
   useEffect(() => {
     loadData();
-  }, [user.id, isDemo]);
+  }, [user.id]);
 
   // Supabase Realtime Subscription
   useEffect(() => {
-    if (isDemo) return;
-
     const channel = supabase
       .channel(`teacher-realtime-${user.id}`)
       .on(
@@ -218,7 +201,7 @@ export default function TeacherDashboard({ user, isDemo, onLogout }: TeacherDash
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user.id, isDemo]);
+  }, [user.id]);
 
   // Load leaderboard details when a test is selected in the tab
   useEffect(() => {
@@ -426,7 +409,7 @@ export default function TeacherDashboard({ user, isDemo, onLogout }: TeacherDash
     setLoading(true);
 
     try {
-      const testId = isDemo ? 'test-' + Date.now() : undefined;
+
       const formattedQuestions: Question[] = questions.map((q, idx) => ({
         id: `q-${idx + 1}`,
         text: q.text,
@@ -439,39 +422,7 @@ export default function TeacherDashboard({ user, isDemo, onLogout }: TeacherDash
         return acc;
       }, {} as Record<string, number>);
 
-      if (isDemo) {
-        const newTest: Test = {
-          id: testId!,
-          title: testTitle,
-          access_code: accessCode,
-          duration: duration,
-          total_students: totalStudents,
-          teacher_email: user.email,
-          questions: formattedQuestions,
-          created_at: new Date().toISOString(),
-          access_start: accessStart ? new Date(accessStart).toISOString() : null,
-          access_end: accessEnd ? new Date(accessEnd).toISOString() : null,
-          allowed_emails: strictValidation ? (allowedEmailsInput.trim() ? allowedEmailsInput.split(',').map(e => e.trim()).filter(e => e) : []) : null
-        };
-
-        const localTests = JSON.parse(localStorage.getItem('demo_tests') || '[]');
-        localTests.push(newTest);
-        localStorage.setItem('demo_tests', JSON.stringify(localTests));
-
-        const localAnswers = JSON.parse(localStorage.getItem('demo_answers') || '{}');
-        localAnswers[testId!] = correctAnswersObj;
-        localStorage.setItem('demo_answers', JSON.stringify(localAnswers));
-
-        setMsg({ type: 'success', text: `Test "${testTitle}" created successfully in Demo Mode! Access code: ${accessCode}` });
-        
-        setTestTitle('');
-        setAccessCode('');
-        setTargetYear('');
-        setTargetClass('');
-        setQuestions([{ text: '', options: ['', '', '', ''], correctIndex: 0, imageUrl: '' }]);
-        loadData();
-        setActiveTab('exams');
-      } else {
+      
         const { data: testData, error: testErr } = await supabase
           .from('tests')
           .insert({
@@ -508,7 +459,7 @@ export default function TeacherDashboard({ user, isDemo, onLogout }: TeacherDash
         setQuestions([{ text: '', options: ['', '', '', ''], correctIndex: 0, imageUrl: '' }]);
         loadData();
         setActiveTab('exams');
-      }
+      
     } catch (err: any) {
       console.error(err);
       setMsg({ type: 'error', text: err.message || 'Failed to publish test.' });
@@ -521,17 +472,7 @@ export default function TeacherDashboard({ user, isDemo, onLogout }: TeacherDash
   const handleToggleRetry = async (attemptId: string, currentStatus: boolean) => {
     setSyncing(true);
     try {
-      if (isDemo) {
-        const localAttempts = JSON.parse(localStorage.getItem('demo_attempts') || '[]');
-        const updated = localAttempts.map((att: any) => {
-          if (att.id === attemptId) {
-            return { ...att, allowed_retry: !currentStatus };
-          }
-          return att;
-        });
-        localStorage.setItem('demo_attempts', JSON.stringify(updated));
-        setAttempts(attempts.map(att => att.id === attemptId ? { ...att, allowed_retry: !currentStatus } : att));
-      } else {
+      
         const { error } = await supabase
           .from('test_attempts')
           .update({ allowed_retry: !currentStatus })
@@ -539,7 +480,7 @@ export default function TeacherDashboard({ user, isDemo, onLogout }: TeacherDash
 
         if (error) throw error;
         setAttempts(attempts.map(att => att.id === attemptId ? { ...att, allowed_retry: !currentStatus } : att));
-      }
+      
     } catch (err: any) {
       console.error(err);
       alert(err.message || 'Failed to toggle retry permission.');
@@ -553,17 +494,7 @@ export default function TeacherDashboard({ user, isDemo, onLogout }: TeacherDash
     if (!confirm('Are you sure you want to delete this test? All Examinees results will be deleted.')) return;
     setLoading(true);
     try {
-      if (isDemo) {
-        const localTests = JSON.parse(localStorage.getItem('demo_tests') || '[]');
-        const updatedTests = localTests.filter((t: any) => t.id !== testId);
-        localStorage.setItem('demo_tests', JSON.stringify(updatedTests));
-
-        const localAttempts = JSON.parse(localStorage.getItem('demo_attempts') || '[]');
-        const updatedAttempts = localAttempts.filter((a: any) => a.test_id !== testId);
-        localStorage.setItem('demo_attempts', JSON.stringify(updatedAttempts));
-
-        loadData();
-      } else {
+      
         const { error } = await supabase
           .from('tests')
           .delete()
@@ -571,7 +502,7 @@ export default function TeacherDashboard({ user, isDemo, onLogout }: TeacherDash
 
         if (error) throw error;
         loadData();
-      }
+      
     } catch (err: any) {
       console.error(err);
       alert('Failed to delete test.');

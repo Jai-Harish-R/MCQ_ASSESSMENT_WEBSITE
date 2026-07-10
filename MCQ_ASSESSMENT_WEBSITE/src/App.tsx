@@ -15,7 +15,6 @@ interface UserState {
 
 export default function App() {
   const [user, setUser] = useState<UserState | null>(null);
-  const [isDemo, setIsDemo] = useState(false);
   const [initializing, setInitializing] = useState(true);
 
   useEffect(() => {
@@ -88,23 +87,17 @@ export default function App() {
     };
   }, []);
 
-  const handleAuthSuccess = (authenticatedUser: UserState, demoMode: boolean) => {
+  const handleAuthSuccess = (authenticatedUser: UserState) => {
     setUser(authenticatedUser);
-    setIsDemo(demoMode);
   };
 
   const handleLogout = async () => {
-    if (isDemo) {
+    try {
+      await supabase.auth.signOut();
       setUser(null);
-      setIsDemo(false);
-    } else {
-      try {
-        await supabase.auth.signOut();
-        setUser(null);
-      } catch (err) {
-        console.error("Signout error:", err);
-        setUser(null); // Force local reset anyway
-      }
+    } catch (err) {
+      console.error("Signout error:", err);
+      setUser(null); // Force local reset anyway
     }
   };
 
@@ -134,11 +127,11 @@ export default function App() {
     <>
       {user.role === 'teacher' ? (
         <ErrorBoundary name="TeacherDashboard">
-          <TeacherDashboard user={user} isDemo={isDemo} onLogout={handleLogout} />
+          <TeacherDashboard user={user} onLogout={handleLogout} />
         </ErrorBoundary>
       ) : (
         <ErrorBoundary name="StudentPortal">
-          <StudentPortal user={user} isDemo={isDemo} onLogout={handleLogout} />
+          <StudentPortal user={user} onLogout={handleLogout} />
         </ErrorBoundary>
       )}
     </>

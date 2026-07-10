@@ -54,195 +54,11 @@ const getLocalDateStr = (d: Date | string | number) => {
 
 interface StudentPortalProps {
   user: { id: string; email: string; user_metadata?: { full_name?: string } };
-  isDemo: boolean;
+
   onLogout: () => void;
 }
 
-// Demo Data Seeder to match the screenshots exactly
-const seedDemoData = () => {
-  const existingTests = localStorage.getItem('demo_tests');
-  if (!existingTests) {
-    const demoTests: Test[] = [
-      {
-        id: 'test-physics-101',
-        title: 'Physics Quiz',
-        access_code: '123456',
-        teacher_email: 'teacher.demo@codersfun.com',
-        type: 'quiz',
-        questions: [
-          { id: 'p1', text: 'What is the speed of light?', options: ['3e8 m/s', '1e8 m/s', '3e6 m/s', '3e10 m/s'] },
-          { id: 'p2', text: 'Which particle has a positive charge?', options: ['Electron', 'Neutron', 'Proton', 'Positron'] },
-          { id: 'p3', text: 'What is the unit of electric current?', options: ['Volt', 'Ampere', 'Ohm', 'Watt'] }
-        ]
-      },
-      {
-        id: 'test-chem-202',
-        title: 'Chemistry Test',
-        access_code: '88200',
-        teacher_email: 'teacher.demo@codersfun.com',
-        type: 'test',
-        questions: [
-          { id: 'c1', text: 'What is the atomic number of Hydrogen?', options: ['1', '2', '3', '4'] },
-          { id: 'c2', text: 'Which gas is commonly known as laughing gas?', options: ['Nitric oxide', 'Nitrous oxide', 'Nitrogen dioxide', 'Nitrogen pentoxide'] }
-        ]
-      },
-      {
-        id: 'test-math-303',
-        title: 'Math Assignment',
-        access_code: '654321',
-        teacher_email: 'teacher.demo@codersfun.com',
-        type: 'assignment',
-        questions: [
-          { id: 'm1', text: 'What is the derivative of sin(x)?', options: ['cos(x)', '-cos(x)', 'sin(x)', '-sin(x)'] }
-        ]
-      },
-      {
-        id: 'test-ai-404',
-        title: 'AI Concepts Live Exam',
-        access_code: '999999',
-        teacher_email: 'teacher.demo@codersfun.com',
-        type: 'live_exam',
-        questions: [
-          { id: 'a1', text: 'What does AI stand for?', options: ['Artificial Intelligence', 'Automated Integration', 'Active Information', 'Actual Input'] }
-        ]
-      }
-    ];
-    localStorage.setItem('demo_tests', JSON.stringify(demoTests));
-
-    const demoAnswers = {
-      'test-physics-101': { 'p1': 0, 'p2': 2, 'p3': 1 },
-      'test-chem-202': { 'c1': 0, 'c2': 1 },
-      'test-math-303': { 'm1': 0 },
-      'test-ai-404': { 'a1': 0 }
-    };
-    localStorage.setItem('demo_answers', JSON.stringify(demoAnswers));
-
-    const demoAttempts = [
-      // Current student attempts
-      {
-        id: 'att-harish-phys',
-        test_id: 'test-physics-101',
-        student_email: 'HARISH@SEC.EDU',
-        score: 2,
-        total_questions: 3,
-        completed_at: '2026-06-07T09:30:00Z',
-        allowed_retry: false,
-        time_taken_seconds: 1292, // 21m 32s
-        answers: { 'p1': 0, 'p2': 1, 'p3': 1 }
-      },
-      {
-        id: 'att-harish-chem',
-        test_id: 'test-chem-202',
-        student_email: 'HARISH@SEC.EDU',
-        score: 2,
-        total_questions: 2,
-        completed_at: '2026-06-07T14:58:30Z',
-        allowed_retry: false,
-        time_taken_seconds: 3510, // 58m 30s
-        answers: { 'c1': 0, 'c2': 1 }
-      },
-      {
-        id: 'att-harish-math',
-        test_id: 'test-math-303',
-        student_email: 'HARISH@SEC.EDU',
-        score: 1,
-        total_questions: 1,
-        completed_at: '2026-06-06T11:45:00Z',
-        allowed_retry: false,
-        time_taken_seconds: 1200, // 20m
-        answers: { 'm1': 0 }
-      },
-      // Other student attempts (for leaderboard)
-      {
-        id: 'att-aryan-phys',
-        test_id: 'test-physics-101',
-        student_email: 'aryan.sharma@demo.com',
-        score: 3,
-        total_questions: 3,
-        completed_at: '2026-06-07T09:18:24Z',
-        allowed_retry: false,
-        time_taken_seconds: 1104, // 18m 24s
-        student_name: 'Aryan Sharma',
-        answers: { 'p1': 0, 'p2': 2, 'p3': 1 }
-      },
-      {
-        id: 'att-diya-phys',
-        test_id: 'test-physics-101',
-        student_email: 'diya.patel@demo.com',
-        score: 3,
-        total_questions: 3,
-        completed_at: '2026-06-07T09:20:11Z',
-        allowed_retry: false,
-        time_taken_seconds: 1211, // 20m 11s
-        student_name: 'Diya Patel',
-        answers: { 'p1': 0, 'p2': 2, 'p3': 1 }
-      },
-      {
-        id: 'att-rohan-phys',
-        test_id: 'test-physics-101',
-        student_email: 'rohan.verma@demo.com',
-        score: 3,
-        total_questions: 3,
-        completed_at: '2026-06-07T09:15:45Z',
-        allowed_retry: false,
-        time_taken_seconds: 945, // 15m 45s
-        student_name: 'Rohan Verma',
-        answers: { 'p1': 0, 'p2': 2, 'p3': 1 }
-      },
-      {
-        id: 'att-ananya-phys',
-        test_id: 'test-physics-101',
-        student_email: 'ananya.singh@demo.com',
-        score: 2,
-        total_questions: 3,
-        completed_at: '2026-06-07T09:22:03Z',
-        allowed_retry: false,
-        time_taken_seconds: 1323, // 22m 03s
-        student_name: 'Ananya Singh',
-        answers: { 'p1': 0, 'p2': 1, 'p3': 1 }
-      },
-      {
-        id: 'att-ishaan-phys',
-        test_id: 'test-physics-101',
-        student_email: 'ishaan.mehta@demo.com',
-        score: 2,
-        total_questions: 3,
-        completed_at: '2026-06-07T09:19:17Z',
-        allowed_retry: false,
-        time_taken_seconds: 1157, // 19m 17s
-        student_name: 'Ishaan Mehta',
-        answers: { 'p1': 0, 'p2': 1, 'p3': 1 }
-      },
-      {
-        id: 'att-kartik-phys',
-        test_id: 'test-physics-101',
-        student_email: 'kartik.malhotra@demo.com',
-        score: 1,
-        total_questions: 3,
-        completed_at: '2026-06-07T09:23:10Z',
-        allowed_retry: false,
-        time_taken_seconds: 1390, // 23m 10s
-        student_name: 'Kartik Malhotra',
-        answers: { 'p1': 0, 'p2': 1, 'p3': 2 }
-      },
-      {
-        id: 'att-meera-phys',
-        test_id: 'test-physics-101',
-        student_email: 'meera.nair@demo.com',
-        score: 1,
-        total_questions: 3,
-        completed_at: '2026-06-07T09:24:05Z',
-        allowed_retry: false,
-        time_taken_seconds: 1445, // 24m 05s
-        student_name: 'Meera Nair',
-        answers: { 'p1': 0, 'p2': 1, 'p3': 2 }
-      }
-    ];
-    localStorage.setItem('demo_attempts', JSON.stringify(demoAttempts));
-  }
-};
-
-export default function StudentPortal({ user, isDemo, onLogout }: StudentPortalProps) {
+export default function StudentPortal({ user, onLogout }: StudentPortalProps) {
   // Navigation tabs: 'dashboard' | 'lobby' | 'review_attempts' | 'leaderboard'
   const [activeTab, setActiveTab] = useState<'dashboard' | 'lobby' | 'review_attempts' | 'leaderboard'>('dashboard');
   const [viewState, setViewState] = useState<'lobby' | 'exam' | 'result'>('lobby');
@@ -264,15 +80,7 @@ export default function StudentPortal({ user, isDemo, onLogout }: StudentPortalP
     }
     setLeaderboardLoading(true);
     try {
-      if (isDemo) {
-        const localAttempts = JSON.parse(localStorage.getItem('demo_attempts') || '[]');
-        const forTest = localAttempts.filter((a: any) => a.test_id === testId);
-        const sorted = forTest.sort((a: any, b: any) => {
-          if (b.score !== a.score) return b.score - a.score;
-          return (a.time_taken_seconds || Infinity) - (b.time_taken_seconds || Infinity);
-        });
-        setLeaderboardAttempts(sorted);
-      } else {
+      
         const { data, error } = await supabase
           .from('test_attempts')
           .select('*')
@@ -285,13 +93,13 @@ export default function StudentPortal({ user, isDemo, onLogout }: StudentPortalP
           return (a.time_taken_seconds || Infinity) - (b.time_taken_seconds || Infinity);
         });
         setLeaderboardAttempts(sorted);
-      }
+      
     } catch (err) {
       console.error(err);
     } finally {
       setLeaderboardLoading(false);
     }
-  }, [isDemo]);
+  }, []);
 
   useEffect(() => {
     fetchLeaderboardForTest(leaderboardSelectedTestId);
@@ -299,7 +107,7 @@ export default function StudentPortal({ user, isDemo, onLogout }: StudentPortalP
   
   // Realtime subscription for leaderboard
   useEffect(() => {
-    if (isDemo || !leaderboardSelectedTestId) return;
+    if (!leaderboardSelectedTestId) return;
     
     const channel = supabase
       .channel('leaderboard-realtime')
@@ -315,7 +123,7 @@ export default function StudentPortal({ user, isDemo, onLogout }: StudentPortalP
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [leaderboardSelectedTestId, isDemo, fetchLeaderboardForTest]);
+  }, [leaderboardSelectedTestId, fetchLeaderboardForTest]);
 
 
   // Interactive Calendar and Popover states
@@ -391,26 +199,7 @@ export default function StudentPortal({ user, isDemo, onLogout }: StudentPortalP
   const loadPortalData = useCallback(async () => {
     setIsLoadingData(true);
     try {
-      if (isDemo) {
-        // Load tests & attempts from localStorage
-        const localTests: Test[] = JSON.parse(localStorage.getItem('demo_tests') || '[]');
-        const localAttempts: Attempt[] = JSON.parse(localStorage.getItem('demo_attempts') || '[]');
-        
-        // Filter my attempts
-        const myFiltered = localAttempts.map(att => {
-          const t = localTests.find(x => x.id === att.test_id);
-          return { ...att, test_title: t ? t.title : 'Deleted Exam' };
-        }).filter(att => att.student_email === user.email);
-        
-        setMyAttempts(myFiltered);
-
-        // Filter tests I haven't submitted yet (or are allowed retry)
-        const pending = localTests.filter(t => {
-          const att = localAttempts.find(a => a.test_id === t.id && a.student_email === user.email);
-          return !att || att.allowed_retry;
-        });
-        setAvailableTests(pending);
-      } else {
+      
         // Load attempts from Supabase
         const { data: attemptsData, error: attemptsErr } = await supabase
           .from('test_attempts')
@@ -451,14 +240,14 @@ export default function StudentPortal({ user, isDemo, onLogout }: StudentPortalP
         } else {
           setAvailableTests([]);
         }
-      }
+      
     } catch (err) {
       console.error("Failed to load student dashboard stats:", err);
     } finally {
       setIsLoadingData(false);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user.id, user.email, isDemo]);
+  }, [user.id, user.email]);
 
   
   // Supabase Realtime Subscription for Dashboard (fixed with stable callback)
@@ -466,7 +255,7 @@ export default function StudentPortal({ user, isDemo, onLogout }: StudentPortalP
     // Always do an initial load
     loadPortalData();
 
-    if (isDemo) return;
+    
 
     const channel = supabase
       .channel(`student-realtime-${user.id}`)
@@ -493,23 +282,18 @@ export default function StudentPortal({ user, isDemo, onLogout }: StudentPortalP
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [loadPortalData, isDemo, user.id]);
+  }, [loadPortalData, user.id]);
   
   // Trigger seeding of demo data
   useEffect(() => {
-    if (isDemo) {
-      seedDemoData();
-    }
-  }, [isDemo]);
+    
+  }, []);
 
   const handleReviewPastAttempt = (attempt: Attempt) => {
     let test: Test | null = null;
-    if (isDemo) {
-      const localTests = JSON.parse(localStorage.getItem('demo_tests') || '[]');
-      test = localTests.find((t: any) => t.id === attempt.test_id) || null;
-    } else {
+    
       test = availableTests.find(t => t.id === attempt.test_id) || null;
-    }
+    
 
     if (!test) {
       alert("Test data not found.");
@@ -523,12 +307,9 @@ export default function StudentPortal({ user, isDemo, onLogout }: StudentPortalP
     setTotalQuestions(attempt.total_questions);
     
     // Set correct answers key
-    if (isDemo) {
-      const localAnswers = JSON.parse(localStorage.getItem('demo_answers') || '{}');
-      setCorrectAnswers(localAnswers[test.id] || {});
-    } else {
+    
       setCorrectAnswers({});
-    }
+    
     
     setViewState('result');
   };
@@ -591,30 +372,7 @@ export default function StudentPortal({ user, isDemo, onLogout }: StudentPortalP
       let test: Test | null = null;
       let existingAttempt: any = null;
 
-      if (isDemo) {
-        const localTests = JSON.parse(localStorage.getItem('demo_tests') || '[]');
-        test = localTests.find(
-          (t: any) => 
-            t.teacher_email.toLowerCase() === emailInput.toLowerCase().trim() && 
-            t.access_code === pinInput.trim()
-        ) || null;
-
-        if (test) {
-          // Strict Validation (Demo)
-          if (test.allowed_emails !== null && test.allowed_emails !== undefined) {
-            const isAllowed = test.allowed_emails.some((e: string) => e.toLowerCase() === user.email.toLowerCase());
-            if (!isAllowed) {
-              setErrorMsg("Access Denied: Your email address is not authorized to take this test.");
-              setLoading(false);
-              return;
-            }
-          }
-          const localAttempts = JSON.parse(localStorage.getItem('demo_attempts') || '[]');
-          existingAttempt = localAttempts.find(
-            (a: any) => a.test_id === test!.id && a.student_email === user.email
-          ) || null;
-        }
-      } else {
+      
         const { data: testData, error: testErr } = await supabase
           .from('tests')
           .select('*')
@@ -655,7 +413,7 @@ export default function StudentPortal({ user, isDemo, onLogout }: StudentPortalP
           if (attemptErr) throw attemptErr;
           existingAttempt = attemptData;
         }
-      }
+      
 
       if (!test) {
         setErrorMsg('No test found matching this teacher email and access code PIN.');
@@ -711,44 +469,7 @@ export default function StudentPortal({ user, isDemo, onLogout }: StudentPortalP
     setLoading(true);
 
     try {
-      if (isDemo) {
-        const localAnswers = JSON.parse(localStorage.getItem('demo_answers') || '{}');
-        const correctAnswersKey = localAnswers[activeTest.id] || {};
-        
-        let calculatedScore = 0;
-        const total = activeTest.questions.length;
-        
-        activeTest.questions.forEach((q) => {
-          const correctIdx = correctAnswersKey[q.id];
-          if (answers[q.id] === correctIdx) {
-            calculatedScore++;
-          }
-        });
-
-        const newAttempt = {
-          id: 'attempt-' + Date.now(),
-          test_id: activeTest.id,
-          student_email: user.email,
-          answers: answers,
-          score: calculatedScore,
-          total_questions: total,
-          completed_at: new Date().toISOString(),
-          allowed_retry: false
-        };
-
-        const localAttempts = JSON.parse(localStorage.getItem('demo_attempts') || '[]');
-        const filteredAttempts = localAttempts.filter(
-          (a: any) => !(a.test_id === activeTest!.id && a.student_email === user.email)
-        );
-        filteredAttempts.push(newAttempt);
-        localStorage.setItem('demo_attempts', JSON.stringify(filteredAttempts));
-
-        setScore(calculatedScore);
-        setTotalQuestions(total);
-        setCorrectAnswers(correctAnswersKey);
-        setViewState('result');
-        dispatchEmailNotification(calculatedScore, total, correctAnswersKey, activeTest);
-      } else {
+      
         const { data, error } = await supabase.rpc('submit_test_attempt', {
           p_test_id: activeTest.id,
           p_student_id: user.id,
@@ -763,7 +484,7 @@ export default function StudentPortal({ user, isDemo, onLogout }: StudentPortalP
         setCorrectAnswers(data.correct_answers);
         setViewState('result');
         dispatchEmailNotification(data.score, data.total_questions, data.correct_answers, activeTest);
-      }
+      
     } catch (err: any) {
       console.error(err);
       alert(err.message || 'Failed to submit exam.');
@@ -797,9 +518,7 @@ export default function StudentPortal({ user, isDemo, onLogout }: StudentPortalP
     };
 
     try {
-      if (window.location.hostname !== 'localhost') {
-        throw new Error('Skipping local Spring Boot fetch in production to prevent CORS error');
-      }
+      
       const response = await fetch('/api/evaluate', {
         method: 'POST',
         headers: {
@@ -851,19 +570,7 @@ Content-Type: text/html; charset=UTF-8
       let test: Test | null = null;
       let allAttemptsForTest: Attempt[] = [];
 
-      if (isDemo) {
-        const localTests: Test[] = JSON.parse(localStorage.getItem('demo_tests') || '[]');
-        test = localTests.find(
-          t => 
-            t.teacher_email.toLowerCase() === leaderboardTeacherEmail.toLowerCase().trim() &&
-            t.access_code === leaderboardAccessCode.trim()
-        ) || null;
-
-        if (test) {
-          const localAttempts: Attempt[] = JSON.parse(localStorage.getItem('demo_attempts') || '[]');
-          allAttemptsForTest = localAttempts.filter(a => a.test_id === test!.id);
-        }
-      } else {
+      
         // Fetch test from Supabase
         const { data: testData } = await supabase
           .from('tests')
@@ -883,7 +590,7 @@ Content-Type: text/html; charset=UTF-8
           
           allAttemptsForTest = attemptsData || [];
         }
-      }
+      
 
       if (!test) {
         setLeaderboardError('No test found matching these details.');

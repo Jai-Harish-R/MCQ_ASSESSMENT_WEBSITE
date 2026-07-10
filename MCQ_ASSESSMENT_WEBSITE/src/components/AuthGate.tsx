@@ -3,7 +3,7 @@ import { supabase } from '../utils/supabase';
 import { Mail, Lock, AlertCircle, ArrowRight, User, CheckCircle2, GraduationCap, School, ShieldCheck } from 'lucide-react';
 
 interface AuthGateProps {
-  onAuthSuccess: (user: { id: string; email: string; role: 'teacher' | 'student'; user_metadata?: any }, isDemo: boolean) => void;
+  onAuthSuccess: (user: { id: string; email: string; role: 'teacher' | 'student'; user_metadata?: any }) => void;
 }
 
 export default function AuthGate({ onAuthSuccess }: AuthGateProps) {
@@ -97,7 +97,7 @@ export default function AuthGate({ onAuthSuccess }: AuthGateProps) {
               email: data.user.email || email,
               role: userRole as 'teacher' | 'student',
               user_metadata: data.user.user_metadata,
-            }, false);
+            });
             return;
           }
 
@@ -113,7 +113,7 @@ export default function AuthGate({ onAuthSuccess }: AuthGateProps) {
             email: data.user.email || email,
             role: profile.role as 'teacher' | 'student',
               user_metadata: data.user.user_metadata,
-            }, false);
+            });
         }
       }
     } catch (err: any) {
@@ -124,14 +124,7 @@ export default function AuthGate({ onAuthSuccess }: AuthGateProps) {
     }
   };
 
-  const handleLaunchDemo = (role: 'student' | 'teacher') => {
-    const dummyEmail = role === 'teacher' ? 'JAI@SEC.EDU' : 'HARISH@SEC.EDU';
-    onAuthSuccess({
-      id: role === 'teacher' ? 'demo-teacher-123' : 'demo-student-456',
-      email: dummyEmail,
-      role: role,
-    }, true);
-  };
+
 
   return (
     <div style={{ 
@@ -533,15 +526,8 @@ export default function AuthGate({ onAuthSuccess }: AuthGateProps) {
               </button>
             </div>
 
-            {showSandbox && (
-              <div style={{ marginTop: '32px', paddingTop: '24px', borderTop: '1px solid #e2e8f0', textAlign: 'center' }}>
-                <p style={{ fontSize: '12px', fontWeight: '800', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '16px' }}>Sandbox Bypass Tools</p>
-                <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
-                  <button onClick={() => handleLaunchDemo('student')} style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid #e2e8f0', backgroundColor: 'white', fontSize: '12px', fontWeight: '600', color: '#475569', cursor: 'pointer' }}>Demo Student</button>
-                  <button onClick={() => handleLaunchDemo('teacher')} style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid #e2e8f0', backgroundColor: 'white', fontSize: '12px', fontWeight: '600', color: '#475569', cursor: 'pointer' }}>Demo Teacher</button>
-                </div>
-              </div>
-            )}
+
+
           </div>
         </div>
 
