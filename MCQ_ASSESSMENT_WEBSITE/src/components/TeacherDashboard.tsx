@@ -33,6 +33,8 @@ interface Test {
   access_end?: string | null;
   allowed_emails?: string[] | null;
   created_at: string;
+  pass_percentage?: number;
+  max_attempts?: number;
 }
 
 interface Attempt {
@@ -82,6 +84,11 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
   const [targetClass, setTargetClass] = useState('');
   const profession = user.user_metadata?.profession;
   const [accessCode, setAccessCode] = useState('');
+
+  // Advanced config state
+  const [advancedConfigEnabled, setAdvancedConfigEnabled] = useState(false);
+  const [passPercentage, setPassPercentage] = useState<number>(80);
+  const [maxAttempts, setMaxAttempts] = useState<number>(3);
   const [duration, setDuration] = useState(10);
   const [totalStudents, setTotalStudents] = useState(50);
   const [accessStart, setAccessStart] = useState('');
@@ -445,7 +452,9 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
             total_students: totalStudents,
             access_start: accessStart ? new Date(accessStart).toISOString() : null,
             access_end: accessEnd ? new Date(accessEnd).toISOString() : null,
-            allowed_emails: strictValidation ? (allowedEmailsInput.trim() ? allowedEmailsInput.split(',').map(e => e.trim()).filter(e => e) : []) : null
+            allowed_emails: strictValidation ? (allowedEmailsInput.trim() ? allowedEmailsInput.split(',').map(e => e.trim()).filter(e => e) : []) : null,
+            pass_percentage: advancedConfigEnabled ? passPercentage : 80,
+            max_attempts: advancedConfigEnabled ? maxAttempts : 3
           })
           .select()
           .single();
@@ -466,6 +475,9 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
         setTestTitle('');
         setAccessCode('');
         setQuestions([{ text: '', options: ['', '', '', ''], correctIndex: 0, imageUrl: '' }]);
+        setAdvancedConfigEnabled(false);
+        setPassPercentage(80);
+        setMaxAttempts(3);
         loadData();
         setActiveTab('exams');
       
@@ -915,6 +927,48 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                 </div>
               </div>
 
+              {/* Advanced Configurations */}
+              <div className="card">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--color-outline-variant)', paddingBottom: '12px', marginBottom: '20px' }}>
+                  <div>
+                    <h3 style={{ fontSize: '16px', fontWeight: '600' }}>Advanced Rules</h3>
+                    <p style={{ fontSize: '13px', color: 'var(--color-on-surface-variant)', marginTop: '4px' }}>Set custom pass percentage and maximum attempt limits.</p>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <div style={{ position: 'relative', width: '44px', height: '24px', backgroundColor: advancedConfigEnabled ? '#3b82f6' : '#cbd5e1', borderRadius: '12px', cursor: 'pointer', transition: 'background-color 0.2s' }} onClick={() => setAdvancedConfigEnabled(!advancedConfigEnabled)}>
+                      <div style={{ position: 'absolute', top: '2px', left: advancedConfigEnabled ? '22px' : '2px', width: '20px', height: '20px', backgroundColor: '#fff', borderRadius: '50%', transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }}></div>
+                    </div>
+                  </div>
+                </div>
+
+                {advancedConfigEnabled && (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px' }}>
+                    <div>
+                      <label className="input-label">Set Pass Percentage (%)</label>
+                      <input 
+                        type="number" 
+                        min="1" max="100" 
+                        className="input-field" 
+                        value={passPercentage} 
+                        onChange={(e) => setPassPercentage(parseInt(e.target.value) || 80)} 
+                        placeholder="e.g. 80" 
+                      />
+                    </div>
+                    <div>
+                      <label className="input-label">Set Max Attempts</label>
+                      <input 
+                        type="number" 
+                        min="1" max="10" 
+                        className="input-field" 
+                        value={maxAttempts} 
+                        onChange={(e) => setMaxAttempts(parseInt(e.target.value) || 3)} 
+                        placeholder="e.g. 3" 
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
               {/* MCQ question list builder */}
               <div className="card">
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--color-outline-variant)', paddingBottom: '12px', marginBottom: '24px' }}>
@@ -1166,6 +1220,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                           <th>Score</th>
                           <th>Percentage</th>
                           <th>Status</th>
+                          <th>Attempt</th>
                           <th>Submitted Date</th>
                           <th>Submitted Time</th>
                           <th>Actions</th>
@@ -1188,8 +1243,15 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                             return new Date(b.completed_at).getTime() - new Date(a.completed_at).getTime(); // default
                           })
                           .map(att => {
+                          const testDetails = tests.find(t => t.id === att.test_id);
+                          const currentPassPct = testDetails?.pass_percentage || 80;
+                          const currentMaxAttempts = testDetails?.max_attempts || 3;
                           const pct = Math.round((att.score / att.total_questions) * 100);
-                          const isPassing = pct >= 50;
+                          const isPassing = pct >= currentPassPct;
+                          
+                          // Calculate attempt number by counting chronologically older attempts by same student for same test
+                          const studentAttempts = attempts.filter(a => a.test_id === att.test_id && a.student_email === att.student_email).sort((a,b) => new Date(a.completed_at).getTime() - new Date(b.completed_at).getTime());
+                          const attemptIndex = studentAttempts.findIndex(a => a.id === att.id) + 1;
 
                           return (
                             <tr key={att.id}>
@@ -1203,6 +1265,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                                   {isPassing ? 'Pass' : 'Fail'}
                                 </span>
                               </td>
+                              <td style={{ fontWeight: '600', color: '#64748b' }}>({attemptIndex}/{currentMaxAttempts})</td>
                               <td>{new Date(att.completed_at).toLocaleDateString()}</td>
                               <td>{new Date(att.completed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
                               <td>
