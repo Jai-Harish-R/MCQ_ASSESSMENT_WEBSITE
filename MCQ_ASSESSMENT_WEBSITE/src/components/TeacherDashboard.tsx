@@ -416,10 +416,10 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
 
         if (imported.length > numQuestions) {
           imported = imported.slice(0, numQuestions);
-          setMsg({ type: 'success', text: `${numQuestions} IMPORTED SPECIFIED` });
+          setMsg({ type: 'success', text: `QUESTION IMPORTED : ${numQuestions}\nTOTAL QUESTION : ${numQuestions}` });
         } else {
           setNumQuestions(imported.length);
-          setMsg({ type: 'success', text: `Loaded ${imported.length} questions from ${file.name}!` });
+          setMsg({ type: 'success', text: `QUESTION IMPORTED : ${imported.length}\nTOTAL QUESTION : ${imported.length}` });
         }
 
         setQuestions(imported);
@@ -943,7 +943,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                   {msg.type === 'error' ? 'Notice' : 'Success'}
                 </h3>
                 
-                <p style={{ fontSize: '15px', color: '#475569', margin: 0, lineHeight: '1.5' }}>
+                <p style={{ fontSize: '15px', color: '#475569', margin: 0, lineHeight: '1.5', whiteSpace: 'pre-line' }}>
                   {typeof msg.text === 'object' ? JSON.stringify(msg.text) : String(msg.text)}
                 </p>
                 
