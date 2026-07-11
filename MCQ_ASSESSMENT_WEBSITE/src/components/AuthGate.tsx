@@ -339,28 +339,6 @@ if (countryCode === '+966' && cleanPhone.length !== 9) {
               </button>
             </div>
 
-            {errorMsg && (
-              <div style={{
-                display: 'flex', alignItems: 'flex-start', gap: '8px', backgroundColor: '#fef2f2',
-                color: '#b91c1c', padding: '16px', borderRadius: '12px', fontSize: '14px', marginBottom: '24px',
-                border: '1px solid #fee2e2'
-              }}>
-                <AlertCircle size={18} style={{ flexShrink: 0, marginTop: '2px' }} />
-                <span>{typeof errorMsg === 'object' ? JSON.stringify(errorMsg) : String(errorMsg)}</span>
-              </div>
-            )}
-
-            {successMsg && (
-              <div style={{
-                display: 'flex', alignItems: 'flex-start', gap: '8px', backgroundColor: '#f0fdf4',
-                color: '#15803d', padding: '16px', borderRadius: '12px', fontSize: '14px', marginBottom: '24px',
-                border: '1px solid #dcfce7'
-              }}>
-                <CheckCircle2 size={18} style={{ flexShrink: 0, marginTop: '2px' }} />
-                <span>{successMsg}</span>
-              </div>
-            )}
-
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               {isSignUp && (
                 <div>
