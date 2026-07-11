@@ -1097,7 +1097,10 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                                       const pct = Math.round((a.score / a.total_questions) * 100);
                                       if (pct >= passThreshold) passes++; else fails++;
                                     });
-                                    const isLive = !t.access_end || new Date(t.access_end) > new Date();
+                                    const statusStr = getTestStatus(t);
+                                    let statusColor = '#16a34a';
+                                    if (statusStr === 'Ended') statusColor = '#ef4444';
+                                    if (statusStr === 'Not Started') statusColor = '#f59e0b';
                                     
                                     return (
                                       <div key={t.id} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr', gap: '8px', fontSize: '11px', textAlign: 'left', alignItems: 'center' }}>
@@ -1106,7 +1109,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                                         <span style={{ color: '#64748b', fontWeight: '600' }}>{tAttempts.length}</span>
                                         <span style={{ color: passes > 0 ? '#16a34a' : '#64748b', fontWeight: '600' }}>{passes}</span>
                                         <span style={{ color: fails > 0 ? '#ef4444' : '#64748b', fontWeight: '600' }}>{fails}</span>
-                                        <span style={{ color: isLive ? '#16a34a' : '#ef4444', fontWeight: '700' }}>{isLive ? 'Live' : 'Ended'}</span>
+                                        <span style={{ color: statusColor, fontWeight: '700' }}>{statusStr}</span>
                                       </div>
                                     );
                                   })}
