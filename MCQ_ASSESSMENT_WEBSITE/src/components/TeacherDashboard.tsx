@@ -1505,7 +1505,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
               <div className="card">
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--color-outline-variant)', paddingBottom: '12px', marginBottom: '24px' }}>
                   <h3 style={{ fontSize: '16px', fontWeight: '600' }}>MCQ Questions ({Math.min(questions.length, numQuestions)})</h3>
-                  {activeTab === 'edit_test' && (
+                  {activeTab !== 'edit_test' && (
                     <button 
                       type="button" 
                       onClick={() => { setNumQuestions(prev => prev + 1); setQuestions([...questions, { text: '', options: ['', '', '', ''], correctIndex: 0, imageUrl: '' }]); }}
@@ -1521,15 +1521,16 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                     <div key={qIdx} style={{ padding: '24px', border: '1px solid var(--color-outline-variant)', borderRadius: 'var(--radius-md)', backgroundColor: '#f8fafc' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                         <span style={{ fontSize: '12px', fontWeight: '700', color: '#ea580c' }}>Question #{qIdx + 1}</span>
-                        {activeTab === 'edit_test' && (
+                        {activeTab !== 'edit_test' && (
                           <button 
                             type="button" 
+                            disabled={numQuestions <= 1}
                             onClick={() => {
                               if (numQuestions <= 1) return;
                               setNumQuestions(prev => prev - 1);
                               setQuestions(questions.filter((_, i) => i !== qIdx));
                             }}
-                            style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', fontWeight: '600', color: '#ef4444', backgroundColor: 'transparent', border: 'none', cursor: 'pointer' }}
+                            style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', fontWeight: '600', color: numQuestions <= 1 ? '#cbd5e1' : '#ef4444', backgroundColor: 'transparent', border: 'none', cursor: numQuestions <= 1 ? 'not-allowed' : 'pointer' }}
                           >
                             <Trash2 size={14} /> Remove
                           </button>
