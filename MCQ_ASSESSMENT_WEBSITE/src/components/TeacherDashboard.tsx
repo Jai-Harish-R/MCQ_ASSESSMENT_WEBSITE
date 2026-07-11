@@ -195,34 +195,57 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
       setMsg({ type: 'error', text: 'Please select at least one test to export.' });
       return;
     }
-    const attemptsToExport = attempts.filter(att => exportSelectedTests.includes(att.test_id));
-    
-    // Build Excel Data
-    const data = attemptsToExport.map(att => {
-      const test = tests.find(t => t.id === att.test_id);
-      const profile = allProfiles.find(p => p.email === att.student_email);
-      const studentName = profile?.full_name || 'Unknown';
-      const studentId = profile?.short_id || '-';
-      const passPct = test?.pass_percentage || 80;
-      const isPass = Math.round((att.score / att.total_questions) * 100) >= passPct ? 'Pass' : 'Fail';
+
+    const workbook = XLSX.utils.book_new();
+
+    exportSelectedTests.forEach(testId => {
+      const test = tests.find(t => t.id === testId);
+      if (!test) return;
+
+      const testAttempts = attempts.filter(att => att.test_id === testId);
+      const aoa = [];
       
-      return {
-        "Test Title": test?.title || '',
-        "Test Date": getLocalDateStr(test?.access_start || test?.created_at || new Date()),
-        "Student Name": studentName,
-        "Student Email": att.student_email,
-        "Student ID": studentId,
-        "Score": att.score,
-        "Total Questions": att.total_questions,
-        "Pass/Fail": isPass,
-        "Completed At": new Date(att.completed_at).toLocaleString()
-      };
+      aoa.push([`Assessment Title: ${test.title}`]);
+      aoa.push([`Assessment ID: ${test.short_id || test.id}`]);
+      aoa.push([]);
+      
+      aoa.push(["Examinee Name", "Examinee ID", "Test Title", "Score", "Percentage", "Status", "Attempt", "Submitted Date"]);
+
+      testAttempts.forEach(att => {
+        const profile = allProfiles.find(p => p.email === att.student_email);
+        const studentName = profile?.full_name || 'Unknown';
+        const studentId = profile?.short_id ? `ID-${String(profile.short_id).padStart(3, '0')}` : '-';
+        
+        const pct = Math.round((att.score / att.total_questions) * 100);
+        const passPct = test.pass_percentage || 80;
+        const status = pct >= passPct ? 'Passed' : 'Failed';
+        
+        const studentAttempts = attempts.filter(a => a.test_id === att.test_id && a.student_email === att.student_email).sort((a,b) => new Date(a.completed_at).getTime() - new Date(b.completed_at).getTime());
+        const attemptIndex = studentAttempts.findIndex(a => a.id === att.id) + 1;
+        const maxAttempts = test.max_attempts || 3;
+        
+        const scoreStr = `${att.score} / ${att.total_questions}`;
+        const pctStr = `${pct}%`;
+        const attemptStr = `${attemptIndex} / ${maxAttempts}`;
+        const dateStr = new Date(att.completed_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+
+        aoa.push([studentName, studentId, test.title, scoreStr, pctStr, status, attemptStr, dateStr]);
+      });
+
+      const worksheet = XLSX.utils.aoa_to_sheet(aoa);
+      let sheetName = test.title.replace(/[\\/*?:[\]]/g, '').substring(0, 31);
+      if (!sheetName) sheetName = 'Sheet';
+      if (workbook.SheetNames.includes(sheetName)) {
+        sheetName = `${sheetName.substring(0, 27)}_${Math.floor(Math.random()*1000)}`;
+      }
+      
+      XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
     });
 
-    const worksheet = XLSX.utils.json_to_sheet(data);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Examinee Results");
-    
+    if (workbook.SheetNames.length === 0) {
+       XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet([["No data"]]), "Sheet1");
+    }
+
     XLSX.writeFile(workbook, `examinee_results_export_${new Date().getTime()}.xlsx`);
     setIsExportModalOpen(false);
   };
