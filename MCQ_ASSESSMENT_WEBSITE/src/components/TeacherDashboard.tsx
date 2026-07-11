@@ -1243,7 +1243,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                     style={{ backgroundColor: '#f8fafc', padding: '12px' }}
                   >
                     <option value="">-- Choose a test --</option>
-                    {tests.map(t => (
+                    {tests.filter(t => getTestStatus(t) !== 'Ended').map(t => (
                       <option key={t.id} value={t.id} title={`${t.title}${t.short_id ? ` - ${t.short_id}` : ''}`}>{t.title.length > 10 ? t.title.substring(0, 10) + '...' : t.title} {t.short_id ? `- ${t.short_id}` : ''}</option>
                     ))}
                   </select>
