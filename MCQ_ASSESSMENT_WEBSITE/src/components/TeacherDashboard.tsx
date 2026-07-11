@@ -290,12 +290,15 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
 
   // Form question managers
   const addQuestionField = () => {
+    if (questions.length >= 200) return;
     setQuestions([...questions, { text: '', options: ['', '', '', ''], correctIndex: 0, imageUrl: '' }]);
+    setNumQuestions(prev => Math.min(200, prev + 1));
   };
 
   const removeQuestionField = (index: number) => {
     if (questions.length === 1) return;
     setQuestions(questions.filter((_, i) => i !== index));
+    setNumQuestions(prev => Math.max(1, prev - 1));
   };
 
   const updateQuestionText = (index: number, text: string) => {
@@ -1512,6 +1515,11 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                     <div key={qIdx} style={{ padding: '24px', border: '1px solid var(--color-outline-variant)', borderRadius: 'var(--radius-md)', backgroundColor: '#f8fafc' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                         <span style={{ fontSize: '12px', fontWeight: '700', color: 'var(--color-primary)' }}>Question #{qIdx + 1}</span>
+                        {activeTab === 'exams' && questions.length > 1 && (
+                          <button type="button" onClick={() => removeQuestionField(qIdx)} className="btn btn-outline" style={{ padding: '4px 8px', fontSize: '11px', color: 'var(--color-error)', borderColor: 'var(--color-error)' }}>
+                            Remove Question
+                          </button>
+                        )}
                       </div>
 
                       <div style={{ marginBottom: '16px' }}>
@@ -1589,6 +1597,12 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                       </div>
                     </div>
                   ))}
+                  
+                  {activeTab === 'exams' && questions.length < 200 && (
+                    <button type="button" onClick={addQuestionField} className="btn btn-outline" style={{ padding: '12px', width: '100%', borderStyle: 'dashed' }}>
+                      + Add Question manually
+                    </button>
+                  )}
                 </div>
 
                 <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '16px' }}>
