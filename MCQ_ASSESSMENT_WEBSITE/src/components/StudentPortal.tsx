@@ -68,6 +68,7 @@ interface Profile {
   id: string;
   email: string;
   short_id?: number;
+  designation?: string;
   full_name: string | null;
   avatar_url: string | null;
 }
