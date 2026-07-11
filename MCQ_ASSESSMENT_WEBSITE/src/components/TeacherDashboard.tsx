@@ -32,6 +32,7 @@ interface Test {
   target_class?: string;
   teacher_email: string;
   questions: Question[];
+  no_of_questions?: number;
   duration?: number;
   total_students?: number;
   access_start?: string | null;
@@ -590,7 +591,8 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
             access_end: accessEnd ? new Date(accessEnd).toISOString() : null,
             allowed_emails: strictValidation ? (allowedEmailsInput.trim() ? allowedEmailsInput.split(',').map(e => e.trim()).filter(e => e) : []) : null,
             pass_percentage: passPercentageEnabled ? passPercentage : 80,
-            max_attempts: maxAttemptsEnabled ? maxAttempts : 3
+            max_attempts: maxAttemptsEnabled ? maxAttempts : 3,
+            no_of_questions: numQuestions
           })
           .select()
           .single();
@@ -700,7 +702,8 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
           access_end: accessEnd ? new Date(accessEnd).toISOString() : null,
           allowed_emails: strictValidation ? (allowedEmailsInput.trim() ? allowedEmailsInput.split(',').map(e => e.trim()).filter(e => e) : []) : null,
           pass_percentage: passPercentageEnabled ? passPercentage : 80,
-          max_attempts: maxAttemptsEnabled ? maxAttempts : 3
+          max_attempts: maxAttemptsEnabled ? maxAttempts : 3,
+          no_of_questions: numQuestions
         })
         .eq('id', selectedEditTestId)
         .select()
