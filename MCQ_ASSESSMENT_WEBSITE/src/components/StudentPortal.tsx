@@ -153,6 +153,11 @@ export default function StudentPortal({ user, onLogout }: StudentPortalProps) {
     };
   }, [leaderboardSelectedTestId, fetchLeaderboardForTest]);
 
+  const getAttemptNumber = (att: Attempt) => {
+    const studentAttempts = myAttempts.filter(a => a.test_id === att.test_id).sort((a,b) => new Date(a.completed_at).getTime() - new Date(b.completed_at).getTime());
+    return studentAttempts.findIndex(a => a.id === att.id) + 1;
+  };
+
 
   // Interactive Calendar and Popover states
   const [selectedDate, setSelectedDate] = useState<Date>(new Date(2025, 5, 7));
@@ -1272,7 +1277,7 @@ Content-Type: text/html; charset=UTF-8
                         const isToday = isCurrentMonth && displayNum === today.getDate();
                         
                         return (
-                          <div key={i} style={{ 
+                          <div key={i} className="calendar-hover-wrapper" style={{ 
                             position: 'relative', padding: '12px 0 24px', fontSize: '14px', fontWeight: '600', 
                             color: isCurrentMonth ? (isToday ? '#ea580c' : '#0f172a') : '#cbd5e1',
                             backgroundColor: isToday ? '#fff7ed' : 'transparent',
@@ -1283,14 +1288,40 @@ Content-Type: text/html; charset=UTF-8
                             
                             {/* Render Icons for Specific Dates dynamically based on myAttempts */}
                             {dayAttempts.length > 0 && (
-                                <div style={{ position: 'absolute', bottom: '6px', display: 'flex', gap: '2px' }}>
-                                  {dayAttempts.slice(0, 3).map((att, idx) => {
-                                    if (att.test_type === 'quiz') return <FileText key={idx} size={14} color="#3b82f6" />;
-                                    if (att.test_type === 'assignment') return <ClipboardEdit key={idx} size={14} color="#ea580c" />;
-                                    if (att.test_type === 'live_exam') return <Trophy key={idx} size={14} color="#a855f7" />;
-                                    return <Target key={idx} size={14} color="#22c55e" />; // test/result
-                                  })}
-                                </div>
+                                <>
+                                  <div style={{ position: 'absolute', bottom: '6px', display: 'flex', gap: '2px' }}>
+                                    {dayAttempts.slice(0, 3).map((att, idx) => {
+                                      if (att.test_type === 'quiz') return <FileText key={idx} size={14} color="#3b82f6" />;
+                                      if (att.test_type === 'assignment') return <ClipboardEdit key={idx} size={14} color="#ea580c" />;
+                                      if (att.test_type === 'live_exam') return <Trophy key={idx} size={14} color="#a855f7" />;
+                                      return <Target key={idx} size={14} color="#22c55e" />; // test/result
+                                    })}
+                                  </div>
+                                  <div className="calendar-hover-card">
+                                    <div style={{ fontSize: '12px', fontWeight: '800', color: '#0f172a', marginBottom: '8px', paddingBottom: '4px', borderBottom: '1px solid #e2e8f0' }}>
+                                      {new Date(dayAttempts[0]?.completed_at || currentDateString).toLocaleDateString()}
+                                    </div>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                      {dayAttempts.map(att => {
+                                        const testD = availableTests.find(t => t.id === att.test_id);
+                                        const pct = Math.round((att.score / att.total_questions) * 100);
+                                        const isPassing = pct >= (testD?.pass_percentage || 80);
+                                        const attemptNum = getAttemptNumber(att);
+                                        return (
+                                          <div key={att.id} style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr 1.2fr', gap: '8px', fontSize: '11px', alignItems: 'center' }}>
+                                            <div style={{ fontWeight: '700', color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{att.test_title}</div>
+                                            <div style={{ color: '#64748b' }}>{testD?.short_id || '-'}</div>
+                                            <div style={{ color: '#64748b' }}>Att: {attemptNum}</div>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                              <span style={{ fontWeight: '700', color: isPassing ? '#10b981' : '#ef4444' }}>{pct}%</span>
+                                              <span className={`chip ${isPassing ? 'chip-success' : 'chip-error'}`} style={{ fontSize: '9px', padding: '2px 4px' }}>{isPassing ? 'Pass' : 'Fail'}</span>
+                                            </div>
+                                          </div>
+                                        );
+                                      })}
+                                    </div>
+                                  </div>
+                                </>
                             )}
                           </div>
                         )
@@ -1907,12 +1938,12 @@ Content-Type: text/html; charset=UTF-8
                       return (
                         <div
                           key={i}
+                          className="calendar-hover-wrapper"
                           onClick={() => {
                             if (isCurrentMonth) {
                               setSelectedDate(new Date(year, month, displayNum));
                             }
                           }}
-                          title={dayAttempts.length > 0 ? dayAttempts.map(a => a.test_title || 'Unknown Test').join(', ') : undefined}
                           style={{ 
                             position: 'relative', height: '64px', fontSize: '14px', fontWeight: '700', 
                             color: isCurrentMonth ? (isSelected ? '#ea580c' : '#0f172a') : '#cbd5e1',
@@ -1925,15 +1956,41 @@ Content-Type: text/html; charset=UTF-8
                           
                           {/* Render Dots */}
                           {dayAttempts.length > 0 && (
-                            <div style={{ position: 'absolute', bottom: '12px', display: 'flex', gap: '4px', flexWrap: 'wrap', justifyContent: 'center', width: '80%' }}>
-                              {dayAttempts.slice(0, 3).map((att, idx) => {
-                                let color = '#3b82f6'; // default test
-                                if (att.test_type === 'quiz') color = '#a855f7';
-                                if (att.test_type === 'assignment') color = '#ea580c';
-                                if (att.test_type === 'live_exam') color = '#ef4444';
-                                return <div key={idx} style={{ width: '8px', height: '8px', borderRadius: '2px', backgroundColor: color }}></div>;
-                              })}
-                            </div>
+                            <>
+                              <div style={{ position: 'absolute', bottom: '12px', display: 'flex', gap: '4px', flexWrap: 'wrap', justifyContent: 'center', width: '80%' }}>
+                                {dayAttempts.slice(0, 3).map((att, idx) => {
+                                  let color = '#3b82f6'; // default test
+                                  if (att.test_type === 'quiz') color = '#a855f7';
+                                  if (att.test_type === 'assignment') color = '#ea580c';
+                                  if (att.test_type === 'live_exam') color = '#ef4444';
+                                  return <div key={idx} style={{ width: '8px', height: '8px', borderRadius: '2px', backgroundColor: color }}></div>;
+                                })}
+                              </div>
+                              <div className="calendar-hover-card">
+                                <div style={{ fontSize: '12px', fontWeight: '800', color: '#0f172a', marginBottom: '8px', paddingBottom: '4px', borderBottom: '1px solid #e2e8f0' }}>
+                                  {new Date(currentDateString).toLocaleDateString()}
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                  {dayAttempts.map(att => {
+                                    const testD = availableTests.find(t => t.id === att.test_id);
+                                    const pct = Math.round((att.score / att.total_questions) * 100);
+                                    const isPassing = pct >= (testD?.pass_percentage || 80);
+                                    const attemptNum = getAttemptNumber(att);
+                                    return (
+                                      <div key={att.id} style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr 1.2fr', gap: '8px', fontSize: '11px', alignItems: 'center' }}>
+                                        <div style={{ fontWeight: '700', color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{att.test_title}</div>
+                                        <div style={{ color: '#64748b' }}>{testD?.short_id || '-'}</div>
+                                        <div style={{ color: '#64748b' }}>Att: {attemptNum}</div>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                          <span style={{ fontWeight: '700', color: isPassing ? '#10b981' : '#ef4444' }}>{pct}%</span>
+                                          <span className={`chip ${isPassing ? 'chip-success' : 'chip-error'}`} style={{ fontSize: '9px', padding: '2px 4px' }}>{isPassing ? 'Pass' : 'Fail'}</span>
+                                        </div>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            </>
                           )}
                         </div>
                       );
