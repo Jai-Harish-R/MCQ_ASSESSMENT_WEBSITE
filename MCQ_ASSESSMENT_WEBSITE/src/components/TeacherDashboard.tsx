@@ -804,11 +804,19 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                             </div>
                             
                             {hoveredDateStr === currentDateString && (
-                              <div className="calendar-hover-card" style={{ display: 'block', zIndex: 100, width: '320px', padding: '16px' }}>
+                              <div className="calendar-hover-card" style={{ display: 'block', zIndex: 100, width: '380px', padding: '16px' }}>
                                 <div style={{ fontSize: '12px', fontWeight: '800', color: '#0f172a', marginBottom: '8px', paddingBottom: '4px', borderBottom: '1px solid #e2e8f0' }}>
                                   {new Date(currentDateString).toLocaleDateString()}
                                 </div>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                  <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr', gap: '8px', fontSize: '9px', fontWeight: '800', color: '#94a3b8', textTransform: 'uppercase', paddingBottom: '4px', borderBottom: '1px dashed #e2e8f0' }}>
+                                    <span>Exam Name</span>
+                                    <span>ID</span>
+                                    <span>Att</span>
+                                    <span>Pass</span>
+                                    <span>Fail</span>
+                                    <span>Status</span>
+                                  </div>
                                   {dayTests.map(t => {
                                     const tAttempts = attempts.filter(a => a.test_id === t.id);
                                     const passThreshold = t.pass_percentage || 80;
@@ -820,17 +828,13 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                                     const isLive = !t.access_end || new Date(t.access_end) > new Date();
                                     
                                     return (
-                                      <div key={t.id} style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '11px', textAlign: 'left' }}>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: '700' }}>
-                                          <span style={{ color: '#0f172a' }}>{t.title}</span>
-                                          <span style={{ color: isLive ? '#16a34a' : '#ef4444' }}>{isLive ? 'Live' : 'Ended'}</span>
-                                        </div>
-                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1.2fr', color: '#64748b' }}>
-                                          <span>ID: {t.short_id || '-'}</span>
-                                          <span>Att: {tAttempts.length}</span>
-                                          <span style={{ color: passes > 0 ? '#16a34a' : 'inherit' }}>Pass: {passes}</span>
-                                          <span style={{ color: fails > 0 ? '#ef4444' : 'inherit' }}>Fail: {fails}</span>
-                                        </div>
+                                      <div key={t.id} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr', gap: '8px', fontSize: '11px', textAlign: 'left', alignItems: 'center' }}>
+                                        <span style={{ color: '#0f172a', fontWeight: '700', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={t.title}>{t.title}</span>
+                                        <span style={{ color: '#64748b' }}>{t.short_id || '-'}</span>
+                                        <span style={{ color: '#64748b', fontWeight: '600' }}>{tAttempts.length}</span>
+                                        <span style={{ color: passes > 0 ? '#16a34a' : '#64748b', fontWeight: '600' }}>{passes}</span>
+                                        <span style={{ color: fails > 0 ? '#ef4444' : '#64748b', fontWeight: '600' }}>{fails}</span>
+                                        <span style={{ color: isLive ? '#16a34a' : '#ef4444', fontWeight: '700' }}>{isLive ? 'Live' : 'Ended'}</span>
                                       </div>
                                     );
                                   })}
