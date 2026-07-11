@@ -819,22 +819,22 @@ Content-Type: text/html; charset=UTF-8
   }, [myAttempts]);
 
   const performanceTrend = React.useMemo(() => {
-    const testIds = Array.from(new Set(myAttempts.map(a => a.test_id)));
+    const testIds = Array.from(new Set(filteredMyAttempts.map(a => a.test_id)));
     const testStats = testIds.map(testId => {
-      const attempts = myAttempts.filter(a => a.test_id === testId).sort((a, b) => new Date(a.completed_at).getTime() - new Date(b.completed_at).getTime());
+      const attempts = filteredMyAttempts.filter(a => a.test_id === testId).sort((a, b) => new Date(a.completed_at).getTime() - new Date(b.completed_at).getTime());
       const maxPct = Math.max(...attempts.map(a => Math.round((a.score / a.total_questions) * 100)));
       return { maxPct, date: new Date(attempts[0].completed_at), testId };
     });
     testStats.sort((a, b) => a.date.getTime() - b.date.getTime());
     
-    let recent = testStats.slice(-5);
+    let recent = testStats;
     if (recent.length === 0) {
       recent = [{ maxPct: 0, date: new Date(), testId: '' }, { maxPct: 0, date: new Date(), testId: '' }];
     } else if (recent.length === 1) {
       recent = [{ maxPct: 0, date: new Date(), testId: '' }, recent[0]];
     }
     return recent;
-  }, [myAttempts]);
+  }, [filteredMyAttempts]);
 
   // Active Exam View hides sidebar
   if (viewState === 'exam' || viewState === 'result') {
@@ -1554,7 +1554,7 @@ Content-Type: text/html; charset=UTF-8
                             <span>No tests yet</span>
                           ) : (
                             performanceTrend.map((pt, i) => (
-                              <span key={i}>{pt.testId ? `Test ${i+1}` : ''}</span>
+                              <span key={i}>{pt.testId ? `${i+1}` : ''}</span>
                             ))
                           )}
                         </div>
