@@ -2532,7 +2532,7 @@ Content-Type: text/html; charset=UTF-8
                           >
                             <option value="">-- Select a test --</option>
                             {availableTests.map(t => (
-                              <option key={t.id} value={t.id}>{t.title.length > 14 ? t.title.substring(0, 14) + '...' : t.title} {t.short_id ? `- ${t.short_id}` : ''}</option>
+                              <option key={t.id} value={t.id} title={`${t.title}${t.short_id ? ` - ${t.short_id}` : ''}`}>{t.title.length > 10 ? t.title.substring(0, 10) + '...' : t.title} {t.short_id ? `- ${t.short_id}` : ''}</option>
                             ))}
                           </select>
                           <ChevronDown size={16} color="#64748b" style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />

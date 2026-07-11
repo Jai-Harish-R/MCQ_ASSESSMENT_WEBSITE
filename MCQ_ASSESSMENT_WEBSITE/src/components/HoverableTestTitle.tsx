@@ -26,7 +26,7 @@ export default function HoverableTestTitle({ title, shortId, questionsCount, dur
     }
   }, [isHovered]);
 
-  const truncatedTitle = title.length > 14 ? title.substring(0, 14) + '...' : title;
+  const truncatedTitle = title.length > 10 ? title.substring(0, 10) + '...' : title;
   const displayTitle = `${truncatedTitle}${shortId ? ` - ${shortId}` : ''}`;
 
   return (
