@@ -5,7 +5,7 @@ import {
   Trash2, Users, Award, AlertCircle, BookOpen, ChevronLeft, ChevronRight, Calendar, FileText, 
   Check, Send, GraduationCap, RefreshCw,
   Upload, Download, Image, ClipboardList,
-  Trophy, ClipboardEdit, ChevronDown, BarChart3, ShieldCheck
+  Trophy, ClipboardEdit, ChevronDown, BarChart3, ShieldCheck, Clock
 } from 'lucide-react';
 import animeAvatar from '../assets/anime_avatar.png';
 import studentAvatar from '../assets/student_avatar.png';
@@ -569,9 +569,10 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
   };
 
   // Stats
-  const activeTestsCount = tests.filter(t => !t.access_end || new Date(t.access_end) > new Date()).length;
-  const totalAttempts = attempts.length;
-  const classTotal = new Set(attempts.map(a => a.student_email)).size;
+  const now = new Date();
+  const notStartedTestsCount = tests.filter(t => t.access_start && new Date(t.access_start) > now).length;
+  const inactiveTestsCount = tests.filter(t => t.access_end && new Date(t.access_end) <= now).length;
+  const activeTestsCount = tests.length - notStartedTestsCount - inactiveTestsCount;
   
   // Calendar variables
   const getDaysInMonth = (year: number, month: number) => new Date(year, month + 1, 0).getDate();
@@ -732,7 +733,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
               {/* Stats overview boxes */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '24px' }}>
                 <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                  <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: 'var(--color-primary-container)', color: 'var(--color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: 'var(--color-success-container)', color: 'var(--color-success)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <BookOpen size={20} />
                   </div>
                   <div>
@@ -742,12 +743,22 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                 </div>
 
                 <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                  <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: '#fef3c7', color: '#d97706', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Users size={20} />
+                  <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: 'var(--color-error-container)', color: 'var(--color-error)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <AlertCircle size={20} />
                   </div>
                   <div>
-                    <span style={{ fontSize: '11px', color: 'var(--color-on-surface-variant)', fontWeight: '600', textTransform: 'uppercase' }}>Submissions</span>
-                    <h3 style={{ fontSize: '24px', fontWeight: '700', marginTop: '2px' }}>{totalAttempts === 0 ? '-' : totalAttempts} <span style={{ fontSize: '14px', color: '#64748b' }}>/ {classTotal}</span></h3>
+                    <span style={{ fontSize: '11px', color: 'var(--color-on-surface-variant)', fontWeight: '600', textTransform: 'uppercase' }}>Inactive Tests</span>
+                    <h3 style={{ fontSize: '24px', fontWeight: '700', marginTop: '2px' }}>{inactiveTestsCount}</h3>
+                  </div>
+                </div>
+                
+                <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: 'var(--color-surface-variant)', color: 'var(--color-on-surface-variant)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Clock size={20} />
+                  </div>
+                  <div>
+                    <span style={{ fontSize: '11px', color: 'var(--color-on-surface-variant)', fontWeight: '600', textTransform: 'uppercase' }}>Not Started</span>
+                    <h3 style={{ fontSize: '24px', fontWeight: '700', marginTop: '2px' }}>{notStartedTestsCount}</h3>
                   </div>
                 </div>
               </div>
