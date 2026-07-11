@@ -35,6 +35,7 @@ interface Test {
   pass_percentage?: number;
   max_attempts?: number;
   short_id?: number;
+  no_of_questions?: number;
   shuffle_questions?: boolean;
 }
 
