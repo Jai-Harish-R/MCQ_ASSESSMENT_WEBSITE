@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
 interface HoverableTestTitleProps {
   title: string;
@@ -11,6 +11,20 @@ interface HoverableTestTitleProps {
 
 export default function HoverableTestTitle({ title, shortId, questionsCount, duration, testCode, customStyle }: HoverableTestTitleProps) {
   const [isHovered, setIsHovered] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [cardStyle, setCardStyle] = useState<React.CSSProperties>({ left: '0' });
+
+  useEffect(() => {
+    if (isHovered && cardRef.current) {
+      const rect = cardRef.current.getBoundingClientRect();
+      const overflowRight = rect.right - window.innerWidth;
+      if (overflowRight > 0) {
+        setCardStyle({ right: '0', left: 'auto' });
+      }
+    } else if (!isHovered) {
+      setCardStyle({ left: '0' });
+    }
+  }, [isHovered]);
 
   const truncatedTitle = title.length > 14 ? title.substring(0, 14) + '...' : title;
   const displayTitle = `${truncatedTitle}${shortId ? ` - ${shortId}` : ''}`;
@@ -27,10 +41,11 @@ export default function HoverableTestTitle({ title, shortId, questionsCount, dur
 
       {isHovered && (
         <div 
+          ref={cardRef}
           style={{ 
             position: 'absolute', 
             top: '100%', 
-            left: '0', 
+            ...cardStyle,
             marginTop: '8px',
             zIndex: 9999, 
             width: 'max-content',

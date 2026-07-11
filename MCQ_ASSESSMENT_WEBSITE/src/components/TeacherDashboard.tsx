@@ -845,7 +845,11 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                             </div>
                             
                             {hoveredDateStr === currentDateString && (
-                              <div className="calendar-hover-card" style={{ display: 'block', zIndex: 100, width: '480px', padding: '16px', borderRadius: '16px', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)' }}>
+                              <div className="calendar-hover-card" style={{ 
+                                display: 'block', zIndex: 100, width: '480px', padding: '16px', borderRadius: '16px', 
+                                boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+                                ...(i % 7 >= 4 ? { left: 'auto', right: '0%', transform: 'none' } : (i % 7 <= 2 ? { left: '0%', right: 'auto', transform: 'none' } : {}))
+                              }}>
                                 <div style={{ fontSize: '12px', fontWeight: '800', color: '#0f172a', marginBottom: '8px', paddingBottom: '4px', borderBottom: '1px solid #e2e8f0' }}>
                                   {new Date(currentDateString).toLocaleDateString()}
                                 </div>
