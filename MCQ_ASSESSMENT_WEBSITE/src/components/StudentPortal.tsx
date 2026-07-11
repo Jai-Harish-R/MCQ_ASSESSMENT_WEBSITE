@@ -2185,11 +2185,12 @@ Content-Type: text/html; charset=UTF-8
 
                       {/* Leaderboard Table */}
                       <div style={{ width: '100%' }}>
-                        <div style={{ display: 'grid', gridTemplateColumns: '60px 2fr 1fr 1fr 1fr', padding: '16px', borderBottom: '1px solid #e2e8f0', fontSize: '12px', fontWeight: '700', color: '#64748b', alignItems: 'center' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '60px 2fr 1fr 1fr 1fr 1fr', padding: '16px', borderBottom: '1px solid #e2e8f0', fontSize: '12px', fontWeight: '700', color: '#64748b', alignItems: 'center' }}>
                           <div style={{ textAlign: 'center' }}>Rank</div>
                           <div>Student</div>
                           <div style={{ textAlign: 'center' }}>Marks Obtained</div>
                           <div style={{ textAlign: 'center' }}>Percentage</div>
+                          <div style={{ textAlign: 'center' }}>Status</div>
                           <div style={{ textAlign: 'right' }}>Time Taken</div>
                         </div>
 
@@ -2212,9 +2213,10 @@ Content-Type: text/html; charset=UTF-8
                               const durationText = st.time_taken_seconds
                                 ? `${Math.floor(st.time_taken_seconds / 60)}m ${st.time_taken_seconds % 60}s`
                                 : 'N/A';
+                              const isPassing = pct >= (selectedTest?.pass_percentage || 80);
                                 
                               return (
-                                <div key={st.id} style={{ display: 'grid', gridTemplateColumns: '60px 2fr 1fr 1fr 1fr', padding: '16px', borderBottom: '1px solid #f1f5f9', backgroundColor: isMe ? '#f5f3ff' : 'transparent', borderLeft: isMe ? '4px solid #8b5cf6' : '4px solid transparent', alignItems: 'center', transition: 'background-color 0.2s', margin: isMe ? '4px 0' : '0' }}>
+                                <div key={st.id} style={{ display: 'grid', gridTemplateColumns: '60px 2fr 1fr 1fr 1fr 1fr', padding: '16px', borderBottom: '1px solid #f1f5f9', backgroundColor: isMe ? '#f5f3ff' : 'transparent', borderLeft: isMe ? '4px solid #8b5cf6' : '4px solid transparent', alignItems: 'center', transition: 'background-color 0.2s', margin: isMe ? '4px 0' : '0' }}>
                                   <div style={{ textAlign: 'center', fontSize: medal ? '20px' : '14px', fontWeight: '700', color: medal ? 'inherit' : (isMe ? '#8b5cf6' : '#0f172a') }}>
                                     {medal || rank}
                                   </div>
@@ -2229,6 +2231,11 @@ Content-Type: text/html; charset=UTF-8
                                   </div>
                                   <div style={{ textAlign: 'center', fontSize: '14px', fontWeight: isMe ? '800' : '700', color: isMe ? '#8b5cf6' : '#0f172a' }}>{st.score}</div>
                                   <div style={{ textAlign: 'center', fontSize: '14px', fontWeight: '800', color: isMe ? '#8b5cf6' : '#10b981' }}>{pct}%</div>
+                                  <div style={{ textAlign: 'center' }}>
+                                    <span className={`chip ${isPassing ? 'chip-success' : 'chip-error'}`} style={{ fontSize: '11px', padding: '4px 8px' }}>
+                                      {isPassing ? 'Pass' : 'Fail'}
+                                    </span>
+                                  </div>
                                   <div style={{ textAlign: 'right', fontSize: '13px', fontWeight: isMe ? '700' : '600', color: isMe ? '#8b5cf6' : '#0f172a' }}>{durationText}</div>
                                 </div>
                               );
