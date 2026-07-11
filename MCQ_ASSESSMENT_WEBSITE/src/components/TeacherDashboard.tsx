@@ -1555,7 +1555,9 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                             <ClipboardEdit size={24} />
                           </div>
                           <div>
-                            <div style={{ fontSize: '15px', fontWeight: '700', color: '#0f172a' }}>{selectedTest.title} {selectedTest.short_id ? `- ${selectedTest.short_id}` : ''}</div>
+                            <div style={{ fontSize: '15px', fontWeight: '700', color: '#0f172a' }} title={selectedTest.title}>
+                              {selectedTest.title.length > 14 ? selectedTest.title.substring(0, 14) + '...' : selectedTest.title} {selectedTest.short_id ? `- ${selectedTest.short_id}` : ''}
+                            </div>
                             <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>{selectedTest.questions?.length || 0} Questions • MCQ Test</div>
                           </div>
                         </div>
@@ -1656,7 +1658,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                           >
                             <option value="">-- Choose a test --</option>
                             {tests.map(t => (
-                              <option key={t.id} value={t.id}>{t.title} {t.short_id ? `- ${t.short_id}` : ''} (PIN: {t.access_code})</option>
+                              <option key={t.id} value={t.id}>{t.title.length > 14 ? t.title.substring(0, 14) + '...' : t.title} {t.short_id ? `- ${t.short_id}` : ''}</option>
                             ))}
                           </select>
                           <ChevronDown size={16} color="#64748b" style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
