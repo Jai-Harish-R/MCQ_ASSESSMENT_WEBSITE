@@ -481,7 +481,59 @@ if (countryCode === '+966' && cleanPhone.length !== 9) {
                     <>
                       <div>
                         <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#475569', marginBottom: '8px' }}>College Name</label>
-                        <input type="text" style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc', fontSize: '15px', color: '#0f172a', outline: 'none', boxSizing: 'border-box' }} placeholder="Enter college name" value={institutionName} onChange={(e) => setInstitutionName(e.target.value)} disabled={loading} required />
+                        <input type="text" list="college-options" style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc', fontSize: '15px', color: '#0f172a', outline: 'none', boxSizing: 'border-box' }} placeholder="Select or search college name" value={institutionName} onChange={(e) => setInstitutionName(e.target.value)} disabled={loading} required autoComplete="off" />
+                        <datalist id="college-options">
+                          <option value="Anna University" />
+                          <option value="Indian Institute of Technology Madras" />
+                          <option value="National Institute of Technology Tiruchirappalli" />
+                          <option value="Vellore Institute of Technology" />
+                          <option value="SRM Institute of Science and Technology" />
+                          <option value="SASTRA Deemed University" />
+                          <option value="PSG College of Technology" />
+                          <option value="Coimbatore Institute of Technology" />
+                          <option value="Thiagarajar College of Engineering" />
+                          <option value="Kumaraguru College of Technology" />
+                          <option value="Kongu Engineering College" />
+                          <option value="SSN College of Engineering" />
+                          <option value="Sri Krishna College of Engineering and Technology" />
+                          <option value="Bannari Amman Institute of Technology" />
+                          <option value="Velammal Engineering College" />
+                          <option value="Rajalakshmi Engineering College" />
+                          <option value="St. Joseph's College of Engineering" />
+                          <option value="Easwari Engineering College" />
+                          <option value="Hindustan Institute of Technology and Science" />
+                          <option value="Karpagam College of Engineering" />
+                          <option value="Indian Institute of Science" />
+                          <option value="National Institute of Technology Karnataka" />
+                          <option value="RV College of Engineering" />
+                          <option value="PES University" />
+                          <option value="BMS College of Engineering" />
+                          <option value="MS Ramaiah Institute of Technology" />
+                          <option value="Dayananda Sagar College of Engineering" />
+                          <option value="CMR Institute of Technology" />
+                          <option value="Indian Institute of Technology Hyderabad" />
+                          <option value="International Institute of Information Technology Hyderabad" />
+                          <option value="Jawaharlal Nehru Technological University Hyderabad" />
+                          <option value="Chaitanya Bharathi Institute of Technology" />
+                          <option value="VNR Vignana Jyothi Institute of Engineering and Technology" />
+                          <option value="Indian Institute of Technology Tirupati" />
+                          <option value="Andhra University College of Engineering" />
+                          <option value="Vignan's Foundation for Science, Technology and Research" />
+                          <option value="SRM University AP" />
+                          <option value="Indian Institute of Technology Bombay" />
+                          <option value="College of Engineering Pune" />
+                          <option value="Veermata Jijabai Technological Institute" />
+                          <option value="Vishwakarma Institute of Technology" />
+                          <option value="MIT World Peace University" />
+                          <option value="Indian Institute of Technology Delhi" />
+                          <option value="Delhi Technological University" />
+                          <option value="Indian Institute of Technology Kanpur" />
+                          <option value="Motilal Nehru National Institute of Technology" />
+                          <option value="Malaviya National Institute of Technology Jaipur" />
+                          <option value="BITS Pilani" />
+                          <option value="Indian Institute of Technology Gandhinagar" />
+                          <option value="Indian Institute of Technology Kharagpur" />
+                        </datalist>
                       </div>
                       <div>
                         <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#475569', marginBottom: '8px' }}>Department</label>
@@ -520,7 +572,59 @@ if (countryCode === '+966' && cleanPhone.length !== 9) {
                     <>
                       <div>
                         <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#475569', marginBottom: '8px' }}>Company Name</label>
-                        <input type="text" style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc', fontSize: '15px', color: '#0f172a', outline: 'none', boxSizing: 'border-box' }} placeholder="Enter company name" value={institutionName} onChange={(e) => setInstitutionName(e.target.value)} disabled={loading} required />
+                        <input type="text" list="company-options" style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc', fontSize: '15px', color: '#0f172a', outline: 'none', boxSizing: 'border-box' }} placeholder="Select or search company name" value={institutionName} onChange={(e) => setInstitutionName(e.target.value)} disabled={loading} required autoComplete="off" />
+                        <datalist id="company-options">
+                          <option value="Tata Consultancy Services (TCS)" />
+                          <option value="Infosys" />
+                          <option value="Wipro" />
+                          <option value="HCLTech" />
+                          <option value="Tech Mahindra" />
+                          <option value="Accenture" />
+                          <option value="Cognizant" />
+                          <option value="Capgemini" />
+                          <option value="IBM" />
+                          <option value="Oracle" />
+                          <option value="Microsoft" />
+                          <option value="Google" />
+                          <option value="Amazon" />
+                          <option value="Apple" />
+                          <option value="Meta" />
+                          <option value="NVIDIA" />
+                          <option value="Intel" />
+                          <option value="AMD" />
+                          <option value="Cisco" />
+                          <option value="Dell Technologies" />
+                          <option value="HP Inc." />
+                          <option value="SAP" />
+                          <option value="Salesforce" />
+                          <option value="Adobe" />
+                          <option value="ServiceNow" />
+                          <option value="Zoho Corporation" />
+                          <option value="Freshworks" />
+                          <option value="Paytm" />
+                          <option value="PhonePe" />
+                          <option value="Flipkart" />
+                          <option value="Reliance Industries" />
+                          <option value="Adani Group" />
+                          <option value="Larsen & Toubro (L&T)" />
+                          <option value="Mahindra & Mahindra" />
+                          <option value="TVS Motor Company" />
+                          <option value="Ashok Leyland" />
+                          <option value="Bosch India" />
+                          <option value="Siemens" />
+                          <option value="Schneider Electric" />
+                          <option value="Honeywell" />
+                          <option value="Deloitte" />
+                          <option value="EY (Ernst & Young)" />
+                          <option value="KPMG" />
+                          <option value="PwC" />
+                          <option value="JP Morgan Chase & Co." />
+                          <option value="Goldman Sachs" />
+                          <option value="Morgan Stanley" />
+                          <option value="HSBC" />
+                          <option value="Barclays" />
+                          <option value="Siemens Healthineers" />
+                        </datalist>
                       </div>
 
                       <div>
