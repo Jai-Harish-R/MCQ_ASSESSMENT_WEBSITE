@@ -1123,7 +1123,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                                     
                                     return (
                                       <div key={t.id} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr', gap: '8px', fontSize: '11px', textAlign: 'left', alignItems: 'center' }}>
-                                        <span style={{ color: '#0f172a', fontWeight: '700', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={t.title}>{t.title}</span>
+                                        <HoverableTestTitle title={t.title} />
                                         <span style={{ color: '#64748b' }}>{t.short_id || '-'}</span>
                                         <span style={{ color: '#64748b', fontWeight: '600' }}>{tAttempts.length}</span>
                                         <span style={{ color: passes > 0 ? '#16a34a' : '#64748b', fontWeight: '600' }}>{passes}</span>
@@ -1794,7 +1794,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                                 </div>
                               </td>
                               <td style={{ color: '#64748b' }}>{(att as any).display_id !== undefined ? `ID: ${(att as any).display_id}` : 'LOADING...'}</td>
-                              <td>{att.test_title}</td>
+                              <td><HoverableTestTitle title={att.test_title?.replace(/\s*-.*$/, '') || 'Assessment'} shortId={att.short_id} /></td>
                               <td style={{ fontWeight: '700' }}>{att.score} / {att.total_questions}</td>
                               <td>{pct}%</td>
                               <td>

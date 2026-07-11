@@ -1446,7 +1446,7 @@ Content-Type: text/html; charset=UTF-8
                                         const attemptNum = getAttemptNumber(att);
                                         return (
                                           <div key={att.id} style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr 1.2fr', gap: '8px', fontSize: '11px', alignItems: 'center' }}>
-                                            <div style={{ fontWeight: '700', color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{att.test_title?.replace(/\s*-.*$/, '')}</div>
+                                            <div style={{ fontWeight: '700', color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}><HoverableTestTitle title={testD?.title || att.test_title?.replace(/\s*-.*$/, '') || 'Assessment'} /></div>
                                             <div style={{ color: '#64748b' }}>{testD?.short_id || '-'}</div>
                                             <div style={{ color: '#64748b' }}>{attemptNum}</div>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -1679,7 +1679,7 @@ Content-Type: text/html; charset=UTF-8
                               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                 <Icon size={16} color={fg} />
                                 <span style={{ fontSize: '13px', fontWeight: '600', color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '180px' }}>
-                                  {attempt.test_title || 'Assessment'} submitted
+                                  <HoverableTestTitle title={testD?.title || attempt.test_title?.replace(/\s*-.*$/, '') || 'Assessment'} shortId={testD?.short_id} /> submitted
                                 </span>
                               </div>
                               <span style={{ fontSize: '12px', color: '#94a3b8', fontWeight: '500', whiteSpace: 'nowrap' }}>
@@ -2134,7 +2134,7 @@ Content-Type: text/html; charset=UTF-8
                                     const attemptNum = getAttemptNumber(att);
                                     return (
                                       <div key={att.id} style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr 1.2fr', gap: '8px', fontSize: '11px', alignItems: 'center' }}>
-                                        <div style={{ fontWeight: '700', color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{att.test_title?.replace(/\s*-.*$/, '')}</div>
+                                        <div style={{ fontWeight: '700', color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}><HoverableTestTitle title={testD?.title || att.test_title?.replace(/\s*-.*$/, '') || 'Assessment'} /></div>
                                         <div style={{ color: '#64748b' }}>{testD?.short_id || '-'}</div>
                                         <div style={{ color: '#64748b' }}>{attemptNum}</div>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -2197,7 +2197,7 @@ Content-Type: text/html; charset=UTF-8
                                   <Icon size={24} />
                                 </div>
                                 <div>
-                                  <h4 style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a', margin: '0 0 4px 0' }}>{latestAttempt.test_title || 'Assessment'}</h4>
+                                  <h4 style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a', margin: '0 0 4px 0' }}><HoverableTestTitle title={latestAttempt.test_title?.replace(/\s*-.*$/, '') || 'Assessment'} shortId={testAttempts[0]?.short_id} /></h4>
                                   <div style={{ fontSize: '12px', color: '#64748b', fontWeight: '500' }}>
                                     {testAttempts.length} Attempt{testAttempts.length !== 1 ? 's' : ''}
                                   </div>
@@ -2303,7 +2303,7 @@ Content-Type: text/html; charset=UTF-8
                             </div>
                             <div>
                               <h4 style={{ fontSize: '15px', fontWeight: '700', color: '#0f172a', margin: '0 0 4px 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '250px' }}>
-                                {attempt.test_title || 'Assessment'}
+                                <HoverableTestTitle title={attempt.test_title?.replace(/\s*-.*$/, '') || 'Assessment'} shortId={attempt.short_id} />
                               </h4>
                               <div style={{ fontSize: '12px', color: '#64748b', fontWeight: '500' }}>
                                 {typeName} • {attempt.total_questions} Questions
