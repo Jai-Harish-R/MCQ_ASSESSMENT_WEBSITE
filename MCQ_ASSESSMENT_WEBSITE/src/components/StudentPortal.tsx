@@ -214,6 +214,9 @@ export default function StudentPortal({ user, onLogout }: StudentPortalProps) {
   // Timer State (10 minutes)
   const [secondsLeft, setSecondsLeft] = useState(600);
   const timerRef = useRef<any>(null);
+  
+  // Submit Modal State
+  const [showSubmitModal, setShowSubmitModal] = useState(false);
 
   // Result state
   const [score, setScore] = useState<number | null>(null);
@@ -509,8 +512,13 @@ export default function StudentPortal({ user, onLogout }: StudentPortalProps) {
   // Submit Exam
   const handleSubmitExam = async (force = false) => {
     if (!activeTest) return;
-    if (!force && !confirm('Are you sure you want to finish and submit your exam?')) return;
+    
+    if (!force && !showSubmitModal) {
+      setShowSubmitModal(true);
+      return;
+    }
 
+    setShowSubmitModal(false);
     if (timerRef.current) clearInterval(timerRef.current);
     setLoading(true);
 
@@ -939,6 +947,81 @@ Content-Type: text/html; charset=UTF-8
                       </button>
                     );
                   })}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* SUBMIT CONFIRMATION MODAL */}
+          {showSubmitModal && activeTest && (
+            <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+              <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', width: '100%', maxWidth: '600px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)', padding: '32px', maxHeight: '90vh', overflowY: 'auto' }}>
+                <h3 style={{ fontSize: '20px', fontWeight: '800', color: '#0f172a', marginBottom: '16px' }}>Submit Exam Confirmation</h3>
+                
+                {(() => {
+                  const unansweredCount = activeTest.questions.length - Object.keys(answers).length;
+                  if (unansweredCount > 0) {
+                    return (
+                      <div style={{ backgroundColor: '#fef2f2', border: '1px solid #fecaca', padding: '16px', borderRadius: '8px', marginBottom: '24px', display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                        <AlertTriangle size={20} color="#ef4444" style={{ flexShrink: 0, marginTop: '2px' }} />
+                        <div>
+                          <h4 style={{ margin: '0 0 4px 0', fontSize: '14px', fontWeight: '700', color: '#991b1b' }}>Unanswered Questions Warning</h4>
+                          <p style={{ margin: 0, fontSize: '14px', color: '#b91c1c' }}>
+                            You have <strong>{unansweredCount}</strong> unanswered {unansweredCount === 1 ? 'question' : 'questions'}. Are you sure you want to submit your exam now?
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  }
+                  return (
+                    <div style={{ backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', padding: '16px', borderRadius: '8px', marginBottom: '24px', display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                      <CheckCircle2 size={20} color="#3b82f6" style={{ flexShrink: 0, marginTop: '2px' }} />
+                      <div>
+                        <h4 style={{ margin: '0 0 4px 0', fontSize: '14px', fontWeight: '700', color: '#1e40af' }}>Ready to Submit</h4>
+                        <p style={{ margin: 0, fontSize: '14px', color: '#1d4ed8' }}>
+                          You have answered all questions. You can confidently submit your exam.
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                <div style={{ marginBottom: '24px' }}>
+                  <h4 style={{ fontSize: '14px', fontWeight: '700', color: '#334155', marginBottom: '12px' }}>Question Overview</h4>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(40px, 1fr))', gap: '8px' }}>
+                    {activeTest.questions.map((q, idx) => {
+                      const isAnswered = answers[q.id] !== undefined;
+                      const isFlagged = flagged[q.id];
+                      
+                      let bgColor = isAnswered ? 'rgba(59, 130, 246, 0.15)' : 'rgba(239, 68, 68, 0.15)';
+                      let borderColor = isAnswered ? '#93c5fd' : '#fca5a5';
+                      let textColor = isAnswered ? '#1d4ed8' : '#b91c1c';
+
+                      return (
+                        <div key={idx} style={{ 
+                          height: '40px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                          backgroundColor: bgColor, border: `1px solid ${borderColor}`, color: textColor,
+                          fontSize: '13px', fontWeight: '700', position: 'relative'
+                        }}>
+                          {idx + 1}
+                          {isFlagged && (
+                            <div style={{ position: 'absolute', top: '-4px', right: '-4px' }}>
+                              <AlertTriangle size={14} color="#ea580c" fill="#ea580c" />
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '32px' }}>
+                  <button onClick={() => setShowSubmitModal(false)} className="btn btn-secondary" style={{ padding: '10px 24px' }}>
+                    Return to Test
+                  </button>
+                  <button onClick={() => handleSubmitExam(true)} className="btn btn-success" style={{ padding: '10px 24px' }}>
+                    Confirm Submit
+                  </button>
                 </div>
               </div>
             </div>
