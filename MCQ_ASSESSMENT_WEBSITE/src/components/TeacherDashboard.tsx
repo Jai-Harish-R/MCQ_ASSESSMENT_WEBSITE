@@ -110,6 +110,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
   const [targetClass, setTargetClass] = useState('');
   const profession = user.user_metadata?.profession;
   const [accessCode, setAccessCode] = useState('');
+  const [numQuestions, setNumQuestions] = useState<number>(1);
 
   // Advanced config state
   const [passPercentageEnabled, setPassPercentageEnabled] = useState(false);
@@ -423,11 +424,34 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
     e.target.value = '';
   };
 
+  const handleNumQuestionsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let count = parseInt(e.target.value);
+    if (isNaN(count) || count < 1) count = 1;
+    if (count > 200) count = 200; // sane limit
+    
+    setNumQuestions(count);
+    
+    setQuestions(prev => {
+      const newQuestions = [...prev];
+      if (count > newQuestions.length) {
+        // Add new blank questions
+        for (let i = newQuestions.length; i < count; i++) {
+          newQuestions.push({ text: '', options: ['', '', '', ''], correctIndex: 0, imageUrl: '' });
+        }
+      } else if (count < newQuestions.length) {
+        // Truncate
+        newQuestions.length = count;
+      }
+      return newQuestions;
+    });
+  };
+
   const resetForm = () => {
     setTestTitle('');
     setTargetYear('');
     setTargetClass('');
     setAccessCode('');
+    setNumQuestions(1);
     setPassPercentageEnabled(false);
     setMaxAttemptsEnabled(false);
     setPassPercentage(80);
@@ -476,14 +500,17 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
       })) : [{ text: '', options: ['', '', '', ''], correctIndex: 0, imageUrl: '' }];
       
       setQuestions(mappedQuestions);
+      setNumQuestions(mappedQuestions.length);
     } catch (e) {
       console.error('Failed to load correct answers', e);
-      setQuestions(test.questions && test.questions.length > 0 ? test.questions.map(q => ({
+      const mappedQuestions = test.questions && test.questions.length > 0 ? test.questions.map(q => ({
         text: q.text,
         options: q.options,
         correctIndex: 0,
         imageUrl: q.imageUrl || ''
-      })) : [{ text: '', options: ['', '', '', ''], correctIndex: 0, imageUrl: '' }]);
+      })) : [{ text: '', options: ['', '', '', ''], correctIndex: 0, imageUrl: '' }];
+      setQuestions(mappedQuestions);
+      setNumQuestions(mappedQuestions.length);
     }
   };
 
@@ -1263,6 +1290,20 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                     />
                   </div>
                   <div>
+                    <label className="input-label">Number of Questions</label>
+                    <input
+                      type="number"
+                      className="input-field"
+                      value={numQuestions}
+                      onChange={handleNumQuestionsChange}
+                      min={1}
+                      max={200}
+                      disabled={activeTab === 'edit_test'}
+                      title={activeTab === 'edit_test' ? "Number of questions cannot be changed in Edit mode." : ""}
+                      style={{ backgroundColor: activeTab === 'edit_test' ? '#e2e8f0' : '#fff' }}
+                    />
+                  </div>
+                  <div>
                     <label className="input-label">Test Duration (Minutes)</label>
                     <input
                       type="number"
@@ -1408,14 +1449,6 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
               <div className="card">
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--color-outline-variant)', paddingBottom: '12px', marginBottom: '24px' }}>
                   <h3 style={{ fontSize: '16px', fontWeight: '600' }}>MCQ Questions ({questions.length})</h3>
-                  <button
-                    type="button"
-                    onClick={addQuestionField}
-                    className="btn btn-secondary"
-                    style={{ padding: '6px 12px', fontSize: '13px' }}
-                  >
-                    <PlusCircle size={16} /> Add Question
-                  </button>
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
@@ -1423,15 +1456,6 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                     <div key={qIdx} style={{ padding: '24px', border: '1px solid var(--color-outline-variant)', borderRadius: 'var(--radius-md)', backgroundColor: '#f8fafc' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                         <span style={{ fontSize: '12px', fontWeight: '700', color: 'var(--color-primary)' }}>Question #{qIdx + 1}</span>
-                        {questions.length > 1 && (
-                          <button
-                            type="button"
-                            onClick={() => removeQuestionField(qIdx)}
-                            style={{ background: 'none', border: 'none', color: 'var(--color-error)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px' }}
-                          >
-                            <Trash2 size={14} /> Remove
-                          </button>
-                        )}
                       </div>
 
                       <div style={{ marginBottom: '16px' }}>
