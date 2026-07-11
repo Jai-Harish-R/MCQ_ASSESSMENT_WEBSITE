@@ -91,6 +91,8 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
   const [selectedReportTestId, setSelectedReportTestId] = useState<string>('');
   const [sortConfig, setSortConfig] = useState<'name_asc' | 'name_desc' | 'mark_asc' | 'mark_desc' | ''>('');
   const [leaderboardAttempts, setLeaderboardAttempts] = useState<Attempt[]>([]);
+  const [showAllTests, setShowAllTests] = useState(false);
+  const [hoveredDateStr, setHoveredDateStr] = useState<string | null>(null);
 
   // Test form state
   const [testTitle, setTestTitle] = useState('');
@@ -567,11 +569,19 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
   };
 
   // Stats
-  const totalTests = tests.length;
+  const activeTestsCount = tests.filter(t => !t.access_end || new Date(t.access_end) > new Date()).length;
   const totalAttempts = attempts.length;
-  const classAvg = totalAttempts > 0 
-    ? Math.round((attempts.reduce((sum, att) => sum + (att.score / att.total_questions), 0) / totalAttempts) * 100)
-    : 0;
+  const classTotal = new Set(attempts.map(a => a.student_email)).size;
+  
+  // Calendar variables
+  const getDaysInMonth = (year: number, month: number) => new Date(year, month + 1, 0).getDate();
+  const getFirstDayOfMonth = (year: number, month: number) => new Date(year, month, 1).getDay();
+  const daysInMonth = getDaysInMonth(currentMonth.getFullYear(), currentMonth.getMonth());
+  const firstDay = getFirstDayOfMonth(currentMonth.getFullYear(), currentMonth.getMonth());
+  const getLocalDateStr = (dateVal: Date | string) => {
+    const d = new Date(dateVal);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  };
 
   return (
     <div className="edu-app-frame">
@@ -703,8 +713,8 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                   const myProfile = allProfiles.find(p => p.id === user.id);
                   const teacherName = myProfile?.full_name || user.user_metadata?.full_name || user.email.split('@')[0] || 'Teacher';
                   
-                  const roleTxt = myProfile?.department || myProfile?.designation || myProfile?.profession || 'Examiner';
-                  const instTxt = myProfile?.institution_name || 'Organization';
+                  const roleTxt = myProfile?.designation || 'Examiner';
+                  const instTxt = myProfile?.institution_name || 'a Organization';
                   const subtitleText = `${roleTxt} in ${instTxt}`;
 
                   return (
@@ -727,7 +737,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                   </div>
                   <div>
                     <span style={{ fontSize: '11px', color: 'var(--color-on-surface-variant)', fontWeight: '600', textTransform: 'uppercase' }}>Active Tests</span>
-                    <h3 style={{ fontSize: '24px', fontWeight: '700', marginTop: '2px' }}>{totalTests}</h3>
+                    <h3 style={{ fontSize: '24px', fontWeight: '700', marginTop: '2px' }}>{activeTestsCount}</h3>
                   </div>
                 </div>
 
@@ -737,18 +747,101 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                   </div>
                   <div>
                     <span style={{ fontSize: '11px', color: 'var(--color-on-surface-variant)', fontWeight: '600', textTransform: 'uppercase' }}>Submissions</span>
-                    <h3 style={{ fontSize: '24px', fontWeight: '700', marginTop: '2px' }}>{totalAttempts}</h3>
+                    <h3 style={{ fontSize: '24px', fontWeight: '700', marginTop: '2px' }}>{totalAttempts === 0 ? '-' : totalAttempts} <span style={{ fontSize: '14px', color: '#64748b' }}>/ {classTotal}</span></h3>
                   </div>
                 </div>
+              </div>
 
-                <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                  <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: 'var(--color-success-container)', color: 'var(--color-success)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Award size={20} />
+              {/* Monthly Calendar */}
+              <div className="card" style={{ padding: '24px', display: 'flex', flexDirection: 'column' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+                  <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#0f172a', margin: 0 }}>{currentMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}</h3>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button onClick={() => setCurrentMonth(new Date())} style={{ padding: '6px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', backgroundColor: '#ffffff', fontSize: '13px', fontWeight: '600', color: '#0f172a', cursor: 'pointer' }}>Today</button>
+                    <button onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1))} style={{ padding: '6px 10px', borderRadius: '8px', border: '1px solid #e2e8f0', backgroundColor: '#ffffff', fontSize: '13px', fontWeight: '600', color: '#0f172a', cursor: 'pointer' }}>&lt;</button>
+                    <button onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1))} style={{ padding: '6px 10px', borderRadius: '8px', border: '1px solid #e2e8f0', backgroundColor: '#ffffff', fontSize: '13px', fontWeight: '600', color: '#0f172a', cursor: 'pointer' }}>&gt;</button>
                   </div>
-                  <div>
-                    <span style={{ fontSize: '11px', color: 'var(--color-on-surface-variant)', fontWeight: '600', textTransform: 'uppercase' }}>Class Average</span>
-                    <h3 style={{ fontSize: '24px', fontWeight: '700', marginTop: '2px' }}>{classAvg}%</h3>
-                  </div>
+                </div>
+                
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '8px', textAlign: 'center', marginBottom: '12px' }}>
+                  {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+                    <div key={day} style={{ fontSize: '12px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase' }}>{day}</div>
+                  ))}
+                </div>
+                
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '8px', flex: 1 }}>
+                  {Array.from({ length: 42 }).map((_, i) => {
+                    const dateNum = i - firstDay + 1;
+                    const isCurrentMonth = dateNum > 0 && dateNum <= daysInMonth;
+                    const displayNum = isCurrentMonth ? dateNum : (dateNum <= 0 ? getDaysInMonth(currentMonth.getFullYear(), currentMonth.getMonth() - 1) + dateNum : dateNum - daysInMonth);
+                    const year = currentMonth.getFullYear();
+                    const month = currentMonth.getMonth();
+                    
+                    const currentDateString = getLocalDateStr(new Date(year, isCurrentMonth ? month : (dateNum <= 0 ? month - 1 : month + 1), displayNum));
+                    const isToday = isCurrentMonth && displayNum === new Date().getDate() && month === new Date().getMonth() && year === new Date().getFullYear();
+                    
+                    const dayTests = tests.filter(t => getLocalDateStr(t.created_at) === currentDateString);
+
+                    return (
+                      <div key={i} className="calendar-hover-wrapper"
+                        onMouseEnter={() => setHoveredDateStr(currentDateString)}
+                        onMouseLeave={() => setHoveredDateStr(null)}
+                        style={{ 
+                          position: 'relative', padding: '12px 0 24px', fontSize: '14px', fontWeight: '600', 
+                          color: isCurrentMonth ? (isToday ? '#ea580c' : '#0f172a') : '#cbd5e1',
+                          backgroundColor: isToday ? '#fff7ed' : 'transparent',
+                          borderRadius: '12px', cursor: 'pointer',
+                          display: 'flex', flexDirection: 'column', alignItems: 'center'
+                        }}>
+                        {displayNum}
+                        
+                        {dayTests.length > 0 && (
+                          <>
+                            <div style={{ position: 'absolute', bottom: '8px', display: 'flex', gap: '4px' }}>
+                              {dayTests.map((t, idx) => (
+                                <div key={idx} style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#ea580c' }}></div>
+                              ))}
+                            </div>
+                            
+                            {hoveredDateStr === currentDateString && (
+                              <div className="calendar-hover-card" style={{ display: 'block', zIndex: 100, width: '320px', padding: '16px' }}>
+                                <div style={{ fontSize: '12px', fontWeight: '800', color: '#0f172a', marginBottom: '8px', paddingBottom: '4px', borderBottom: '1px solid #e2e8f0' }}>
+                                  {new Date(currentDateString).toLocaleDateString()}
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                  {dayTests.map(t => {
+                                    const tAttempts = attempts.filter(a => a.test_id === t.id);
+                                    const passThreshold = t.pass_percentage || 80;
+                                    let passes = 0, fails = 0;
+                                    tAttempts.forEach(a => {
+                                      const pct = Math.round((a.score / a.total_questions) * 100);
+                                      if (pct >= passThreshold) passes++; else fails++;
+                                    });
+                                    const isLive = !t.access_end || new Date(t.access_end) > new Date();
+                                    
+                                    return (
+                                      <div key={t.id} style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '11px', textAlign: 'left' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: '700' }}>
+                                          <span style={{ color: '#0f172a' }}>{t.title}</span>
+                                          <span style={{ color: isLive ? '#16a34a' : '#ef4444' }}>{isLive ? 'Live' : 'Ended'}</span>
+                                        </div>
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1.2fr', color: '#64748b' }}>
+                                          <span>ID: {t.short_id || '-'}</span>
+                                          <span>Att: {tAttempts.length}</span>
+                                          <span style={{ color: passes > 0 ? '#16a34a' : 'inherit' }}>Pass: {passes}</span>
+                                          <span style={{ color: fails > 0 ? '#ef4444' : 'inherit' }}>Fail: {fails}</span>
+                                        </div>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            )}
+                          </>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -761,7 +854,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                   </div>
                 ) : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    {tests.map(test => (
+                    {tests.slice(0, showAllTests ? tests.length : 5).map(test => (
                       <div key={test.id} style={{ display: 'flex', justifySelf: 'stretch', justifyContent: 'space-between', alignItems: 'center', padding: '16px', border: '1px solid var(--color-outline-variant)', borderRadius: 'var(--radius-default)' }}>
                         <div>
                           <h4 style={{ fontSize: '15px', fontWeight: '600' }}>{test.title} {test.short_id ? `- ${test.short_id}` : ''}</h4>
@@ -791,6 +884,14 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                         </div>
                       </div>
                     ))}
+                    
+                    {tests.length > 5 && (
+                      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '8px' }}>
+                        <button onClick={() => setShowAllTests(!showAllTests)} style={{ backgroundColor: 'transparent', border: 'none', color: 'var(--color-primary)', fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}>
+                          {showAllTests ? 'Show Less' : 'View All Assessments'}
+                        </button>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
