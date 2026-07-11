@@ -11,6 +11,7 @@ import animeAvatar from '../assets/anime_avatar.png';
 import studentAvatar from '../assets/student_avatar.png';
 import ProfileModal from './ProfileModal';
 import HoverableTestTitle from './HoverableTestTitle';
+import * as XLSX from 'xlsx';
 
 const getLocalDateStr = (d: Date | string | number) => {
   const date = new Date(d);
@@ -189,34 +190,40 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
     return 'Live';
   };
 
-  const exportToCSV = () => {
+  const exportToExcel = () => {
     if (exportSelectedTests.length === 0) {
       setMsg({ type: 'error', text: 'Please select at least one test to export.' });
       return;
     }
     const attemptsToExport = attempts.filter(att => exportSelectedTests.includes(att.test_id));
     
-    // Build CSV
-    let csvContent = "Test Title,Test Date,Student Name,Student Email,Student ID,Score,Total Questions,Pass/Fail,Completed At\n";
-    attemptsToExport.forEach(att => {
+    // Build Excel Data
+    const data = attemptsToExport.map(att => {
       const test = tests.find(t => t.id === att.test_id);
       const profile = allProfiles.find(p => p.email === att.student_email);
       const studentName = profile?.full_name || 'Unknown';
       const studentId = profile?.short_id || '-';
       const passPct = test?.pass_percentage || 80;
       const isPass = Math.round((att.score / att.total_questions) * 100) >= passPct ? 'Pass' : 'Fail';
-      const row = `"${(test?.title || '').replace(/"/g, '""')}","${getLocalDateStr(test?.access_start || test?.created_at || new Date())}","${studentName.replace(/"/g, '""')}","${att.student_email}","${studentId}",${att.score},${att.total_questions},"${isPass}","${new Date(att.completed_at).toLocaleString()}"`;
-      csvContent += row + "\n";
+      
+      return {
+        "Test Title": test?.title || '',
+        "Test Date": getLocalDateStr(test?.access_start || test?.created_at || new Date()),
+        "Student Name": studentName,
+        "Student Email": att.student_email,
+        "Student ID": studentId,
+        "Score": att.score,
+        "Total Questions": att.total_questions,
+        "Pass/Fail": isPass,
+        "Completed At": new Date(att.completed_at).toLocaleString()
+      };
     });
 
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.setAttribute("href", url);
-    link.setAttribute("download", `examinee_results_export_${new Date().getTime()}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Examinee Results");
+    
+    XLSX.writeFile(workbook, `examinee_results_export_${new Date().getTime()}.xlsx`);
     setIsExportModalOpen(false);
   };
 
@@ -2246,7 +2253,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                 Cancel
               </button>
               <button 
-                onClick={exportToCSV}
+                onClick={exportToExcel}
                 className="btn btn-primary"
                 style={{ padding: '10px 20px', fontSize: '14px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px' }}
                 disabled={exportSelectedTests.length === 0}
