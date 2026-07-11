@@ -451,6 +451,7 @@ if (countryCode === '+966' && cleanPhone.length !== 9) {
                         <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#475569', marginBottom: '8px' }}>College Name</label>
                         <input type="text" list="college-options" style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc', fontSize: '15px', color: '#0f172a', outline: 'none', boxSizing: 'border-box' }} placeholder="Select or search college name" value={institutionName} onChange={(e) => setInstitutionName(e.target.value)} disabled={loading} required autoComplete="off" />
                         <datalist id="college-options">
+                          <option value="Saveetha Engineering College" />
                           <option value="Anna University" />
                           <option value="Indian Institute of Technology Madras" />
                           <option value="National Institute of Technology Tiruchirappalli" />
@@ -542,6 +543,7 @@ if (countryCode === '+966' && cleanPhone.length !== 9) {
                         <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#475569', marginBottom: '8px' }}>Company Name</label>
                         <input type="text" list="company-options" style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc', fontSize: '15px', color: '#0f172a', outline: 'none', boxSizing: 'border-box' }} placeholder="Select or search company name" value={institutionName} onChange={(e) => setInstitutionName(e.target.value)} disabled={loading} required autoComplete="off" />
                         <datalist id="company-options">
+                          <option value="CodersFun" />
                           <option value="Tata Consultancy Services (TCS)" />
                           <option value="Infosys" />
                           <option value="Wipro" />
@@ -695,13 +697,54 @@ if (countryCode === '+966' && cleanPhone.length !== 9) {
                 {isSignUp ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}
               </button>
             </div>
-
-
-
           </div>
         </div>
 
       </main>
+
+      {/* Error/Success Modal Overlay */}
+      {(errorMsg || successMsg) && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(15, 23, 42, 0.4)', backdropFilter: 'blur(4px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000
+        }}>
+          <div style={{
+            backgroundColor: '#ffffff', borderRadius: '16px', padding: '32px', width: '400px',
+            maxWidth: '90%', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '16px'
+          }}>
+            {errorMsg ? (
+              <div style={{ width: '48px', height: '48px', borderRadius: '50%', backgroundColor: '#fef2f2', color: '#dc2626', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <AlertCircle size={24} />
+              </div>
+            ) : (
+              <div style={{ width: '48px', height: '48px', borderRadius: '50%', backgroundColor: '#f0fdf4', color: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <CheckCircle2 size={24} />
+              </div>
+            )}
+            
+            <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#0f172a', margin: 0 }}>
+              {errorMsg ? 'Notice' : 'Success'}
+            </h3>
+            
+            <p style={{ fontSize: '15px', color: '#475569', margin: 0, lineHeight: '1.5' }}>
+              {errorMsg ? (typeof errorMsg === 'object' ? JSON.stringify(errorMsg) : String(errorMsg)) : (typeof successMsg === 'object' ? JSON.stringify(successMsg) : String(successMsg))}
+            </p>
+            
+            <button
+              onClick={() => { setErrorMsg(''); setSuccessMsg(''); }}
+              style={{
+                marginTop: '16px', width: '100%', padding: '12px', backgroundColor: '#f1f5f9',
+                color: '#0f172a', border: 'none', borderRadius: '12px', fontSize: '15px',
+                fontWeight: '600', cursor: 'pointer', transition: 'background-color 0.2s'
+              }}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
