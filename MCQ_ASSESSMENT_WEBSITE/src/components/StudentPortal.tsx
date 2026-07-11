@@ -1200,7 +1200,8 @@ Content-Type: text/html; charset=UTF-8
             <img src={currentAvatar} alt="Student" style={{ width: '40px', height: '40px', borderRadius: '50%', border: '2px solid #e2e8f0', objectFit: 'cover' }} />
             <div style={{ flex: 1, overflow: 'hidden' }}>
               <div style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{currentName || 'jhgno.official'}</div>
-              <div style={{ fontSize: '12px', color: '#64748b', fontWeight: '700', letterSpacing: '0.05em' }}>ID: {allProfiles.find(p => p.email === user.email)?.short_id || '-'}</div>
+              <div style={{ fontSize: '12px', color: '#64748b', fontWeight: '600', textTransform: 'uppercase' }}>{allProfiles.find(p => p.email === user.email)?.designation || 'EXAMINEE'}</div>
+              <div style={{ fontSize: '11px', color: '#94a3b8', fontWeight: '700', letterSpacing: '0.05em' }}>ID - {allProfiles.find(p => p.email === user.email)?.short_id || '-'}</div>
             </div>
             <ChevronDown size={16} color="#94a3b8" />
           </div>

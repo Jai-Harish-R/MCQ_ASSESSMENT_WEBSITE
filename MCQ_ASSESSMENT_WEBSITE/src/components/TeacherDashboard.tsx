@@ -848,7 +848,8 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
             <img className="sidebar-profile-avatar" src={currentAvatar} alt="Teacher Avatar" style={{ objectFit: 'cover' }} />
             <div className="sidebar-profile-info">
               <span className="sidebar-profile-name">{currentName || 'jhgno.official'}</span>
-              <span className="sidebar-profile-role">ID: {allProfiles.find(p => p.email === user.email)?.short_id || '-'}</span>
+              <span className="sidebar-profile-role" style={{ textTransform: 'uppercase', marginBottom: '2px' }}>{allProfiles.find(p => p.email === user.email)?.designation || 'EXAMINER'}</span>
+              <span className="sidebar-profile-role" style={{ fontSize: '11px', color: '#94a3b8' }}>ID - {allProfiles.find(p => p.email === user.email)?.short_id || '-'}</span>
             </div>
           </div>
 
@@ -1074,7 +1075,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                     const currentDateString = getLocalDateStr(new Date(year, isCurrentMonth ? month : (dateNum <= 0 ? month - 1 : month + 1), displayNum));
                     const isToday = isCurrentMonth && displayNum === new Date().getDate() && month === new Date().getMonth() && year === new Date().getFullYear();
                     
-                    const dayTests = tests.filter(t => getLocalDateStr(t.created_at) === currentDateString);
+                    const dayTests = tests.filter(t => getLocalDateStr(t.access_start || t.created_at) === currentDateString);
 
                     return (
                       <div key={i} className="calendar-hover-wrapper"
