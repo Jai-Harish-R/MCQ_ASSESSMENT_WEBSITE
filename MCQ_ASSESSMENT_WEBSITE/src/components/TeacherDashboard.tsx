@@ -1715,9 +1715,13 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
               </div>
 
               <div className="card" style={{ }}>
-                {attempts.length === 0 ? (
+                {!selectedReportTestId ? (
                   <div style={{ textAlign: 'center', padding: '32px', color: 'var(--color-on-surface-variant)' }}>
-                    No attempts submitted yet.
+                    Please select a test from the dropdown to view examinee results.
+                  </div>
+                ) : attempts.filter(att => att.test_id === selectedReportTestId).length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '32px', color: 'var(--color-on-surface-variant)' }}>
+                    No attempts submitted yet for this test.
                   </div>
                 ) : (
                   <div className="table-container">
@@ -1737,7 +1741,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                       </thead>
                       <tbody>
                         {(() => {
-                           const filtered = attempts.filter(att => selectedReportTestId ? att.test_id === selectedReportTestId : true);
+                           const filtered = attempts.filter(att => att.test_id === selectedReportTestId);
                            const grouped = new Map();
                            for (const att of filtered) {
                              const key = `${att.test_id}-${att.student_email}`;
