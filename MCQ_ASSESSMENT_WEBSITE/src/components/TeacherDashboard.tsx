@@ -802,9 +802,16 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
 
   // Stats
   const now = new Date();
-  const notStartedTestsCount = tests.filter(t => t.access_start && new Date(t.access_start) > now).length;
-  const inactiveTestsCount = tests.filter(t => t.access_end && new Date(t.access_end) <= now).length;
-  const activeTestsCount = tests.length - notStartedTestsCount - inactiveTestsCount;
+  const testsInMonth = tests.filter(t => {
+    const dateStr = t.access_start || t.created_at;
+    if (!dateStr) return false;
+    const d = new Date(dateStr);
+    return d.getMonth() === currentMonth.getMonth() && d.getFullYear() === currentMonth.getFullYear();
+  });
+  
+  const notStartedTestsCount = testsInMonth.filter(t => t.access_start && new Date(t.access_start) > now).length;
+  const inactiveTestsCount = testsInMonth.filter(t => t.access_end && new Date(t.access_end) <= now).length;
+  const activeTestsCount = testsInMonth.length - notStartedTestsCount - inactiveTestsCount;
   
   // Calendar variables
   const getDaysInMonth = (year: number, month: number) => new Date(year, month + 1, 0).getDate();
@@ -841,7 +848,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
             <img className="sidebar-profile-avatar" src={currentAvatar} alt="Teacher Avatar" style={{ objectFit: 'cover' }} />
             <div className="sidebar-profile-info">
               <span className="sidebar-profile-name">{currentName || 'jhgno.official'}</span>
-              <span className="sidebar-profile-role">EDUCATOR PORTAL</span>
+              <span className="sidebar-profile-role">ID: {allProfiles.find(p => p.email === user.email)?.short_id || '-'}</span>
             </div>
           </div>
 
@@ -990,7 +997,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                   const myProfile = allProfiles.find(p => p.id === user.id);
                   const teacherName = myProfile?.full_name || user.user_metadata?.full_name || user.email.split('@')[0] || 'Teacher';
                   
-                  const roleTxt = myProfile?.designation || 'Examiner';
+                  const roleTxt = `ID: ${myProfile?.short_id || '-'}`;
                   const instTxt = myProfile?.institution_name || 'a Organization';
                   const subtitleText = `${roleTxt} in ${instTxt}`;
 
@@ -1100,9 +1107,10 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                                   {new Date(currentDateString).toLocaleDateString()}
                                 </div>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                  <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr', gap: '8px', fontSize: '9px', fontWeight: '800', color: '#94a3b8', textTransform: 'uppercase', paddingBottom: '4px', borderBottom: '1px dashed #e2e8f0' }}>
+                                  <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1.5fr 1fr 1fr 1fr 1fr', gap: '8px', fontSize: '9px', fontWeight: '800', color: '#94a3b8', textTransform: 'uppercase', paddingBottom: '4px', borderBottom: '1px dashed #e2e8f0' }}>
                                     <span>Exam Name</span>
                                     <span>ID</span>
+                                    <span>Code</span>
                                     <span>Att</span>
                                     <span>Pass</span>
                                     <span>Fail</span>
@@ -1122,9 +1130,10 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                                     if (statusStr === 'Not Started') statusColor = '#f59e0b';
                                     
                                     return (
-                                      <div key={t.id} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr', gap: '8px', fontSize: '11px', textAlign: 'left', alignItems: 'center' }}>
+                                      <div key={t.id} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1.5fr 1fr 1fr 1fr 1fr', gap: '8px', fontSize: '11px', textAlign: 'left', alignItems: 'center' }}>
                                         <HoverableTestTitle title={t.title} />
                                         <span style={{ color: '#64748b' }}>{t.short_id || '-'}</span>
+                                        <span style={{ color: '#0f172a', fontWeight: '600' }}>{t.access_code || '-'}</span>
                                         <span style={{ color: '#64748b', fontWeight: '600' }}>{tAttempts.length}</span>
                                         <span style={{ color: passes > 0 ? '#16a34a' : '#64748b', fontWeight: '600' }}>{passes}</span>
                                         <span style={{ color: fails > 0 ? '#ef4444' : '#64748b', fontWeight: '600' }}>{fails}</span>
