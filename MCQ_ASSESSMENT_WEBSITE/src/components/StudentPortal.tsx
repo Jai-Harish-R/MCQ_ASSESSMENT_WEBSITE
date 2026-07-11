@@ -237,7 +237,12 @@ export default function StudentPortal({ user, onLogout }: StudentPortalProps) {
     try {
       
         const { data: profilesData } = await supabase.from('profiles').select('*');
-        if (profilesData) setAllProfiles(profilesData);
+        if (profilesData) {
+          setAllProfiles(profilesData);
+          const myProfile = profilesData.find(p => p.id === user.id);
+          if (myProfile?.full_name) setCurrentName(myProfile.full_name);
+          if (myProfile?.avatar_url) setCurrentAvatar(myProfile.avatar_url);
+        }
 
         // Load attempts from Supabase
         const { data: attemptsData, error: attemptsErr } = await supabase
@@ -1524,8 +1529,9 @@ Content-Type: text/html; charset=UTF-8
                         <div style={{ fontSize: '13px', color: '#64748b', textAlign: 'center', padding: '20px' }}>No recent activity found.</div>
                       ) : (
                         myAttempts.slice(0, showAllRecentActivity ? myAttempts.length : 8).map(attempt => {
+                          const testD = availableTests.find(t => t.id === attempt.test_id);
                           const pct = (attempt.score / attempt.total_questions) * 100;
-                          const isPassed = pct >= 40;
+                          const isPassed = pct >= (testD?.pass_percentage || 80);
                           
                           let fg = isPassed ? '#16a34a' : '#ea580c';
                           let Icon = isPassed ? CheckCircle2 : AlertCircle;
