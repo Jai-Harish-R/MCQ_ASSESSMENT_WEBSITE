@@ -5,11 +5,11 @@ interface HoverableTestTitleProps {
   shortId?: number | string;
   questionsCount?: number;
   duration?: number;
-  type?: string;
+  testCode?: string;
   customStyle?: React.CSSProperties;
 }
 
-export default function HoverableTestTitle({ title, shortId, questionsCount, duration, type, customStyle }: HoverableTestTitleProps) {
+export default function HoverableTestTitle({ title, shortId, questionsCount, duration, testCode, customStyle }: HoverableTestTitleProps) {
   const [isHovered, setIsHovered] = useState(false);
 
   const truncatedTitle = title.length > 14 ? title.substring(0, 14) + '...' : title;
@@ -54,8 +54,14 @@ export default function HoverableTestTitle({ title, shortId, questionsCount, dur
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
             {shortId && (
               <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '700', textTransform: 'uppercase' }}>Short ID</span>
+                <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '700', textTransform: 'uppercase' }}>Test ID</span>
                 <span style={{ fontSize: '14px', color: '#0f172a', fontWeight: '700' }}>{shortId}</span>
+              </div>
+            )}
+            {testCode && (
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '700', textTransform: 'uppercase' }}>Test Code</span>
+                <span style={{ fontSize: '14px', color: '#0f172a', fontWeight: '700' }}>{testCode}</span>
               </div>
             )}
             {questionsCount !== undefined && (
@@ -68,12 +74,6 @@ export default function HoverableTestTitle({ title, shortId, questionsCount, dur
               <div style={{ display: 'flex', flexDirection: 'column' }}>
                 <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '700', textTransform: 'uppercase' }}>Duration</span>
                 <span style={{ fontSize: '14px', color: '#0f172a', fontWeight: '700' }}>{duration} mins</span>
-              </div>
-            )}
-            {type && (
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '700', textTransform: 'uppercase' }}>Type</span>
-                <span style={{ fontSize: '14px', color: '#0f172a', fontWeight: '700', textTransform: 'capitalize' }}>{type}</span>
               </div>
             )}
           </div>

@@ -857,7 +857,7 @@ Content-Type: text/html; charset=UTF-8
                     shortId={activeTest.short_id}
                     questionsCount={activeTest.questions?.length || 0}
                     duration={activeTest.duration}
-                    type={activeTest.type}
+                    testCode={activeTest.access_code}
                     customStyle={{ fontSize: '18px', fontWeight: '700', color: 'var(--color-primary)', marginTop: '2px' }}
                   />
                 </div>
@@ -2341,6 +2341,7 @@ Content-Type: text/html; charset=UTF-8
                           <div>
                             <HoverableTestTitle 
                               title={selectedTest.title}
+                              testCode={selectedTest.access_code}
                               shortId={selectedTest.short_id}
                               questionsCount={selectedTest.questions?.length || 0}
                               duration={selectedTest.duration}

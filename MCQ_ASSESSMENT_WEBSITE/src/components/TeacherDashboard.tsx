@@ -907,7 +907,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                             shortId={test.short_id} 
                             questionsCount={test.questions?.length || 0} 
                             duration={test.duration} 
-                            type={test.type}
+                            testCode={test.access_code}
                             customStyle={{ fontSize: '15px', fontWeight: '600' }} 
                           />
                           <div style={{ display: 'flex', gap: '16px', marginTop: '4px', fontSize: '12px', color: 'var(--color-on-surface-variant)' }}>
@@ -1365,7 +1365,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                       shortId={selectedReportTestId && tests.find(t => t.id === selectedReportTestId)?.short_id}
                       questionsCount={selectedReportTestId ? tests.find(t => t.id === selectedReportTestId)?.questions?.length : undefined}
                       duration={selectedReportTestId ? tests.find(t => t.id === selectedReportTestId)?.duration : undefined}
-                      type={selectedReportTestId ? tests.find(t => t.id === selectedReportTestId)?.type : undefined}
+                      testCode={selectedReportTestId ? tests.find(t => t.id === selectedReportTestId)?.access_code : undefined}
                       customStyle={{ fontSize: '16px', fontWeight: '700', color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'block' }}
                     />
                   </div>
@@ -1570,7 +1570,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                               shortId={selectedTest.short_id}
                               questionsCount={selectedTest.questions?.length || 0}
                               duration={selectedTest.duration}
-                              type={selectedTest.type}
+                              testCode={selectedTest.access_code}
                               customStyle={{ fontSize: '15px', fontWeight: '700', color: '#0f172a' }}
                             />
                             <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>{selectedTest.questions?.length || 0} Questions • MCQ Test</div>
