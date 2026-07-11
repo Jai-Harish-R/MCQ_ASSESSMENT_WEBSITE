@@ -43,6 +43,7 @@ interface Test {
   max_attempts?: number;
   short_id?: number;
   type?: string;
+  shuffle_questions?: boolean;
 }
 
 interface Attempt {
@@ -124,6 +125,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
   const [accessEnd, setAccessEnd] = useState('');
   const [allowedEmailsInput, setAllowedEmailsInput] = useState('');
   const [strictValidation, setStrictValidation] = useState(false);
+  const [shuffleQuestions, setShuffleQuestions] = useState(false);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -414,12 +416,11 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
           throw new Error("No questions found.");
         }
 
-        if (imported.length > numQuestions) {
-          imported = imported.slice(0, numQuestions);
-          setMsg({ type: 'success', text: `QUESTION IMPORTED : ${numQuestions}\nTOTAL QUESTION : ${numQuestions}` });
-        } else {
+        if (imported.length < numQuestions) {
           setNumQuestions(imported.length);
           setMsg({ type: 'success', text: `QUESTION IMPORTED : ${imported.length}\nTOTAL QUESTION : ${imported.length}` });
+        } else {
+          setMsg({ type: 'success', text: `QUESTION IMPORTED : ${imported.length}\nTOTAL QUESTION : ${numQuestions}` });
         }
 
         setQuestions(imported);
@@ -442,14 +443,12 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
     setQuestions(prev => {
       const newQuestions = [...prev];
       if (count > newQuestions.length) {
-        // Add new blank questions
+        // Add new blank questions if specified count exceeds pool
         for (let i = newQuestions.length; i < count; i++) {
           newQuestions.push({ text: '', options: ['', '', '', ''], correctIndex: 0, imageUrl: '' });
         }
-      } else if (count < newQuestions.length) {
-        // Truncate
-        newQuestions.length = count;
       }
+      // DO NOT truncate here to preserve the question bank!
       return newQuestions;
     });
   };
@@ -470,6 +469,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
     setAccessEnd('');
     setAllowedEmailsInput('');
     setStrictValidation(false);
+    setShuffleQuestions(false);
     setQuestions([{ text: '', options: ['', '', '', ''], correctIndex: 0, imageUrl: '' }]);
   };
 
@@ -490,6 +490,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
     setAccessEnd(test.access_end ? new Date(test.access_end).toISOString().slice(0,16) : '');
     setAllowedEmailsInput(test.allowed_emails ? test.allowed_emails.join(', ') : '');
     setStrictValidation(!!test.allowed_emails && test.allowed_emails.length > 0);
+    setShuffleQuestions(test.shuffle_questions || false);
     
     try {
       const { data: answerData } = await supabase
@@ -508,7 +509,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
       })) : [{ text: '', options: ['', '', '', ''], correctIndex: 0, imageUrl: '' }];
       
       setQuestions(mappedQuestions);
-      setNumQuestions(mappedQuestions.length);
+      setNumQuestions(test.no_of_questions || mappedQuestions.length);
     } catch (e) {
       console.error('Failed to load correct answers', e);
       const mappedQuestions = test.questions && test.questions.length > 0 ? test.questions.map(q => ({
@@ -518,7 +519,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
         imageUrl: q.imageUrl || ''
       })) : [{ text: '', options: ['', '', '', ''], correctIndex: 0, imageUrl: '' }];
       setQuestions(mappedQuestions);
-      setNumQuestions(mappedQuestions.length);
+      setNumQuestions(test.no_of_questions || mappedQuestions.length);
     }
   };
 
@@ -546,18 +547,23 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
       return;
     }
 
-    if (questions.length === 0) {
+    const activeQuestions = questions.filter((q, idx) => {
+      if (idx < numQuestions) return true;
+      return q.text.trim() !== '';
+    });
+
+    if (activeQuestions.length === 0) {
       setMsg({ type: 'error', text: 'You must add at least one question to the test.' });
       return;
     }
 
-    for (let i = 0; i < questions.length; i++) {
-      if (!questions[i].text.trim()) {
+    for (let i = 0; i < activeQuestions.length; i++) {
+      if (!activeQuestions[i].text.trim()) {
         setMsg({ type: 'error', text: `Question ${i + 1} text cannot be empty.` });
         return;
       }
       for (let j = 0; j < 4; j++) {
-        if (!questions[i].options[j].trim()) {
+        if (!activeQuestions[i].options[j].trim()) {
           setMsg({ type: 'error', text: `Option ${j + 1} for Question ${i + 1} cannot be empty.` });
           return;
         }
@@ -568,14 +574,14 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
 
     try {
 
-      const formattedQuestions: Question[] = questions.map((q, idx) => ({
+      const formattedQuestions: Question[] = activeQuestions.map((q, idx) => ({
         id: `q-${idx + 1}`,
         text: q.text,
         options: q.options,
         imageUrl: q.imageUrl || ''
       }));
 
-      const correctAnswersObj = questions.reduce((acc, q, idx) => {
+      const correctAnswersObj = activeQuestions.reduce((acc, q, idx) => {
         acc[`q-${idx + 1}`] = q.correctIndex;
         return acc;
       }, {} as Record<string, number>);
@@ -599,7 +605,8 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
             allowed_emails: strictValidation ? (allowedEmailsInput.trim() ? allowedEmailsInput.split(',').map(e => e.trim()).filter(e => e) : []) : null,
             pass_percentage: passPercentageEnabled ? passPercentage : 80,
             max_attempts: maxAttemptsEnabled ? maxAttempts : 3,
-            no_of_questions: numQuestions
+            no_of_questions: numQuestions,
+            shuffle_questions: shuffleQuestions
           })
           .select()
           .single();
@@ -662,18 +669,23 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
       return;
     }
 
-    if (questions.length === 0) {
+    const activeQuestions = questions.filter((q, idx) => {
+      if (idx < numQuestions) return true;
+      return q.text.trim() !== '';
+    });
+
+    if (activeQuestions.length === 0) {
       setMsg({ type: 'error', text: 'You must add at least one question to the test.' });
       return;
     }
 
-    for (let i = 0; i < questions.length; i++) {
-      if (!questions[i].text.trim()) {
+    for (let i = 0; i < activeQuestions.length; i++) {
+      if (!activeQuestions[i].text.trim()) {
         setMsg({ type: 'error', text: `Question ${i + 1} text cannot be empty.` });
         return;
       }
       for (let j = 0; j < 4; j++) {
-        if (!questions[i].options[j].trim()) {
+        if (!activeQuestions[i].options[j].trim()) {
           setMsg({ type: 'error', text: `Option ${j + 1} for Question ${i + 1} cannot be empty.` });
           return;
         }
@@ -683,14 +695,14 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
     setLoading(true);
 
     try {
-      const formattedQuestions: Question[] = questions.map((q, idx) => ({
+      const formattedQuestions: Question[] = activeQuestions.map((q, idx) => ({
         id: `q-${idx + 1}`,
         text: q.text,
         options: q.options,
         imageUrl: q.imageUrl || ''
       }));
 
-      const correctAnswersObj = questions.reduce((acc, q, idx) => {
+      const correctAnswersObj = activeQuestions.reduce((acc, q, idx) => {
         acc[`q-${idx + 1}`] = q.correctIndex;
         return acc;
       }, {} as Record<string, number>);
@@ -710,7 +722,8 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
           allowed_emails: strictValidation ? (allowedEmailsInput.trim() ? allowedEmailsInput.split(',').map(e => e.trim()).filter(e => e) : []) : null,
           pass_percentage: passPercentageEnabled ? passPercentage : 80,
           max_attempts: maxAttemptsEnabled ? maxAttempts : 3,
-          no_of_questions: numQuestions
+          no_of_questions: numQuestions,
+          shuffle_questions: shuffleQuestions
         })
         .eq('id', selectedEditTestId)
         .select()
@@ -1458,14 +1471,28 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                 )}
               </div>
 
+              <div className="card">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--color-outline-variant)', paddingBottom: '12px' }}>
+                  <div>
+                    <h3 style={{ fontSize: '16px', fontWeight: '600' }}>Shuffle Questions</h3>
+                    <p style={{ fontSize: '13px', color: 'var(--color-on-surface-variant)', marginTop: '4px' }}>Randomize the order of questions for each student taking the test.</p>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <div style={{ position: 'relative', width: '44px', height: '24px', backgroundColor: shuffleQuestions ? '#3b82f6' : '#cbd5e1', borderRadius: '12px', cursor: 'pointer', transition: 'background-color 0.2s' }} onClick={() => setShuffleQuestions(!shuffleQuestions)}>
+                      <div style={{ position: 'absolute', top: '2px', left: shuffleQuestions ? '22px' : '2px', width: '20px', height: '20px', backgroundColor: '#fff', borderRadius: '50%', transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }}></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               {/* MCQ question list builder */}
               <div className="card">
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--color-outline-variant)', paddingBottom: '12px', marginBottom: '24px' }}>
-                  <h3 style={{ fontSize: '16px', fontWeight: '600' }}>MCQ Questions ({questions.length})</h3>
+                  <h3 style={{ fontSize: '16px', fontWeight: '600' }}>MCQ Questions ({Math.min(questions.length, numQuestions)})</h3>
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-                  {questions.map((q, qIdx) => (
+                  {questions.slice(0, numQuestions).map((q, qIdx) => (
                     <div key={qIdx} style={{ padding: '24px', border: '1px solid var(--color-outline-variant)', borderRadius: 'var(--radius-md)', backgroundColor: '#f8fafc' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                         <span style={{ fontSize: '12px', fontWeight: '700', color: 'var(--color-primary)' }}>Question #{qIdx + 1}</span>

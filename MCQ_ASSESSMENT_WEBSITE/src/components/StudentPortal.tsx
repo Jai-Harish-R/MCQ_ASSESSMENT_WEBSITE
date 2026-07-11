@@ -35,6 +35,7 @@ interface Test {
   pass_percentage?: number;
   max_attempts?: number;
   short_id?: number;
+  shuffle_questions?: boolean;
 }
 
 interface Attempt {
@@ -502,12 +503,17 @@ export default function StudentPortal({ user, onLogout }: StudentPortalProps) {
         }
       }
 
-      // Shuffle questions for this examinee
-      const shuffledQuestions = [...test.questions].sort(() => Math.random() - 0.5);
-      const testWithShuffled = { ...test, questions: shuffledQuestions };
+      // Handle Shuffling and Slicing
+      let studentQuestions = [...test.questions];
+      if (test.shuffle_questions) {
+        studentQuestions = studentQuestions.sort(() => Math.random() - 0.5);
+      }
+      studentQuestions = studentQuestions.slice(0, test.no_of_questions || studentQuestions.length);
 
-      setActiveTest(testWithShuffled);
-      setSecondsLeft((testWithShuffled.duration || 10) * 60);
+      const testWithFinalQuestions = { ...test, questions: studentQuestions };
+
+      setActiveTest(testWithFinalQuestions);
+      setSecondsLeft((testWithFinalQuestions.duration || 10) * 60);
       setViewState('exam');
     } catch (err: any) {
       console.error(err);
