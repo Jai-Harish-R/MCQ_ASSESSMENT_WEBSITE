@@ -222,14 +222,29 @@ if (countryCode === '+966' && cleanPhone.length !== 9) {
           </span>
         </div>
         
-        <div style={{ display: 'flex', alignItems: 'center', gap: '32px', fontSize: '14px', fontWeight: '600', color: '#475569' }}>
-          <a href="#" style={{ color: '#475569', textDecoration: 'none' }}>Home</a>
-          <a href="#" style={{ color: '#475569', textDecoration: 'none' }}>About</a>
-          <a href="#" style={{ color: '#475569', textDecoration: 'none' }}>Training</a>
-          <a href="#" style={{ color: '#475569', textDecoration: 'none' }}>Software Development</a>
-          <a href="#" style={{ color: '#475569', textDecoration: 'none' }}>Job Support</a>
-          <a href="#" style={{ color: '#475569', textDecoration: 'none' }}>Corporate</a>
-          <a href="#" style={{ color: '#475569', textDecoration: 'none' }}>Placements</a>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '32px', fontSize: '14px', fontWeight: '700' }}>
+          <button 
+            onClick={() => setActiveTab('student')}
+            style={{ 
+              backgroundColor: 'transparent', border: 'none', cursor: 'pointer', 
+              color: activeTab === 'student' ? '#ea580c' : '#475569',
+              borderBottom: activeTab === 'student' ? '2px solid #ea580c' : '2px solid transparent',
+              padding: '4px 0'
+            }}
+          >
+            Examinee Lobby
+          </button>
+          <button 
+            onClick={() => setActiveTab('teacher')}
+            style={{ 
+              backgroundColor: 'transparent', border: 'none', cursor: 'pointer', 
+              color: activeTab === 'teacher' ? '#ea580c' : '#475569',
+              borderBottom: activeTab === 'teacher' ? '2px solid #ea580c' : '2px solid transparent',
+              padding: '4px 0'
+            }}
+          >
+            Examiner Lobby
+          </button>
         </div>
         
         <button style={{ 
@@ -352,7 +367,7 @@ if (countryCode === '+966' && cleanPhone.length !== 9) {
                 backgroundColor: '#f1f5f9', padding: '6px 16px', borderRadius: '24px',
                 textTransform: 'uppercase', letterSpacing: '0.05em'
               }}>
-                {activeTab === 'student' ? 'Student Testing Lobby' : 'Educator Lobby'}
+                {activeTab === 'student' ? 'Examinee Lobby' : 'Examiner Lobby'}
               </span>
             </div>
 
