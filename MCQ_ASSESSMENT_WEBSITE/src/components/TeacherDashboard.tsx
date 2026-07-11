@@ -10,6 +10,7 @@ import {
 import animeAvatar from '../assets/anime_avatar.png';
 import studentAvatar from '../assets/student_avatar.png';
 import ProfileModal from './ProfileModal';
+import HoverableTestTitle from './HoverableTestTitle';
 
 const getLocalDateStr = (d: Date | string | number) => {
   const date = new Date(d);
@@ -38,6 +39,7 @@ interface Test {
   pass_percentage?: number;
   max_attempts?: number;
   short_id?: number;
+  type?: string;
 }
 
 interface Attempt {
@@ -900,7 +902,14 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                     {tests.slice(0, showAllTests ? tests.length : 5).map(test => (
                       <div key={test.id} style={{ display: 'flex', justifySelf: 'stretch', justifyContent: 'space-between', alignItems: 'center', padding: '16px', border: '1px solid var(--color-outline-variant)', borderRadius: 'var(--radius-default)' }}>
                         <div>
-                          <h4 style={{ fontSize: '15px', fontWeight: '600' }}>{test.title} {test.short_id ? `- ${test.short_id}` : ''}</h4>
+                          <HoverableTestTitle 
+                            title={test.title} 
+                            shortId={test.short_id} 
+                            questionsCount={test.questions?.length || 0} 
+                            duration={test.duration} 
+                            type={test.type}
+                            customStyle={{ fontSize: '15px', fontWeight: '600' }} 
+                          />
                           <div style={{ display: 'flex', gap: '16px', marginTop: '4px', fontSize: '12px', color: 'var(--color-on-surface-variant)' }}>
                             <span>PIN Code: <strong style={{ color: 'var(--color-primary)' }}>{test.access_code}</strong></span>
                             <span>Questions: <strong>{test.questions ? test.questions.length : 0}</strong></span>
@@ -1351,13 +1360,14 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                     <div style={{ width: '40px', height: '40px', backgroundColor: '#3b82f6', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', flexShrink: 0 }}>
                       <ClipboardEdit size={20} strokeWidth={2.5} />
                     </div>
-                    <span 
-                      style={{ fontSize: '16px', fontWeight: '700', color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'block' }}
-                      title={selectedReportTestId ? tests.find(t => t.id === selectedReportTestId)?.title : '-- Choose a test --'}
-                    >
-                      {selectedReportTestId ? tests.find(t => t.id === selectedReportTestId)?.title : '-- Choose a test --'}
-                      {selectedReportTestId && tests.find(t => t.id === selectedReportTestId)?.short_id ? ` - ${tests.find(t => t.id === selectedReportTestId)?.short_id}` : ''}
-                    </span>
+                    <HoverableTestTitle 
+                      title={selectedReportTestId && tests.find(t => t.id === selectedReportTestId) ? tests.find(t => t.id === selectedReportTestId)!.title : '-- Choose a test --'} 
+                      shortId={selectedReportTestId && tests.find(t => t.id === selectedReportTestId)?.short_id}
+                      questionsCount={selectedReportTestId ? tests.find(t => t.id === selectedReportTestId)?.questions?.length : undefined}
+                      duration={selectedReportTestId ? tests.find(t => t.id === selectedReportTestId)?.duration : undefined}
+                      type={selectedReportTestId ? tests.find(t => t.id === selectedReportTestId)?.type : undefined}
+                      customStyle={{ fontSize: '16px', fontWeight: '700', color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'block' }}
+                    />
                   </div>
 
                   <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
@@ -1555,9 +1565,14 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                             <ClipboardEdit size={24} />
                           </div>
                           <div>
-                            <div style={{ fontSize: '15px', fontWeight: '700', color: '#0f172a' }} title={selectedTest.title}>
-                              {selectedTest.title.length > 14 ? selectedTest.title.substring(0, 14) + '...' : selectedTest.title} {selectedTest.short_id ? `- ${selectedTest.short_id}` : ''}
-                            </div>
+                            <HoverableTestTitle 
+                              title={selectedTest.title}
+                              shortId={selectedTest.short_id}
+                              questionsCount={selectedTest.questions?.length || 0}
+                              duration={selectedTest.duration}
+                              type={selectedTest.type}
+                              customStyle={{ fontSize: '15px', fontWeight: '700', color: '#0f172a' }}
+                            />
                             <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>{selectedTest.questions?.length || 0} Questions • MCQ Test</div>
                           </div>
                         </div>

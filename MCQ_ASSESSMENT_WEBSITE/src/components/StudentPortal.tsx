@@ -10,6 +10,7 @@ import { Bell, ChevronDown, Clock3,
 , Users, Mail} from 'lucide-react';
 import studentAvatar from '../assets/student_avatar.png';
 import ProfileModal from './ProfileModal';
+import HoverableTestTitle from './HoverableTestTitle';
 
 interface Question {
   id: string;
@@ -851,7 +852,14 @@ Content-Type: text/html; charset=UTF-8
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#ffffff', border: '1px solid var(--color-outline-variant)', borderRadius: 'var(--radius-default)', padding: '16px 24px' }}>
                 <div>
                   <span style={{ fontSize: '11px', color: 'var(--color-on-surface-variant)', fontWeight: '600', textTransform: 'uppercase' }}>Active Exam</span>
-                  <h3 style={{ fontSize: '18px', fontWeight: '700', color: 'var(--color-primary)', marginTop: '2px' }}>{activeTest.title} {activeTest.short_id ? `- ${activeTest.short_id}` : ''}</h3>
+                  <HoverableTestTitle 
+                    title={activeTest.title}
+                    shortId={activeTest.short_id}
+                    questionsCount={activeTest.questions?.length || 0}
+                    duration={activeTest.duration}
+                    type={activeTest.type}
+                    customStyle={{ fontSize: '18px', fontWeight: '700', color: 'var(--color-primary)', marginTop: '2px' }}
+                  />
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: secondsLeft < 60 ? 'var(--color-error-container)' : 'var(--color-surface-container)', color: secondsLeft < 60 ? 'var(--color-on-error-container)' : 'var(--color-on-surface)', padding: '8px 16px', borderRadius: 'var(--radius-sm)', fontWeight: '700', fontFamily: 'monospace', fontSize: '16px' }}>
                   <Clock size={16} />
@@ -1061,7 +1069,9 @@ Content-Type: text/html; charset=UTF-8
                       <p style={{ margin: '16px 0' }}>Dear Student ({user.email}),</p>
                       <table style={{ width: '100%', margin: '20px 0', border: '1px solid #e2e8f0', borderCollapse: 'collapse' }}>
                         <tbody>
-                          <tr style={{ backgroundColor: '#f8fafc' }}><td style={{ padding: '10px', borderBottom: '1px solid #e2e8f0', fontWeight: 'bold' }}>Test Title</td><td style={{ padding: '10px', borderBottom: '1px solid #e2e8f0' }}>{activeTest.title}</td></tr>
+                          <tr style={{ backgroundColor: '#f8fafc' }}><td style={{ padding: '10px', borderBottom: '1px solid #e2e8f0', fontWeight: 'bold' }}>Test Title</td><td style={{ padding: '10px', borderBottom: '1px solid #e2e8f0' }}>
+                                <HoverableTestTitle title={activeTest.title} shortId={activeTest.short_id} />
+                              </td></tr>
                           <tr><td style={{ padding: '10px', borderBottom: '1px solid #e2e8f0', fontWeight: 'bold' }}>Score</td><td style={{ padding: '10px', borderBottom: '1px solid #e2e8f0', color: '#003875', fontWeight: 'bold' }}>{score} / {totalQuestions} ({Math.round((score! / totalQuestions) * 100)}%)</td></tr>
                         </tbody>
                       </table>
@@ -2329,7 +2339,13 @@ Content-Type: text/html; charset=UTF-8
                             <ClipboardEdit size={24} />
                           </div>
                           <div>
-                            <div style={{ fontSize: '15px', fontWeight: '700', color: '#0f172a' }}>{selectedTest.title} {selectedTest.short_id ? `- ${selectedTest.short_id}` : ''}</div>
+                            <HoverableTestTitle 
+                              title={selectedTest.title}
+                              shortId={selectedTest.short_id}
+                              questionsCount={selectedTest.questions?.length || 0}
+                              duration={selectedTest.duration}
+                              customStyle={{ fontSize: '15px', fontWeight: '700', color: '#0f172a' }}
+                            />
                             <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>{selectedTest.questions?.length || 0} Questions • MCQ Test</div>
                           </div>
                         </div>
@@ -2434,7 +2450,7 @@ Content-Type: text/html; charset=UTF-8
                           >
                             <option value="">-- Select a test --</option>
                             {availableTests.map(t => (
-                              <option key={t.id} value={t.id}>{t.title} {t.short_id ? `- ${t.short_id}` : ''}</option>
+                              <option key={t.id} value={t.id}>{t.title.length > 14 ? t.title.substring(0, 14) + '...' : t.title} {t.short_id ? `- ${t.short_id}` : ''}</option>
                             ))}
                           </select>
                           <ChevronDown size={16} color="#64748b" style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
