@@ -61,6 +61,10 @@ interface Profile {
   email: string;
   full_name: string | null;
   avatar_url: string | null;
+  department?: string;
+  designation?: string;
+  profession?: string;
+  institution_name?: string;
 }
 
 interface TeacherDashboardProps {
@@ -695,10 +699,30 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
               
               {/* Header Title */}
               <div>
-                <h1 style={{ fontSize: '24px', fontWeight: '700' }}>Teacher Dashboard</h1>
-                <p style={{ color: 'var(--color-on-surface-variant)', fontSize: '13px', marginTop: '4px' }}>
-                  Overview of active assessments and Examinees outcomes.
-                </p>
+                {(() => {
+                  const myProfile = allProfiles.find(p => p.id === user.id);
+                  const teacherName = myProfile?.full_name || user.user_metadata?.full_name || user.email.split('@')[0] || 'Teacher';
+                  
+                  const subtitleParts = [];
+                  if (myProfile?.department) subtitleParts.push(myProfile.department);
+                  if (myProfile?.designation) subtitleParts.push(myProfile.designation);
+                  if (myProfile?.profession) subtitleParts.push(myProfile.profession);
+                  if (myProfile?.institution_name) subtitleParts.push(myProfile.institution_name);
+                  
+                  const subtitleText = subtitleParts.length > 0 
+                    ? subtitleParts.join(' / ') 
+                    : 'Overview of active assessments and Examinees outcomes.';
+
+                  return (
+                    <>
+                      <h2 style={{ fontSize: '24px', fontWeight: '800', color: '#0f172a', margin: '0 0 8px 0' }}>Examiner Dashboard :</h2>
+                      <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#334155', margin: '0 0 4px 0' }}>hi {teacherName}</h3>
+                      <h4 style={{ fontSize: '14px', fontWeight: '500', color: '#64748b', textTransform: 'capitalize', margin: 0 }}>
+                        {subtitleText}
+                      </h4>
+                    </>
+                  );
+                })()}
               </div>
 
               {/* Stats overview boxes */}
