@@ -28,6 +28,8 @@ interface Test {
   id: string;
   title: string;
   access_code: string;
+  target_year?: string;
+  target_class?: string;
   teacher_email: string;
   questions: Question[];
   duration?: number;
@@ -78,8 +80,8 @@ interface TeacherDashboardProps {
 }
 
 export default function TeacherDashboard({ user, onLogout }: TeacherDashboardProps) {
-  // Navigation tabs: 'dashboard' | 'exams' | 'students' | 'leaderboard'
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'exams' | 'students' | 'leaderboard'>('exams');
+  // Navigation tabs: 'dashboard' | 'exams' | 'students' | 'leaderboard' | 'edit_test'
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'exams' | 'students' | 'leaderboard' | 'edit_test'>('exams');
   
   // Data states
   const [tests, setTests] = useState<Test[]>([]);
@@ -94,6 +96,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
   
   const [selectedLeaderboardTestId, setSelectedLeaderboardTestId] = useState<string>('');
   const [selectedReportTestId, setSelectedReportTestId] = useState<string>('');
+  const [selectedEditTestId, setSelectedEditTestId] = useState<string>('');
   const [sortConfig, setSortConfig] = useState<'name_asc' | 'name_desc' | 'mark_asc' | 'mark_desc' | ''>('');
   const [leaderboardAttempts, setLeaderboardAttempts] = useState<Attempt[]>([]);
   const [leaderboardPage, setLeaderboardPage] = useState(1);
@@ -420,6 +423,70 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
     e.target.value = '';
   };
 
+  const resetForm = () => {
+    setTestTitle('');
+    setTargetYear('');
+    setTargetClass('');
+    setAccessCode('');
+    setPassPercentageEnabled(false);
+    setMaxAttemptsEnabled(false);
+    setPassPercentage(80);
+    setMaxAttempts(3);
+    setDuration(10);
+    setTotalStudents(50);
+    setAccessStart('');
+    setAccessEnd('');
+    setAllowedEmailsInput('');
+    setStrictValidation(false);
+    setQuestions([{ text: '', options: ['', '', '', ''], correctIndex: 0, imageUrl: '' }]);
+  };
+
+  const populateForm = async (testId: string) => {
+    const test = tests.find(t => t.id === testId);
+    if (!test) return;
+    setTestTitle(test.title || '');
+    setTargetYear(test.target_year || '');
+    setTargetClass(test.target_class || '');
+    setAccessCode(test.access_code || '');
+    setPassPercentageEnabled(!!test.pass_percentage && test.pass_percentage !== 80);
+    setMaxAttemptsEnabled(!!test.max_attempts && test.max_attempts !== 3);
+    setPassPercentage(test.pass_percentage || 80);
+    setMaxAttempts(test.max_attempts || 3);
+    setDuration(test.duration || 10);
+    setTotalStudents(test.total_students || 50);
+    setAccessStart(test.access_start ? new Date(test.access_start).toISOString().slice(0,16) : '');
+    setAccessEnd(test.access_end ? new Date(test.access_end).toISOString().slice(0,16) : '');
+    setAllowedEmailsInput(test.allowed_emails ? test.allowed_emails.join(', ') : '');
+    setStrictValidation(!!test.allowed_emails && test.allowed_emails.length > 0);
+    
+    try {
+      const { data: answerData } = await supabase
+        .from('test_answers')
+        .select('correct_answers')
+        .eq('test_id', testId)
+        .single();
+        
+      const correctAnswersObj = answerData?.correct_answers || {};
+      
+      const mappedQuestions = test.questions && test.questions.length > 0 ? test.questions.map(q => ({
+        text: q.text,
+        options: q.options,
+        correctIndex: correctAnswersObj[q.id] !== undefined ? correctAnswersObj[q.id] : 0,
+        imageUrl: q.imageUrl || ''
+      })) : [{ text: '', options: ['', '', '', ''], correctIndex: 0, imageUrl: '' }];
+      
+      setQuestions(mappedQuestions);
+    } catch (e) {
+      console.error('Failed to load correct answers', e);
+      setQuestions(test.questions && test.questions.length > 0 ? test.questions.map(q => ({
+        text: q.text,
+        options: q.options,
+        correctIndex: 0,
+        imageUrl: q.imageUrl || ''
+      })) : [{ text: '', options: ['', '', '', ''], correctIndex: 0, imageUrl: '' }]);
+    }
+  };
+
   // Submit test creation
   const handleCreateTest = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -532,6 +599,108 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
     }
   };
 
+  const handleUpdateTest = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setMsg(null);
+
+    if (!selectedEditTestId) {
+      setMsg({ type: 'error', text: 'Please select a test to edit.' });
+      return;
+    }
+    if (!testTitle.trim()) {
+      setMsg({ type: 'error', text: 'Test title is required.' });
+      return;
+    }
+    if (!/^\\d{6}$/.test(accessCode.trim())) {
+      setMsg({ type: 'error', text: 'Access code PIN must be exactly a 6-digit number (e.g. 123456).' });
+      return;
+    }
+
+    if (!accessStart || !accessEnd) {
+      setMsg({ type: 'error', text: 'Both Access Start Time and Access End Time must be provided before publishing.' });
+      return;
+    }
+
+    if (new Date(accessStart) >= new Date(accessEnd)) {
+      setMsg({ type: 'error', text: 'Access End Time must be after Access Start Time.' });
+      return;
+    }
+
+    if (questions.length === 0) {
+      setMsg({ type: 'error', text: 'You must add at least one question to the test.' });
+      return;
+    }
+
+    for (let i = 0; i < questions.length; i++) {
+      if (!questions[i].text.trim()) {
+        setMsg({ type: 'error', text: `Question ${i + 1} text cannot be empty.` });
+        return;
+      }
+      for (let j = 0; j < 4; j++) {
+        if (!questions[i].options[j].trim()) {
+          setMsg({ type: 'error', text: `Option ${j + 1} for Question ${i + 1} cannot be empty.` });
+          return;
+        }
+      }
+    }
+
+    setLoading(true);
+
+    try {
+      const formattedQuestions: Question[] = questions.map((q, idx) => ({
+        id: `q-${idx + 1}`,
+        text: q.text,
+        options: q.options,
+        imageUrl: q.imageUrl || ''
+      }));
+
+      const correctAnswersObj = questions.reduce((acc, q, idx) => {
+        acc[`q-${idx + 1}`] = q.correctIndex;
+        return acc;
+      }, {} as Record<string, number>);
+      
+      const { data: testData, error: testErr } = await supabase
+        .from('tests')
+        .update({
+          title: testTitle,
+          access_code: accessCode,
+          questions: formattedQuestions,
+          target_year: targetYear || null,
+          target_class: targetClass || null,
+          duration: duration,
+          total_students: totalStudents,
+          access_start: accessStart ? new Date(accessStart).toISOString() : null,
+          access_end: accessEnd ? new Date(accessEnd).toISOString() : null,
+          allowed_emails: strictValidation ? (allowedEmailsInput.trim() ? allowedEmailsInput.split(',').map(e => e.trim()).filter(e => e) : []) : null,
+          pass_percentage: passPercentageEnabled ? passPercentage : 80,
+          max_attempts: maxAttemptsEnabled ? maxAttempts : 3
+        })
+        .eq('id', selectedEditTestId)
+        .select()
+        .single();
+
+      if (testErr) throw testErr;
+
+      const { error: answersErr } = await supabase
+        .from('test_answers')
+        .update({
+          correct_answers: correctAnswersObj
+        })
+        .eq('test_id', testData.id);
+
+      if (answersErr) throw answersErr;
+
+      setMsg({ type: 'success', text: `Test "${testTitle}" updated successfully!` });
+      
+      loadData();
+    } catch (err: any) {
+      console.error(err);
+      setMsg({ type: 'error', text: err.message || 'Failed to update test.' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Toggle Retry
   const handleToggleRetry = async (attemptId: string, currentStatus: boolean) => {
     setSyncing(true);
@@ -633,11 +802,27 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
             </li>
             <li>
               <button
-                onClick={() => setActiveTab('exams')}
+                onClick={() => {
+                  setActiveTab('exams');
+                  resetForm();
+                }}
                 className={`sidebar-item-btn ${activeTab === 'exams' ? 'active' : ''}`}
               >
                 <BookOpen size={18} />
                 Conduct Test (Create)
+              </button>
+            </li>
+            <li>
+              <button
+                onClick={() => {
+                  setActiveTab('edit_test');
+                  resetForm();
+                  setSelectedEditTestId('');
+                }}
+                className={`sidebar-item-btn ${activeTab === 'edit_test' ? 'active' : ''}`}
+              >
+                <ClipboardEdit size={18} />
+                Edit Test
               </button>
             </li>
             <li>
@@ -959,17 +1144,42 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
             </div>
           )}
 
-          {/* TAB 2: CONDUCT TEST (EXAMS CREATE FORM) */}
-          {activeTab === 'exams' && (
+          {/* TAB 2 & 5: CONDUCT TEST (EXAMS CREATE FORM) & EDIT TEST */}
+          {(activeTab === 'exams' || activeTab === 'edit_test') && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
               
               {/* Header Title */}
               <div>
-                <h1 style={{ fontSize: '24px', fontWeight: '700' }}>Conduct a New Test</h1>
+                <h1 style={{ fontSize: '24px', fontWeight: '700' }}>{activeTab === 'edit_test' ? 'Edit Test' : 'Conduct a New Test'}</h1>
                 <p style={{ color: 'var(--color-on-surface-variant)', fontSize: '13px', marginTop: '4px' }}>
-                  Configure assessment questions, options, and security access key.
+                  {activeTab === 'edit_test' ? 'Select a test to modify its settings and questions.' : 'Configure assessment questions, options, and security access key.'}
                 </p>
               </div>
+
+              {activeTab === 'edit_test' && (
+                <div className="card" style={{ marginBottom: '0px' }}>
+                  <label className="input-label">Select Test to Edit</label>
+                  <select
+                    className="input-field"
+                    value={selectedEditTestId}
+                    onChange={(e) => {
+                      const id = e.target.value;
+                      setSelectedEditTestId(id);
+                      if (id) {
+                        populateForm(id);
+                      } else {
+                        resetForm();
+                      }
+                    }}
+                    style={{ backgroundColor: '#f8fafc', padding: '12px' }}
+                  >
+                    <option value="">-- Choose a test --</option>
+                    {tests.map(t => (
+                      <option key={t.id} value={t.id}>{t.title} {t.short_id ? `- ${t.short_id}` : ''}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
               {/* Title parameters card */}
               <div className="card">
@@ -1303,13 +1513,13 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
 
                 <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '16px' }}>
                   <button
-                    type="submit"
-                    onClick={handleCreateTest}
+                    type="button"
+                    onClick={activeTab === 'edit_test' ? handleUpdateTest : handleCreateTest}
                     className="btn btn-primary"
                     style={{ padding: '12px 24px', fontWeight: '600' }}
-                    disabled={loading}
+                    disabled={loading || (activeTab === 'edit_test' && !selectedEditTestId)}
                   >
-                    <Send size={16} /> Publish Test
+                    <Send size={16} /> {activeTab === 'edit_test' ? 'Update Test' : 'Publish Test'}
                   </button>
                 </div>
               </div>
@@ -1451,14 +1661,13 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                       <thead>
                         <tr>
                           <th>Examinee Name</th>
-                          <th>Examinee Email</th>
+                          <th>Examinee ID</th>
                           <th>Test Title</th>
                           <th>Score</th>
                           <th>Percentage</th>
                           <th>Status</th>
                           <th>Attempt</th>
                           <th>Submitted Date</th>
-                          <th>Submitted Time</th>
                           <th>Actions</th>
                         </tr>
                       </thead>
@@ -1482,7 +1691,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                                 const profile = allProfiles.find(p => p.email === att.student_email);
                                 const displayName = profile?.full_name || att.student_name || att.student_email.split('@')[0];
                                 const displayAvatar = profile?.avatar_url || studentAvatar as any;
-                                return { ...att, display_name: displayName, display_avatar: displayAvatar };
+                                return { ...att, display_name: displayName, display_avatar: displayAvatar, display_id: att.short_id !== undefined ? att.short_id : profile?.short_id };
                               })
                              .sort((a, b) => {
                                if (sortConfig === 'name_asc') return a.display_name.localeCompare(b.display_name);
@@ -1510,7 +1719,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                                   <span>{att.display_name}</span>
                                 </div>
                               </td>
-                              <td>{att.student_email}</td>
+                              <td style={{ color: '#64748b' }}>{(att as any).display_id !== undefined ? `ID: ${(att as any).display_id}` : 'LOADING...'}</td>
                               <td>{att.test_title}</td>
                               <td style={{ fontWeight: '700' }}>{att.score} / {att.total_questions}</td>
                               <td>{pct}%</td>
@@ -1521,7 +1730,6 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                               </td>
                               <td style={{ fontWeight: '600', color: '#64748b' }}>({attemptIndex}/{currentMaxAttempts})</td>
                               <td>{new Date(att.completed_at).toLocaleDateString()}</td>
-                              <td>{new Date(att.completed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
                               <td>
                                 <button
                                   onClick={() => handleToggleRetry(att.id, att.allowed_retry)}

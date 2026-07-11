@@ -2194,8 +2194,13 @@ Content-Type: text/html; charset=UTF-8
                                       title={`Score: ${attempt.score}/${attempt.total_questions} (${pct}%) - Click to review`} 
                                       style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', backgroundColor: '#f8fafc', borderRadius: '8px', cursor: 'pointer', border: '1px solid #e2e8f0' }}
                                     >
-                                      <div style={{ fontSize: '13px', fontWeight: '600', color: '#334155' }}>
-                                        Attempt {globalAttemptNumber}
+                                      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                        <div style={{ fontSize: '13px', fontWeight: '600', color: '#334155' }}>
+                                          Attempt {globalAttemptNumber}
+                                        </div>
+                                        <div style={{ fontSize: '11px', color: '#64748b' }}>
+                                          ID: {allProfiles.find(p => p.email === user.email)?.short_id || 'N/A'}
+                                        </div>
                                       </div>
                                       <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                                         <div style={{ fontSize: '12px', color: '#64748b' }}>
