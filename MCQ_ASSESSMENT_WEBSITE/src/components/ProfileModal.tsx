@@ -14,6 +14,7 @@ export default function ProfileModal({ user, isOpen, onClose, onUpdate }: Profil
   const [avatarData, setAvatarData] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [shortId, setShortId] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -21,6 +22,24 @@ export default function ProfileModal({ user, isOpen, onClose, onUpdate }: Profil
       setName(user.user_metadata?.full_name || '');
       setAvatarData(user.user_metadata?.avatar_url || null);
       setErrorMsg('');
+
+      const fetchProfile = async () => {
+        try {
+          const { data, error } = await supabase
+            .from('profiles')
+            .select('short_id')
+            .eq('id', user.id)
+            .single();
+            
+          if (data && !error) {
+            setShortId(data.short_id);
+          }
+        } catch (err) {
+          console.error("Error fetching profile short_id:", err);
+        }
+      };
+      
+      fetchProfile();
     }
   }, [user, isOpen]);
 
@@ -157,7 +176,7 @@ export default function ProfileModal({ user, isOpen, onClose, onUpdate }: Profil
           <div>
             <label style={{ display: 'block', fontSize: '13px', fontWeight: '700', color: '#0f172a', marginBottom: '8px' }}>User ID</label>
             <div style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', fontSize: '14px', color: '#64748b', fontWeight: '600' }}>
-              {user.id ? user.id.substring(0, 8).toUpperCase() : 'UNKNOWN'}
+              {shortId !== null ? `ID: ${shortId}` : 'LOADING...'}
             </div>
           </div>
 

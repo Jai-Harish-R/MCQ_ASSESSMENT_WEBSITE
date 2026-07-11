@@ -53,14 +53,17 @@ interface Attempt {
   allowed_retry: boolean;
   test_title?: string;
   time_taken_seconds?: number;
+  short_id?: number;
   profiles?: {
     full_name: string;
+    short_id?: number;
   } | null;
 }
 
 interface Profile {
   id: string;
   email: string;
+  short_id?: number;
   full_name: string | null;
   avatar_url: string | null;
   department?: string;
@@ -93,6 +96,8 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
   const [selectedReportTestId, setSelectedReportTestId] = useState<string>('');
   const [sortConfig, setSortConfig] = useState<'name_asc' | 'name_desc' | 'mark_asc' | 'mark_desc' | ''>('');
   const [leaderboardAttempts, setLeaderboardAttempts] = useState<Attempt[]>([]);
+  const [leaderboardPage, setLeaderboardPage] = useState(1);
+  const itemsPerPage = 10;
   const [showAllTests, setShowAllTests] = useState(false);
   const [hoveredDateStr, setHoveredDateStr] = useState<string | null>(null);
 
@@ -193,7 +198,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
           const testIds = testsData.map(t => t.id);
           const { data: attemptsData, error: attemptsErr } = await supabase
             .from('test_attempts')
-            .select('*')
+            .select('*, profiles(short_id)')
             .in('test_id', testIds)
             .order('completed_at', { ascending: false });
 
@@ -201,7 +206,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
 
           const mappedAttempts = (attemptsData || []).map(att => {
             const t = testsData.find(x => x.id === att.test_id);
-            return { ...att, test_title: t ? t.title : 'Unknown Test' };
+            return { ...att, short_id: att.profiles?.short_id, test_title: t ? t.title : 'Unknown Test' };
           });
           setAttempts(mappedAttempts);
         } else {
@@ -1392,7 +1397,10 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                   {/* Hidden Native Select overlays the entire container */}
                   <select 
                     value={selectedReportTestId}
-                    onChange={(e) => setSelectedReportTestId(e.target.value)}
+                    onChange={(e) => {
+                      setSelectedReportTestId(e.target.value);
+                      setLeaderboardPage(1);
+                    }}
                     style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer', appearance: 'none' }}
                   >
                     <option value="">-- Choose a test --</option>
@@ -1605,8 +1613,8 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                            <div style={{ padding: '32px', textAlign: 'center', color: '#64748b' }}>No attempts yet.</div>
                         ) : (
                           <>
-                            {leaderboardAttempts.map((st, i) => {
-                              const rank = i + 1;
+                            {leaderboardAttempts.slice((leaderboardPage - 1) * itemsPerPage, leaderboardPage * itemsPerPage).map((st, i) => {
+                              const rank = (leaderboardPage - 1) * itemsPerPage + i + 1;
                               const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : null;
                               const pct = Math.round((st.score / st.total_questions) * 100);
                               const durationText = st.time_taken_seconds
@@ -1643,6 +1651,34 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                                 </div>
                               );
                             })}
+                            {/* Pagination Controls */}
+                            {leaderboardAttempts.length > itemsPerPage && (
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '16px', borderTop: '1px solid #e2e8f0' }}>
+                                <button
+                                  onClick={() => setLeaderboardPage(p => Math.max(1, p - 1))}
+                                  disabled={leaderboardPage === 1}
+                                  style={{ padding: '6px 12px', borderRadius: '6px', border: '1px solid #e2e8f0', backgroundColor: leaderboardPage === 1 ? '#f8fafc' : '#ffffff', color: leaderboardPage === 1 ? '#cbd5e1' : '#0f172a', cursor: leaderboardPage === 1 ? 'not-allowed' : 'pointer', fontWeight: '600', fontSize: '13px' }}
+                                >
+                                  Prev
+                                </button>
+                                {Array.from({ length: Math.ceil(leaderboardAttempts.length / itemsPerPage) }).map((_, idx) => (
+                                  <button
+                                    key={idx}
+                                    onClick={() => setLeaderboardPage(idx + 1)}
+                                    style={{ padding: '6px 12px', borderRadius: '6px', border: '1px solid #e2e8f0', backgroundColor: leaderboardPage === idx + 1 ? '#3b82f6' : '#ffffff', color: leaderboardPage === idx + 1 ? '#ffffff' : '#0f172a', cursor: 'pointer', fontWeight: '600', fontSize: '13px' }}
+                                  >
+                                    {idx + 1}
+                                  </button>
+                                ))}
+                                <button
+                                  onClick={() => setLeaderboardPage(p => Math.min(Math.ceil(leaderboardAttempts.length / itemsPerPage), p + 1))}
+                                  disabled={leaderboardPage === Math.ceil(leaderboardAttempts.length / itemsPerPage)}
+                                  style={{ padding: '6px 12px', borderRadius: '6px', border: '1px solid #e2e8f0', backgroundColor: leaderboardPage === Math.ceil(leaderboardAttempts.length / itemsPerPage) ? '#f8fafc' : '#ffffff', color: leaderboardPage === Math.ceil(leaderboardAttempts.length / itemsPerPage) ? '#cbd5e1' : '#0f172a', cursor: leaderboardPage === Math.ceil(leaderboardAttempts.length / itemsPerPage) ? 'not-allowed' : 'pointer', fontWeight: '600', fontSize: '13px' }}
+                                >
+                                  Next
+                                </button>
+                              </div>
+                            )}
                           </>
                         )}
                       </div>

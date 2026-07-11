@@ -50,6 +50,11 @@ interface Attempt {
   time_taken_seconds?: number;
   student_name?: string;
   answers?: Record<string, number>;
+  short_id?: number;
+  profiles?: {
+    full_name: string;
+    short_id?: number;
+  } | null;
 }
 
 const getLocalDateStr = (d: Date | string | number) => {
@@ -60,6 +65,7 @@ const getLocalDateStr = (d: Date | string | number) => {
 interface Profile {
   id: string;
   email: string;
+  short_id?: number;
   full_name: string | null;
   avatar_url: string | null;
 }
@@ -88,6 +94,8 @@ export default function StudentPortal({ user, onLogout }: StudentPortalProps) {
   const [dashboardTimeFilter, setDashboardTimeFilter] = useState('This Month');
   // Leaderboard dynamically fetched states
   const [leaderboardSelectedTestId, setLeaderboardSelectedTestId] = useState<string>('');
+  const [leaderboardPage, setLeaderboardPage] = useState(1);
+  const itemsPerPage = 10;
   const [leaderboardAttempts, setLeaderboardAttempts] = useState<Attempt[]>([]);
   const [leaderboardLoading, setLeaderboardLoading] = useState(false);
 
@@ -101,7 +109,7 @@ export default function StudentPortal({ user, onLogout }: StudentPortalProps) {
       
         const { data, error } = await supabase
           .from('test_attempts')
-          .select('*')
+          .select('*, profiles(short_id)')
           .eq('test_id', testId);
         
         if (error) throw error;
@@ -2377,8 +2385,8 @@ Content-Type: text/html; charset=UTF-8
                            <div style={{ padding: '32px', textAlign: 'center', color: '#64748b' }}>No attempts yet.</div>
                         ) : (
                           <>
-                            {leaderboardAttempts.map((st, i) => {
-                              const rank = i + 1;
+                            {leaderboardAttempts.slice((leaderboardPage - 1) * itemsPerPage, leaderboardPage * itemsPerPage).map((st, i) => {
+                              const rank = (leaderboardPage - 1) * itemsPerPage + i + 1;
                               const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : null;
                               const isMe = st.student_email === user.email;
                               
@@ -2403,7 +2411,7 @@ Content-Type: text/html; charset=UTF-8
                                     </div>
                                     <div>
                                       <div style={{ fontSize: '14px', fontWeight: isMe ? '800' : '700', color: isMe ? '#8b5cf6' : '#0f172a' }}>{displayName} {isMe ? '(You)' : ''}</div>
-                                      <div style={{ fontSize: '11px', color: '#64748b' }}>{profile?.id ? profile.id.substring(0, 8).toUpperCase() : 'UNKNOWN ID'}</div>
+                                      <div style={{ fontSize: '11px', color: '#64748b' }}>{st.short_id !== undefined ? `ID: ${st.short_id}` : (profile?.short_id !== undefined ? `ID: ${profile.short_id}` : 'LOADING...')}</div>
                                     </div>
                                   </div>
                                   <div style={{ textAlign: 'center', fontSize: '14px', fontWeight: isMe ? '800' : '700', color: isMe ? '#8b5cf6' : '#0f172a' }}>{st.score}</div>
@@ -2417,6 +2425,34 @@ Content-Type: text/html; charset=UTF-8
                                 </div>
                               );
                             })}
+                            {/* Pagination Controls */}
+                            {leaderboardAttempts.length > itemsPerPage && (
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '16px', borderTop: '1px solid #e2e8f0' }}>
+                                <button
+                                  onClick={() => setLeaderboardPage(p => Math.max(1, p - 1))}
+                                  disabled={leaderboardPage === 1}
+                                  style={{ padding: '6px 12px', borderRadius: '6px', border: '1px solid #e2e8f0', backgroundColor: leaderboardPage === 1 ? '#f8fafc' : '#ffffff', color: leaderboardPage === 1 ? '#cbd5e1' : '#0f172a', cursor: leaderboardPage === 1 ? 'not-allowed' : 'pointer', fontWeight: '600', fontSize: '13px' }}
+                                >
+                                  Prev
+                                </button>
+                                {Array.from({ length: Math.ceil(leaderboardAttempts.length / itemsPerPage) }).map((_, idx) => (
+                                  <button
+                                    key={idx}
+                                    onClick={() => setLeaderboardPage(idx + 1)}
+                                    style={{ padding: '6px 12px', borderRadius: '6px', border: '1px solid #e2e8f0', backgroundColor: leaderboardPage === idx + 1 ? '#3b82f6' : '#ffffff', color: leaderboardPage === idx + 1 ? '#ffffff' : '#0f172a', cursor: 'pointer', fontWeight: '600', fontSize: '13px' }}
+                                  >
+                                    {idx + 1}
+                                  </button>
+                                ))}
+                                <button
+                                  onClick={() => setLeaderboardPage(p => Math.min(Math.ceil(leaderboardAttempts.length / itemsPerPage), p + 1))}
+                                  disabled={leaderboardPage === Math.ceil(leaderboardAttempts.length / itemsPerPage)}
+                                  style={{ padding: '6px 12px', borderRadius: '6px', border: '1px solid #e2e8f0', backgroundColor: leaderboardPage === Math.ceil(leaderboardAttempts.length / itemsPerPage) ? '#f8fafc' : '#ffffff', color: leaderboardPage === Math.ceil(leaderboardAttempts.length / itemsPerPage) ? '#cbd5e1' : '#0f172a', cursor: leaderboardPage === Math.ceil(leaderboardAttempts.length / itemsPerPage) ? 'not-allowed' : 'pointer', fontWeight: '600', fontSize: '13px' }}
+                                >
+                                  Next
+                                </button>
+                              </div>
+                            )}
                           </>
                         )}
                       </div>
@@ -2446,7 +2482,10 @@ Content-Type: text/html; charset=UTF-8
                           </div>
                           <select 
                             value={leaderboardSelectedTestId}
-                            onChange={(e) => setLeaderboardSelectedTestId(e.target.value)}
+                            onChange={(e) => {
+                      setLeaderboardSelectedTestId(e.target.value);
+                      setLeaderboardPage(1);
+                    }}
                             style={{ width: '100%', padding: '10px 12px 10px 44px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '13px', color: '#0f172a', appearance: 'none', outline: 'none', height: '44px', backgroundColor: '#fff' }}
                           >
                             <option value="">-- Select a test --</option>
