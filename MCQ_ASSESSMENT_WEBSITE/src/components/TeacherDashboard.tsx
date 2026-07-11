@@ -414,8 +414,15 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
           throw new Error("No questions found.");
         }
 
+        if (imported.length > numQuestions) {
+          imported = imported.slice(0, numQuestions);
+          setMsg({ type: 'success', text: `${numQuestions} IMPORTED SPECIFIED` });
+        } else {
+          setNumQuestions(imported.length);
+          setMsg({ type: 'success', text: `Loaded ${imported.length} questions from ${file.name}!` });
+        }
+
         setQuestions(imported);
-        setMsg({ type: 'success', text: `Loaded ${imported.length} questions from ${file.name}!` });
       } catch (err: any) {
         setMsg({ type: 'error', text: err.message || 'Error parsing imported file.' });
       }
@@ -1293,7 +1300,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                     />
                   </div>
                   <div>
-                    <label className="input-label">Number of Questions</label>
+                    <label className="input-label">Number of Questions (Max 200 Questions)</label>
                     <input
                       type="number"
                       className="input-field"
@@ -1396,7 +1403,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--color-outline-variant)', paddingBottom: '12px', marginBottom: '20px' }}>
                   <div>
                     <h3 style={{ fontSize: '16px', fontWeight: '600' }}>Set Pass Percentage</h3>
-                    <p style={{ fontSize: '13px', color: 'var(--color-on-surface-variant)', marginTop: '4px' }}>Set the minimum passing percentage required.</p>
+                    <p style={{ fontSize: '13px', color: 'var(--color-on-surface-variant)', marginTop: '4px' }}>Set the minimum passing percentage required. (By default 80%)</p>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center' }}>
                     <div style={{ position: 'relative', width: '44px', height: '24px', backgroundColor: passPercentageEnabled ? '#3b82f6' : '#cbd5e1', borderRadius: '12px', cursor: 'pointer', transition: 'background-color 0.2s' }} onClick={() => setPassPercentageEnabled(!passPercentageEnabled)}>
@@ -1424,7 +1431,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--color-outline-variant)', paddingBottom: '12px', marginBottom: '20px' }}>
                   <div>
                     <h3 style={{ fontSize: '16px', fontWeight: '600' }}>Set Attempt Limit</h3>
-                    <p style={{ fontSize: '13px', color: 'var(--color-on-surface-variant)', marginTop: '4px' }}>Set the maximum number of attempts allowed.</p>
+                    <p style={{ fontSize: '13px', color: 'var(--color-on-surface-variant)', marginTop: '4px' }}>Set the maximum number of attempts allowed. (By default 3 attempts)</p>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center' }}>
                     <div style={{ position: 'relative', width: '44px', height: '24px', backgroundColor: maxAttemptsEnabled ? '#3b82f6' : '#cbd5e1', borderRadius: '12px', cursor: 'pointer', transition: 'background-color 0.2s' }} onClick={() => setMaxAttemptsEnabled(!maxAttemptsEnabled)}>

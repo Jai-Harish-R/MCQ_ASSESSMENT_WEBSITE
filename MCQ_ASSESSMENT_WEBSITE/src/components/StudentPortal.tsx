@@ -502,8 +502,12 @@ export default function StudentPortal({ user, onLogout }: StudentPortalProps) {
         }
       }
 
-      setActiveTest(test);
-      setSecondsLeft((test.duration || 10) * 60);
+      // Shuffle questions for this examinee
+      const shuffledQuestions = [...test.questions].sort(() => Math.random() - 0.5);
+      const testWithShuffled = { ...test, questions: shuffledQuestions };
+
+      setActiveTest(testWithShuffled);
+      setSecondsLeft((testWithShuffled.duration || 10) * 60);
       setViewState('exam');
     } catch (err: any) {
       console.error(err);
