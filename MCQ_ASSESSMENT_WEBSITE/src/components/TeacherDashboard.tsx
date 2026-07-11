@@ -1347,12 +1347,16 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                   
                   <div style={{ position: 'relative', width: '100%', border: '1px solid #3b82f6', borderRadius: '12px', padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#fff', boxShadow: '0 4px 12px rgba(59,130,246,0.08)', transition: 'all 0.2s ease', cursor: 'pointer' }} className="custom-select-container">
                   
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px', overflow: 'hidden', flex: 1 }}>
                     <div style={{ width: '40px', height: '40px', backgroundColor: '#3b82f6', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', flexShrink: 0 }}>
                       <ClipboardEdit size={20} strokeWidth={2.5} />
                     </div>
-                    <span style={{ fontSize: '16px', fontWeight: '700', color: '#0f172a' }}>
+                    <span 
+                      style={{ fontSize: '16px', fontWeight: '700', color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'block' }}
+                      title={selectedReportTestId ? tests.find(t => t.id === selectedReportTestId)?.title : '-- Choose a test --'}
+                    >
                       {selectedReportTestId ? tests.find(t => t.id === selectedReportTestId)?.title : '-- Choose a test --'}
+                      {selectedReportTestId && tests.find(t => t.id === selectedReportTestId)?.short_id ? ` - ${tests.find(t => t.id === selectedReportTestId)?.short_id}` : ''}
                     </span>
                   </div>
 
