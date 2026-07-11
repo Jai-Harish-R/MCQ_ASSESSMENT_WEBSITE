@@ -688,19 +688,47 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
         {/* Content Workspace container (1-column clean layout) */}
         <div className="workspace-container">
 
-          {/* Notifications banner */}
+          {/* Centered Notifications Modal Overlay */}
           {msg && (
-            <div className="card" style={{
-              backgroundColor: msg.type === 'success' ? 'var(--color-success-container)' : 'var(--color-error-container)',
-              color: msg.type === 'success' ? 'var(--color-on-success-container)' : 'var(--color-on-error-container)',
-              borderColor: msg.type === 'success' ? 'var(--color-success)' : 'var(--color-error)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px',
-              padding: '16px'
+            <div style={{
+              position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+              backgroundColor: 'rgba(15, 23, 42, 0.4)', backdropFilter: 'blur(4px)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999
             }}>
-              {msg.type === 'success' ? <Check size={20} /> : <AlertCircle size={20} />}
-              <span>{typeof msg.text === 'object' ? JSON.stringify(msg.text) : String(msg.text)}</span>
+              <div style={{
+                backgroundColor: '#ffffff', borderRadius: '16px', padding: '32px', width: '400px',
+                maxWidth: '90%', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+                display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '16px'
+              }}>
+                {msg.type === 'error' ? (
+                  <div style={{ width: '48px', height: '48px', borderRadius: '50%', backgroundColor: '#fef2f2', color: '#dc2626', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <AlertCircle size={24} />
+                  </div>
+                ) : (
+                  <div style={{ width: '48px', height: '48px', borderRadius: '50%', backgroundColor: '#f0fdf4', color: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Check size={24} />
+                  </div>
+                )}
+                
+                <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#0f172a', margin: 0 }}>
+                  {msg.type === 'error' ? 'Notice' : 'Success'}
+                </h3>
+                
+                <p style={{ fontSize: '15px', color: '#475569', margin: 0, lineHeight: '1.5' }}>
+                  {typeof msg.text === 'object' ? JSON.stringify(msg.text) : String(msg.text)}
+                </p>
+                
+                <button
+                  onClick={() => setMsg(null)}
+                  style={{
+                    marginTop: '16px', width: '100%', padding: '12px', backgroundColor: '#f1f5f9',
+                    color: '#0f172a', border: 'none', borderRadius: '12px', fontSize: '15px',
+                    fontWeight: '600', cursor: 'pointer', transition: 'background-color 0.2s'
+                  }}
+                >
+                  Close
+                </button>
+              </div>
             </div>
           )}
 
