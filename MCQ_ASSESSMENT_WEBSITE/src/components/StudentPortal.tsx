@@ -2364,7 +2364,7 @@ Content-Type: text/html; charset=UTF-8
                       <div style={{ width: '100%' }}>
                         <div style={{ display: 'grid', gridTemplateColumns: '60px 2fr 1fr 1fr 1fr 1fr', padding: '16px', borderBottom: '1px solid #e2e8f0', fontSize: '12px', fontWeight: '700', color: '#64748b', alignItems: 'center' }}>
                           <div style={{ textAlign: 'center' }}>Rank</div>
-                          <div>Student</div>
+                          <div>Student / ID</div>
                           <div style={{ textAlign: 'center' }}>Marks Obtained</div>
                           <div style={{ textAlign: 'center' }}>Percentage</div>
                           <div style={{ textAlign: 'center' }}>Status</div>
@@ -2403,7 +2403,7 @@ Content-Type: text/html; charset=UTF-8
                                     </div>
                                     <div>
                                       <div style={{ fontSize: '14px', fontWeight: isMe ? '800' : '700', color: isMe ? '#8b5cf6' : '#0f172a' }}>{displayName} {isMe ? '(You)' : ''}</div>
-                                      <div style={{ fontSize: '11px', color: '#64748b' }}>Examinee</div>
+                                      <div style={{ fontSize: '11px', color: '#64748b' }}>{profile?.id ? profile.id.substring(0, 8).toUpperCase() : 'UNKNOWN ID'}</div>
                                     </div>
                                   </div>
                                   <div style={{ textAlign: 'center', fontSize: '14px', fontWeight: isMe ? '800' : '700', color: isMe ? '#8b5cf6' : '#0f172a' }}>{st.score}</div>

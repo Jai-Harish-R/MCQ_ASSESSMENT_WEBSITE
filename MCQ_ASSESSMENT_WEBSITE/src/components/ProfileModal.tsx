@@ -153,6 +153,14 @@ export default function ProfileModal({ user, isOpen, onClose, onUpdate }: Profil
             />
           </div>
 
+          {/* User ID Display */}
+          <div>
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: '700', color: '#0f172a', marginBottom: '8px' }}>User ID</label>
+            <div style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', fontSize: '14px', color: '#64748b', fontWeight: '600' }}>
+              {user.id ? user.id.substring(0, 8).toUpperCase() : 'UNKNOWN'}
+            </div>
+          </div>
+
           {/* Name Input */}
           <div>
             <label style={{ display: 'block', fontSize: '13px', fontWeight: '700', color: '#0f172a', marginBottom: '8px' }}>Display Name</label>
