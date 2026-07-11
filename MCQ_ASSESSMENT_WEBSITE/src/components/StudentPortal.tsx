@@ -116,22 +116,24 @@ export default function StudentPortal({ user, onLogout }: StudentPortalProps) {
         
         if (error) throw error;
         
-        const sorted = (data || []).sort((a: any, b: any) => {
-          if (b.score !== a.score) return b.score - a.score;
-          return (a.time_taken_seconds || Infinity) - (b.time_taken_seconds || Infinity);
-        });
+        const latestFirst = (data || []).sort((a: any, b: any) => new Date(b.completed_at).getTime() - new Date(a.completed_at).getTime());
         
         const uniqueAttempts: any[] = [];
         const seenEmails = new Set();
-        for (const att of sorted) {
+        for (const att of latestFirst) {
           const key = att.student_email || (att as any).student_id;
           if (!seenEmails.has(key)) {
             seenEmails.add(key);
             uniqueAttempts.push(att);
           }
         }
+
+        const ranked = uniqueAttempts.sort((a: any, b: any) => {
+          if (b.score !== a.score) return b.score - a.score;
+          return (a.time_taken_seconds || Infinity) - (b.time_taken_seconds || Infinity);
+        });
         
-        setLeaderboardAttempts(uniqueAttempts);
+        setLeaderboardAttempts(ranked);
       
     } catch (err) {
       console.error(err);
@@ -675,21 +677,33 @@ Content-Type: text/html; charset=UTF-8
         return;
       }
 
-      // Verify current student has taken the test
-      const myAttempt = allAttemptsForTest.find(a => a.student_email === user.email);
+      // Dedup attempts to keep only the latest per student
+      const latestFirst = [...allAttemptsForTest].sort((a, b) => new Date(b.completed_at).getTime() - new Date(a.completed_at).getTime());
+      const uniqueAttempts: Attempt[] = [];
+      const seenEmails = new Set();
+      for (const att of latestFirst) {
+        const key = att.student_email;
+        if (!seenEmails.has(key)) {
+          seenEmails.add(key);
+          uniqueAttempts.push(att);
+        }
+      }
+
+      // Sort attempts descending by score percentage for ranking
+      const sortedAttempts = uniqueAttempts.sort((a, b) => {
+        const pctA = a.score / a.total_questions;
+        const pctB = b.score / b.total_questions;
+        if (pctB !== pctA) return pctB - pctA;
+        return (a.time_taken_seconds || 0) - (b.time_taken_seconds || 0);
+      });
+
+      // Find my latest attempt for the rank and score percentage check
+      const myAttempt = sortedAttempts.find(a => a.student_email === user.email);
       if (!myAttempt) {
         setLeaderboardError('Leaderboard locked: You must take and submit this exam before you can access its leaderboard.');
         setLoading(false);
         return;
       }
-
-      // Process rankings
-      // Sort attempts descending by score percentage
-      const sortedAttempts = [...allAttemptsForTest].sort((a, b) => {
-        const pctA = a.score / a.total_questions;
-        const pctB = b.score / b.total_questions;
-        return pctB - pctA;
-      });
 
       // Find current student rank
       const rankIdx = sortedAttempts.findIndex(a => a.student_email === user.email);
@@ -1558,6 +1572,18 @@ Content-Type: text/html; charset=UTF-8
                             ))
                           )}
                         </div>
+                      </div>
+                      
+                      {/* Legend */}
+                      <div style={{ display: 'flex', justifyContent: 'center', gap: '24px', marginTop: '24px', fontSize: '11px', color: '#64748b', fontWeight: '700' }}>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#ea580c' }}></span>
+                          X-Axis: Test
+                        </span>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#94a3b8' }}></span>
+                          Y-Axis: Mark (Percentage)
+                        </span>
                       </div>
                     </div>
                   </div>

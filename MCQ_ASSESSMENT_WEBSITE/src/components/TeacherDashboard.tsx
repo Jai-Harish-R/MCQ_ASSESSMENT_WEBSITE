@@ -261,22 +261,28 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
   useEffect(() => {
     if (selectedLeaderboardTestId) {
       const allForTest = attempts.filter(att => att.test_id === selectedLeaderboardTestId);
-      // Sort descending by score percentage
-      const sorted = [...allForTest].sort((a, b) => {
-        const pctA = a.score / a.total_questions;
-        const pctB = b.score / b.total_questions;
-        return pctB - pctA;
-      });
+      // Sort chronologically descending to process last attempts first
+      const latestFirst = [...allForTest].sort((a, b) => new Date(b.completed_at).getTime() - new Date(a.completed_at).getTime());
+      
       const uniqueAttempts: any[] = [];
       const seenEmails = new Set();
-      for (const att of sorted) {
+      for (const att of latestFirst) {
         const key = att.student_email || (att as any).student_id;
         if (!seenEmails.has(key)) {
           seenEmails.add(key);
           uniqueAttempts.push(att);
         }
       }
-      setLeaderboardAttempts(uniqueAttempts);
+
+      // Now rank the last attempts by score descending
+      const ranked = uniqueAttempts.sort((a, b) => {
+        const pctA = a.score / a.total_questions;
+        const pctB = b.score / b.total_questions;
+        if (pctB !== pctA) return pctB - pctA;
+        return (a.time_taken_seconds || 0) - (b.time_taken_seconds || 0);
+      });
+
+      setLeaderboardAttempts(ranked);
     } else {
       setLeaderboardAttempts([]);
     }
