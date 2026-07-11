@@ -2177,8 +2177,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
 
                     return (
                       <div key={i} className="calendar-hover-wrapper"
-                        onMouseEnter={() => setExportHoveredDateStr(currentDateString)}
-                        onMouseLeave={() => setExportHoveredDateStr(null)}
+                        onClick={() => setExportHoveredDateStr(exportHoveredDateStr === currentDateString ? null : currentDateString)}
                         style={{ 
                           position: 'relative', padding: '12px 0 24px', fontSize: '14px', fontWeight: '600', 
                           color: isCurrentMonth ? (isToday ? '#ea580c' : '#0f172a') : '#cbd5e1',
@@ -2197,7 +2196,9 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                             </div>
                             
                             {exportHoveredDateStr === currentDateString && (
-                              <div className="calendar-hover-card" style={{ 
+                              <div className="calendar-hover-card" 
+                                onClick={(e) => e.stopPropagation()}
+                                style={{ 
                                 display: 'block', zIndex: 100, width: '320px', padding: '16px', borderRadius: '16px', 
                                 boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
                                 ...(i % 7 >= 4 ? { left: 'auto', right: '0%', transform: 'none' } : (i % 7 <= 2 ? { left: '0%', right: 'auto', transform: 'none' } : {}))
@@ -2206,8 +2207,11 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                                   {new Date(currentDateString).toLocaleDateString()}
                                 </div>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                  {dayTests.map((t, idx) => (
-                                    <label key={idx} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#334155', cursor: 'pointer', backgroundColor: '#f8fafc', padding: '8px 12px', borderRadius: '8px' }}>
+                                  {dayTests.map((t, idx) => {
+                                    const truncatedTitle = t.title.length > 7 ? t.title.substring(0, 7) + '...' : t.title;
+                                    const displayTitle = `${truncatedTitle}${t.short_id ? ` - ${t.short_id}` : ''}`;
+                                    return (
+                                    <label key={idx} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#334155', cursor: 'pointer', backgroundColor: '#f8fafc', padding: '8px 12px', borderRadius: '8px' }} title={t.title}>
                                       <input 
                                         type="checkbox" 
                                         checked={exportSelectedTests.includes(t.id)}
@@ -2220,9 +2224,9 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                                         }}
                                         style={{ accentColor: '#ea580c' }}
                                       />
-                                      <span style={{ fontWeight: '600' }}>{t.title}</span>
+                                      <span style={{ fontWeight: '600' }}>{displayTitle}</span>
                                     </label>
-                                  ))}
+                                  )})}
                                 </div>
                               </div>
                             )}
