@@ -80,6 +80,8 @@ export default function StudentPortal({ user, onLogout }: StudentPortalProps) {
   const [allProfiles, setAllProfiles] = useState<Profile[]>([]);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [currentAvatar, setCurrentAvatar] = useState(user.user_metadata?.avatar_url || studentAvatar as any);
+  const [showAllRecentActivity, setShowAllRecentActivity] = useState(false);
+  const [showAllRecentAttempts, setShowAllRecentAttempts] = useState(false);
 
   const [, setIsLoadingData] = useState(true);
   const [dashboardTimeFilter, setDashboardTimeFilter] = useState('This Month');
@@ -1473,14 +1475,18 @@ Content-Type: text/html; charset=UTF-8
                   <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', padding: '24px', boxShadow: '0 1px 3px rgba(0,0,0,0.02)', border: '1px solid #f1f5f9' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                       <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#0f172a', margin: 0 }}>Recent Activity</h3>
-                      <span style={{ fontSize: '13px', fontWeight: '600', color: '#ea580c', cursor: 'pointer' }}>View All</span>
+                      {myAttempts.length > 8 && (
+                        <span onClick={() => setShowAllRecentActivity(!showAllRecentActivity)} style={{ fontSize: '13px', fontWeight: '600', color: '#ea580c', cursor: 'pointer' }}>
+                          {showAllRecentActivity ? 'Show Less' : 'View All'}
+                        </span>
+                      )}
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                       {myAttempts.length === 0 ? (
                         <div style={{ fontSize: '13px', color: '#64748b', textAlign: 'center', padding: '20px' }}>No recent activity found.</div>
                       ) : (
-                        myAttempts.slice(0, 4).map(attempt => {
+                        myAttempts.slice(0, showAllRecentActivity ? myAttempts.length : 8).map(attempt => {
                           const pct = (attempt.score / attempt.total_questions) * 100;
                           const isPassed = pct >= 40;
                           
@@ -2041,9 +2047,11 @@ Content-Type: text/html; charset=UTF-8
               <div style={{ marginTop: '16px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
                   <h3 style={{ fontSize: '18px', fontWeight: '800', color: '#0f172a', margin: 0 }}>Recent Attempts</h3>
-                  <button style={{ border: 'none', backgroundColor: 'transparent', color: '#6366f1', fontSize: '14px', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}>
-                    View All <ArrowRight size={16} />
-                  </button>
+                  {myAttempts.length > 8 && (
+                    <button onClick={() => setShowAllRecentAttempts(!showAllRecentAttempts)} style={{ border: 'none', backgroundColor: 'transparent', color: '#6366f1', fontSize: '14px', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}>
+                      {showAllRecentAttempts ? 'Show Less' : 'View All'} {showAllRecentAttempts ? <ArrowRight size={16} style={{ transform: 'rotate(180deg)' }} /> : <ArrowRight size={16} />}
+                    </button>
+                  )}
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -2052,7 +2060,7 @@ Content-Type: text/html; charset=UTF-8
                       <p>You have not completed any tests yet.</p>
                     </div>
                   ) : (
-                    myAttempts.slice(0, 5).map((attempt) => {
+                    myAttempts.slice(0, showAllRecentAttempts ? myAttempts.length : 8).map((attempt) => {
                       const pct = Math.round((attempt.score / attempt.total_questions) * 100);
                       
                       let Icon = FileText;
