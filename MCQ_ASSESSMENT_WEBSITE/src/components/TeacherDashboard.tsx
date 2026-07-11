@@ -105,6 +105,12 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
   const itemsPerPage = 10;
   const [showAllTests, setShowAllTests] = useState(false);
   const [hoveredDateStr, setHoveredDateStr] = useState<string | null>(null);
+  
+  // Export Examinees State
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [exportCurrentMonth, setExportCurrentMonth] = useState(new Date());
+  const [exportHoveredDateStr, setExportHoveredDateStr] = useState<string | null>(null);
+  const [exportSelectedTests, setExportSelectedTests] = useState<string[]>([]);
 
   // Test form state
   const [testTitle, setTestTitle] = useState('');
@@ -181,6 +187,37 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
     if (t.access_start && now < new Date(t.access_start).getTime()) return 'Not Started';
     if (t.access_end && now > new Date(t.access_end).getTime()) return 'Ended';
     return 'Live';
+  };
+
+  const exportToCSV = () => {
+    if (exportSelectedTests.length === 0) {
+      setMsg({ type: 'error', text: 'Please select at least one test to export.' });
+      return;
+    }
+    const attemptsToExport = attempts.filter(att => exportSelectedTests.includes(att.test_id));
+    
+    // Build CSV
+    let csvContent = "Test Title,Test Date,Student Name,Student Email,Student ID,Score,Total Questions,Pass/Fail,Completed At\n";
+    attemptsToExport.forEach(att => {
+      const test = tests.find(t => t.id === att.test_id);
+      const profile = allProfiles.find(p => p.email === att.student_email);
+      const studentName = profile?.full_name || 'Unknown';
+      const studentId = profile?.short_id || '-';
+      const passPct = test?.pass_percentage || 80;
+      const isPass = Math.round((att.score / att.total_questions) * 100) >= passPct ? 'Pass' : 'Fail';
+      const row = `"${(test?.title || '').replace(/"/g, '""')}","${getLocalDateStr(test?.access_start || test?.created_at || new Date())}","${studentName.replace(/"/g, '""')}","${att.student_email}","${studentId}",${att.score},${att.total_questions},"${isPass}","${new Date(att.completed_at).toLocaleString()}"`;
+      csvContent += row + "\n";
+    });
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `examinee_results_export_${new Date().getTime()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setIsExportModalOpen(false);
   };
 
   // Load stats and tables
@@ -1641,6 +1678,15 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                     Review high-density logs of examinee outcomes and retry options.
                   </p>
                 </div>
+                <div style={{ zIndex: 10 }}>
+                  <button 
+                    onClick={() => setIsExportModalOpen(true)}
+                    className="btn btn-primary"
+                    style={{ padding: '10px 20px', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px' }}
+                  >
+                    <Download size={18} /> Export Examinees Results
+                  </button>
+                </div>
                 
                 {/* CSS/Icon Illustration Mock */}
                 <div style={{ display: 'flex', alignItems: 'flex-end', gap: '12px', opacity: 0.9, zIndex: 10 }}>
@@ -2083,6 +2129,131 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
 
         </div>
       </main>
+
+      {/* Export Results Modal */}
+      {isExportModalOpen && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(15, 23, 42, 0.4)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+          <div style={{ width: '100%', maxWidth: '600px', backgroundColor: '#ffffff', borderRadius: '24px', padding: '32px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', position: 'relative' }}>
+            <button 
+              onClick={() => setIsExportModalOpen(false)}
+              style={{ position: 'absolute', top: '24px', right: '24px', background: 'none', border: 'none', cursor: 'pointer', color: '#64748b' }}
+            >
+              <LogOut size={20} />
+            </button>
+            <h2 style={{ fontSize: '24px', fontWeight: '800', color: '#0f172a', marginBottom: '8px' }}>Export Results</h2>
+            <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '24px' }}>Select tests from the calendar to export their examinee results.</p>
+            
+            {/* Calendar for Selection */}
+            <div className="card" style={{ padding: '24px', display: 'flex', flexDirection: 'column' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+                  <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#0f172a', margin: 0 }}>{exportCurrentMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}</h3>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button onClick={() => setExportCurrentMonth(new Date())} style={{ padding: '6px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', backgroundColor: '#ffffff', fontSize: '13px', fontWeight: '600', color: '#0f172a', cursor: 'pointer' }}>Today</button>
+                    <button onClick={() => setExportCurrentMonth(new Date(exportCurrentMonth.getFullYear(), exportCurrentMonth.getMonth() - 1, 1))} style={{ padding: '6px 10px', borderRadius: '8px', border: '1px solid #e2e8f0', backgroundColor: '#ffffff', fontSize: '13px', fontWeight: '600', color: '#0f172a', cursor: 'pointer' }}>&lt;</button>
+                    <button onClick={() => setExportCurrentMonth(new Date(exportCurrentMonth.getFullYear(), exportCurrentMonth.getMonth() + 1, 1))} style={{ padding: '6px 10px', borderRadius: '8px', border: '1px solid #e2e8f0', backgroundColor: '#ffffff', fontSize: '13px', fontWeight: '600', color: '#0f172a', cursor: 'pointer' }}>&gt;</button>
+                  </div>
+                </div>
+                
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '8px', textAlign: 'center', marginBottom: '12px' }}>
+                  {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+                    <div key={day} style={{ fontSize: '12px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase' }}>{day}</div>
+                  ))}
+                </div>
+                
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '8px' }}>
+                  {Array.from({ length: 42 }).map((_, i) => {
+                    const daysInMonth = new Date(exportCurrentMonth.getFullYear(), exportCurrentMonth.getMonth() + 1, 0).getDate();
+                    const firstDay = new Date(exportCurrentMonth.getFullYear(), exportCurrentMonth.getMonth(), 1).getDay();
+                    const dateNum = i - firstDay + 1;
+                    const isCurrentMonth = dateNum > 0 && dateNum <= daysInMonth;
+                    const displayNum = isCurrentMonth ? dateNum : (dateNum <= 0 ? new Date(exportCurrentMonth.getFullYear(), exportCurrentMonth.getMonth(), 0).getDate() + dateNum : dateNum - daysInMonth);
+                    const year = exportCurrentMonth.getFullYear();
+                    const month = exportCurrentMonth.getMonth();
+                    
+                    const currentDateString = getLocalDateStr(new Date(year, isCurrentMonth ? month : (dateNum <= 0 ? month - 1 : month + 1), displayNum));
+                    const isToday = isCurrentMonth && displayNum === new Date().getDate() && month === new Date().getMonth() && year === new Date().getFullYear();
+                    
+                    const dayTests = tests.filter(t => getLocalDateStr(t.access_start || t.created_at) === currentDateString);
+
+                    return (
+                      <div key={i} className="calendar-hover-wrapper"
+                        onMouseEnter={() => setExportHoveredDateStr(currentDateString)}
+                        onMouseLeave={() => setExportHoveredDateStr(null)}
+                        style={{ 
+                          position: 'relative', padding: '12px 0 24px', fontSize: '14px', fontWeight: '600', 
+                          color: isCurrentMonth ? (isToday ? '#ea580c' : '#0f172a') : '#cbd5e1',
+                          backgroundColor: isToday ? '#fff7ed' : 'transparent',
+                          borderRadius: '12px', cursor: 'pointer',
+                          display: 'flex', flexDirection: 'column', alignItems: 'center'
+                        }}>
+                        {displayNum}
+                        
+                        {dayTests.length > 0 && (
+                          <>
+                            <div style={{ position: 'absolute', bottom: '8px', display: 'flex', gap: '4px' }}>
+                              {dayTests.map((t, idx) => (
+                                <div key={idx} style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: exportSelectedTests.includes(t.id) ? '#3b82f6' : '#ea580c' }}></div>
+                              ))}
+                            </div>
+                            
+                            {exportHoveredDateStr === currentDateString && (
+                              <div className="calendar-hover-card" style={{ 
+                                display: 'block', zIndex: 100, width: '320px', padding: '16px', borderRadius: '16px', 
+                                boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+                                ...(i % 7 >= 4 ? { left: 'auto', right: '0%', transform: 'none' } : (i % 7 <= 2 ? { left: '0%', right: 'auto', transform: 'none' } : {}))
+                              }}>
+                                <div style={{ fontSize: '12px', fontWeight: '800', color: '#0f172a', marginBottom: '8px', paddingBottom: '4px', borderBottom: '1px solid #e2e8f0' }}>
+                                  {new Date(currentDateString).toLocaleDateString()}
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                  {dayTests.map((t, idx) => (
+                                    <label key={idx} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#334155', cursor: 'pointer', backgroundColor: '#f8fafc', padding: '8px 12px', borderRadius: '8px' }}>
+                                      <input 
+                                        type="checkbox" 
+                                        checked={exportSelectedTests.includes(t.id)}
+                                        onChange={(e) => {
+                                          if (e.target.checked) {
+                                            setExportSelectedTests([...exportSelectedTests, t.id]);
+                                          } else {
+                                            setExportSelectedTests(exportSelectedTests.filter(id => id !== t.id));
+                                          }
+                                        }}
+                                        style={{ accentColor: '#ea580c' }}
+                                      />
+                                      <span style={{ fontWeight: '600' }}>{t.title}</span>
+                                    </label>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '24px' }}>
+              <button 
+                onClick={() => setIsExportModalOpen(false)}
+                style={{ padding: '10px 20px', borderRadius: '8px', border: '1px solid #e2e8f0', backgroundColor: '#ffffff', fontSize: '14px', fontWeight: '600', color: '#64748b', cursor: 'pointer' }}
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={exportToCSV}
+                className="btn btn-primary"
+                style={{ padding: '10px 20px', fontSize: '14px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px' }}
+                disabled={exportSelectedTests.length === 0}
+              >
+                <Download size={16} /> Export Selected ({exportSelectedTests.length})
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <ProfileModal 
         user={user}
         isOpen={isProfileModalOpen}
