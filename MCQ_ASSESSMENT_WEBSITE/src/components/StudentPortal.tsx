@@ -1301,6 +1301,12 @@ Content-Type: text/html; charset=UTF-8
                                     <div style={{ fontSize: '12px', fontWeight: '800', color: '#0f172a', marginBottom: '8px', paddingBottom: '4px', borderBottom: '1px solid #e2e8f0' }}>
                                       {new Date(dayAttempts[0]?.completed_at || currentDateString).toLocaleDateString()}
                                     </div>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr 1.2fr', gap: '8px', fontSize: '9px', fontWeight: '800', color: '#94a3b8', textTransform: 'uppercase', marginBottom: '8px', paddingBottom: '4px', borderBottom: '1px solid #f1f5f9' }}>
+                                      <div>Exam Name</div>
+                                      <div>Test ID</div>
+                                      <div>Attempt</div>
+                                      <div>Status</div>
+                                    </div>
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                       {dayAttempts.map(att => {
                                         const testD = availableTests.find(t => t.id === att.test_id);
@@ -1311,7 +1317,7 @@ Content-Type: text/html; charset=UTF-8
                                           <div key={att.id} style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr 1.2fr', gap: '8px', fontSize: '11px', alignItems: 'center' }}>
                                             <div style={{ fontWeight: '700', color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{att.test_title}</div>
                                             <div style={{ color: '#64748b' }}>{testD?.short_id || '-'}</div>
-                                            <div style={{ color: '#64748b' }}>Att: {attemptNum}</div>
+                                            <div style={{ color: '#64748b' }}>{attemptNum}</div>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                                               <span style={{ fontWeight: '700', color: isPassing ? '#10b981' : '#ef4444' }}>{pct}%</span>
                                               <span className={`chip ${isPassing ? 'chip-success' : 'chip-error'}`} style={{ fontSize: '9px', padding: '2px 4px' }}>{isPassing ? 'Pass' : 'Fail'}</span>
@@ -1970,6 +1976,12 @@ Content-Type: text/html; charset=UTF-8
                                 <div style={{ fontSize: '12px', fontWeight: '800', color: '#0f172a', marginBottom: '8px', paddingBottom: '4px', borderBottom: '1px solid #e2e8f0' }}>
                                   {new Date(currentDateString).toLocaleDateString()}
                                 </div>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr 1.2fr', gap: '8px', fontSize: '9px', fontWeight: '800', color: '#94a3b8', textTransform: 'uppercase', marginBottom: '8px', paddingBottom: '4px', borderBottom: '1px solid #f1f5f9' }}>
+                                  <div>Exam Name</div>
+                                  <div>Test ID</div>
+                                  <div>Attempt</div>
+                                  <div>Status</div>
+                                </div>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                   {dayAttempts.map(att => {
                                     const testD = availableTests.find(t => t.id === att.test_id);
@@ -1980,7 +1992,7 @@ Content-Type: text/html; charset=UTF-8
                                       <div key={att.id} style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr 1.2fr', gap: '8px', fontSize: '11px', alignItems: 'center' }}>
                                         <div style={{ fontWeight: '700', color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{att.test_title}</div>
                                         <div style={{ color: '#64748b' }}>{testD?.short_id || '-'}</div>
-                                        <div style={{ color: '#64748b' }}>Att: {attemptNum}</div>
+                                        <div style={{ color: '#64748b' }}>{attemptNum}</div>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                                           <span style={{ fontWeight: '700', color: isPassing ? '#10b981' : '#ef4444' }}>{pct}%</span>
                                           <span className={`chip ${isPassing ? 'chip-success' : 'chip-error'}`} style={{ fontSize: '9px', padding: '2px 4px' }}>{isPassing ? 'Pass' : 'Fail'}</span>
