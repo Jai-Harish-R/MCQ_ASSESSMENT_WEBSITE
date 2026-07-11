@@ -2136,7 +2136,9 @@ Content-Type: text/html; charset=UTF-8
                     </div>
                   ) : (
                     myAttempts.slice(0, showAllRecentAttempts ? myAttempts.length : 8).map((attempt) => {
+                      const testD = availableTests.find(t => t.id === attempt.test_id);
                       const pct = Math.round((attempt.score / attempt.total_questions) * 100);
+                      const isPassed = pct >= (testD?.pass_percentage || 80);
                       
                       let Icon = FileText;
                       let color = '#3b82f6', bg = '#eff6ff';
@@ -2146,7 +2148,7 @@ Content-Type: text/html; charset=UTF-8
                       if (attempt.test_type === 'live_exam') { color = '#ef4444'; bg = '#fef2f2'; Icon = Target; typeName = 'Live Exam'; }
                       if (attempt.test_type === 'result') { color = '#16a34a'; bg = '#dcfce7'; Icon = BarChart3; typeName = 'Result'; }
                       
-                      let scoreColor = pct >= 70 ? '#16a34a' : pct >= 40 ? '#d97706' : '#dc2626';
+                      let scoreColor = isPassed ? '#16a34a' : '#ef4444';
 
                       return (
                         <div key={attempt.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 24px', backgroundColor: '#ffffff', borderRadius: '16px', border: '1px solid #f1f5f9', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
