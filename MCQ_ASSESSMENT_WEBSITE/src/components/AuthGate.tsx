@@ -223,28 +223,6 @@ if (countryCode === '+966' && cleanPhone.length !== 9) {
         </div>
         
         <div style={{ display: 'flex', alignItems: 'center', gap: '32px', fontSize: '14px', fontWeight: '700' }}>
-          <button 
-            onClick={() => setActiveTab('student')}
-            style={{ 
-              backgroundColor: 'transparent', border: 'none', cursor: 'pointer', 
-              color: activeTab === 'student' ? '#ea580c' : '#475569',
-              borderBottom: activeTab === 'student' ? '2px solid #ea580c' : '2px solid transparent',
-              padding: '4px 0'
-            }}
-          >
-            Examinee Lobby
-          </button>
-          <button 
-            onClick={() => setActiveTab('teacher')}
-            style={{ 
-              backgroundColor: 'transparent', border: 'none', cursor: 'pointer', 
-              color: activeTab === 'teacher' ? '#ea580c' : '#475569',
-              borderBottom: activeTab === 'teacher' ? '2px solid #ea580c' : '2px solid transparent',
-              padding: '4px 0'
-            }}
-          >
-            Examiner Lobby
-          </button>
         </div>
         
         <button style={{ 
@@ -343,7 +321,7 @@ if (countryCode === '+966' && cleanPhone.length !== 9) {
                   transition: 'all 0.2s'
                 }}
               >
-                <GraduationCap size={18} /> Take Test
+                <GraduationCap size={18} /> Examinee Lobby
               </button>
               <button
                 type="button"
@@ -357,18 +335,8 @@ if (countryCode === '+966' && cleanPhone.length !== 9) {
                   transition: 'all 0.2s'
                 }}
               >
-                <School size={18} /> Conduct Test
+                <School size={18} /> Examiner Lobby
               </button>
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '32px' }}>
-              <span style={{
-                fontSize: '11px', fontWeight: '800', color: '#475569',
-                backgroundColor: '#f1f5f9', padding: '6px 16px', borderRadius: '24px',
-                textTransform: 'uppercase', letterSpacing: '0.05em'
-              }}>
-                {activeTab === 'student' ? 'Examinee Lobby' : 'Examiner Lobby'}
-              </span>
             </div>
 
             {errorMsg && (
