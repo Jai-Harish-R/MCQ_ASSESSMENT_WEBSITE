@@ -10,9 +10,10 @@ interface HoverableTestTitleProps {
   customStyle?: React.CSSProperties;
   correctQuestions?: number;
   isPassing?: boolean;
+  attemptNumber?: string | number;
 }
 
-export default function HoverableTestTitle({ title, shortId, questionsCount, duration, testCode, customStyle, correctQuestions, isPassing }: HoverableTestTitleProps) {
+export default function HoverableTestTitle({ title, shortId, questionsCount, duration, testCode, customStyle, correctQuestions, isPassing, attemptNumber }: HoverableTestTitleProps) {
   const [isHovered, setIsHovered] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -112,6 +113,12 @@ export default function HoverableTestTitle({ title, shortId, questionsCount, dur
               <div style={{ display: 'flex', flexDirection: 'column' }}>
                 <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '700', textTransform: 'uppercase' }}>Result</span>
                 <span style={{ fontSize: '14px', color: isPassing ? '#16a34a' : '#dc2626', fontWeight: '900' }}>{isPassing ? 'PASS' : 'FAIL'}</span>
+              </div>
+            )}
+            {attemptNumber !== undefined && (
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '700', textTransform: 'uppercase' }}>Attempt</span>
+                <span style={{ fontSize: '14px', color: '#0f172a', fontWeight: '700' }}>{attemptNumber}</span>
               </div>
             )}
           </div>

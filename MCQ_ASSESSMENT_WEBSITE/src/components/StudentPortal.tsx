@@ -1496,7 +1496,7 @@ Content-Type: text/html; charset=UTF-8
                                         const attemptNum = getAttemptNumber(att);
                                         return (
                                           <div key={att.id} style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr 1.2fr', gap: '8px', fontSize: '11px', alignItems: 'center' }}>
-                                            <div style={{ fontWeight: '700', color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}><HoverableTestTitle title={testD?.title || att.test_title?.replace(/\s*-.*$/, '') || 'Assessment'} questionsCount={att.total_questions} correctQuestions={att.score} isPassing={Math.round((att.score / (att.total_questions || 1)) * 100) >= (testD?.pass_percentage || 80)} /></div>
+                                            <div style={{ fontWeight: '700', color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}><HoverableTestTitle title={testD?.title || att.test_title?.replace(/\s*-.*$/, '') || 'Assessment'} shortId={testD?.short_id || att.short_id} questionsCount={att.total_questions} correctQuestions={att.score} isPassing={Math.round((att.score / (att.total_questions || 1)) * 100) >= (testD?.pass_percentage || 80)} attemptNumber={attemptNum} /></div>
                                             <div style={{ color: '#64748b' }}>{testD?.short_id || '-'}</div>
                                             <div style={{ color: '#64748b' }}>{attemptNum}</div>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -1729,7 +1729,7 @@ Content-Type: text/html; charset=UTF-8
                               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                 <Icon size={16} color={fg} />
                                 <span style={{ fontSize: '13px', fontWeight: '600', color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '180px' }}>
-                                  <HoverableTestTitle title={testD?.title || attempt.test_title?.replace(/\s*-.*$/, '') || 'Assessment'} shortId={testD?.short_id} questionsCount={attempt.total_questions} correctQuestions={attempt.score} isPassing={Math.round((attempt.score / (attempt.total_questions || 1)) * 100) >= (testD?.pass_percentage || 80)} /> submitted
+                                  <HoverableTestTitle title={testD?.title || attempt.test_title?.replace(/\s*-.*$/, '') || 'Assessment'} shortId={testD?.short_id || attempt.short_id} questionsCount={attempt.total_questions} correctQuestions={attempt.score} isPassing={Math.round((attempt.score / (attempt.total_questions || 1)) * 100) >= (testD?.pass_percentage || 80)} attemptNumber={getAttemptNumber(attempt)} /> submitted
                                 </span>
                               </div>
                               <span style={{ fontSize: '12px', color: '#94a3b8', fontWeight: '500', whiteSpace: 'nowrap' }}>
@@ -2189,7 +2189,7 @@ Content-Type: text/html; charset=UTF-8
                                     const attemptNum = getAttemptNumber(att);
                                     return (
                                       <div key={att.id} style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr 1.2fr', gap: '8px', fontSize: '11px', alignItems: 'center' }}>
-                                        <div style={{ fontWeight: '700', color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}><HoverableTestTitle title={testD?.title || att.test_title?.replace(/\s*-.*$/, '') || 'Assessment'} questionsCount={att.total_questions} correctQuestions={att.score} isPassing={Math.round((att.score / (att.total_questions || 1)) * 100) >= (testD?.pass_percentage || 80)} /></div>
+                                        <div style={{ fontWeight: '700', color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}><HoverableTestTitle title={testD?.title || att.test_title?.replace(/\s*-.*$/, '') || 'Assessment'} shortId={testD?.short_id || att.short_id} questionsCount={att.total_questions} correctQuestions={att.score} isPassing={Math.round((att.score / (att.total_questions || 1)) * 100) >= (testD?.pass_percentage || 80)} attemptNumber={attemptNum} /></div>
                                         <div style={{ color: '#64748b' }}>{testD?.short_id || '-'}</div>
                                         <div style={{ color: '#64748b' }}>{attemptNum}</div>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -2358,7 +2358,7 @@ Content-Type: text/html; charset=UTF-8
                             </div>
                             <div>
                               <h4 style={{ fontSize: '15px', fontWeight: '700', color: '#0f172a', margin: '0 0 4px 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '250px' }}>
-                                <HoverableTestTitle title={attempt.test_title?.replace(/\s*-.*$/, '') || 'Assessment'} shortId={attempt.short_id} questionsCount={attempt.total_questions} correctQuestions={attempt.score} isPassing={isPassed} />
+                                <HoverableTestTitle title={attempt.test_title?.replace(/\s*-.*$/, '') || 'Assessment'} shortId={testD?.short_id || attempt.short_id} questionsCount={attempt.total_questions} correctQuestions={attempt.score} isPassing={isPassed} attemptNumber={getAttemptNumber(attempt)} />
                               </h4>
                               <div style={{ fontSize: '12px', color: '#64748b', fontWeight: '500' }}>
                                 {typeName} • {attempt.total_questions} Questions
