@@ -2139,9 +2139,10 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
 
                       {/* Leaderboard Table */}
                       <div style={{ width: '100%' }}>
-                        <div style={{ display: 'grid', gridTemplateColumns: '60px 2fr 1fr 1fr 1fr 1fr', padding: '16px', borderBottom: '1px solid #e2e8f0', fontSize: '12px', fontWeight: '700', color: '#64748b', alignItems: 'center' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '60px 1.5fr 1fr 1fr 1fr 1fr 1fr', padding: '16px', borderBottom: '1px solid #e2e8f0', fontSize: '12px', fontWeight: '700', color: '#64748b', alignItems: 'center' }}>
                           <div style={{ textAlign: 'center' }}>Rank</div>
-                          <div>Student / ID</div>
+                          <div>Student Name</div>
+                          <div>Student ID</div>
                           <div style={{ textAlign: 'center' }}>Marks Obtained</div>
                           <div style={{ textAlign: 'center' }}>Percentage</div>
                           <div style={{ textAlign: 'center' }}>Status</div>
@@ -2166,7 +2167,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                               const isPassing = pct >= (selectedTest?.pass_percentage || 80);
 
                               return (
-                                <div key={st.id} title={`Student Marks: ${st.score} / ${st.total_questions}`} style={{ display: 'grid', cursor: 'help', gridTemplateColumns: '60px 2fr 1fr 1fr 1fr 1fr', padding: '16px', borderBottom: '1px solid #f1f5f9', alignItems: 'center', transition: 'background-color 0.2s' }}>
+                                <div key={st.id} title={`Student Marks: ${st.score} / ${st.total_questions}`} style={{ display: 'grid', cursor: 'help', gridTemplateColumns: '60px 1.5fr 1fr 1fr 1fr 1fr 1fr', padding: '16px', borderBottom: '1px solid #f1f5f9', alignItems: 'center', transition: 'background-color 0.2s' }}>
                                   <div style={{ textAlign: 'center', fontSize: medal ? '20px' : '14px', fontWeight: '700', color: medal ? 'inherit' : '#0f172a' }}>
                                     {medal || rank}
                                   </div>
@@ -2176,8 +2177,10 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                                     </div>
                                     <div>
                                       <div style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>{displayName}</div>
-                                      <div style={{ fontSize: '12px', color: '#64748b' }}>{profile?.id ? profile.id.substring(0, 8).toUpperCase() : 'UNKNOWN ID'}</div>
                                     </div>
+                                  </div>
+                                  <div style={{ fontSize: '13px', fontWeight: '600', color: '#64748b' }}>
+                                    {profile?.short_id ? `ID-${String(profile.short_id).padStart(3, '0')}` : 'N/A'}
                                   </div>
                                   <div style={{ textAlign: 'center', fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>{st.score}</div>
                                   <div style={{ textAlign: 'center', fontSize: '14px', fontWeight: '800', color: '#10b981' }}>{pct}%</div>
