@@ -7,7 +7,7 @@ import { Bell, ChevronDown, Clock3,
    ClipboardEdit, Target, TrendingUp, CalendarDays,
    BarChart3,  FileText, Trophy, ShieldCheck,
    Lock, Calendar
-, Users, Mail, Menu, X} from 'lucide-react';
+, Users, Mail, Menu} from 'lucide-react';
 import studentAvatar from '../assets/student_avatar.png';
 import ProfileModal from './ProfileModal';
 import HoverableTestTitle from './HoverableTestTitle';
@@ -1171,14 +1171,13 @@ Content-Type: text/html; charset=UTF-8
   return (
     <div className="edu-app-frame" style={{ backgroundColor: '#fafafa' }}>
       
-      {/* Mobile Drawer Overlay */}
+      {/* Mobile Sidebar Overlay */}
       <div 
-        className={`mobile-overlay ${isMobileMenuOpen ? 'mobile-open' : ''}`}
+        className={`sidebar-overlay ${isMobileMenuOpen ? 'open' : ''}`}
         onClick={() => setIsMobileMenuOpen(false)}
       />
-
       {/* Sidebar matching the image exactly */}
-      <aside className={`edu-sidebar ${isMobileMenuOpen ? 'mobile-open' : ''}`} style={{ backgroundColor: '#ffffff', borderRight: '1px solid #f1f5f9', padding: '24px 20px', display: 'flex', flexDirection: 'column', width: '260px' }}>
+      <aside className={`edu-sidebar ${isMobileMenuOpen ? 'open' : ''}`} style={{ backgroundColor: '#ffffff', borderRight: '1px solid #f1f5f9', padding: '24px 20px', display: 'flex', flexDirection: 'column' }}>
         
         {/* Brand Logo */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '24px', padding: '0 8px' }}>
@@ -1219,8 +1218,8 @@ Content-Type: text/html; charset=UTF-8
         <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
           <li>
             <button
-              onClick={() => { setActiveTab('dashboard'); setVerifiedLeaderboard(null); }}
-              style={{
+              onClick={() => { setActiveTab('dashboard'); setIsMobileMenuOpen(false); }}
+              style={{ 
                 display: 'flex', alignItems: 'center', gap: '12px', width: '100%', padding: '12px 16px',
                 borderRadius: '12px', border: 'none', cursor: 'pointer', fontSize: '15px', fontWeight: '600',
                 backgroundColor: activeTab === 'dashboard' ? '#fff7ed' : 'transparent',
@@ -1233,7 +1232,7 @@ Content-Type: text/html; charset=UTF-8
           </li>
           <li>
             <button
-              onClick={() => { setActiveTab('lobby'); setVerifiedLeaderboard(null); }}
+              onClick={() => { setActiveTab('lobby'); setIsMobileMenuOpen(false); }}
               style={{
                 display: 'flex', alignItems: 'center', gap: '12px', width: '100%', padding: '12px 16px',
                 borderRadius: '12px', border: 'none', cursor: 'pointer', fontSize: '15px', fontWeight: '600',
@@ -1295,20 +1294,17 @@ Content-Type: text/html; charset=UTF-8
       <main style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
         
         {/* Top Header Bar */}
-        <header style={{ 
+        <header className="edu-header" style={{ 
           display: 'flex', alignItems: 'center', justifyContent: 'space-between', 
-          padding: '24px 40px', gap: '24px', backgroundColor: 'transparent'
+          padding: '24px 40px', gap: '24px', backgroundColor: 'transparent', height: 'auto', borderBottom: 'none'
         }}>
-          <button 
-            className="hamburger-btn" 
-            onClick={() => setIsMobileMenuOpen(true)}
-            aria-label="Open Menu"
-            style={{ padding: 0 }}
-          >
+          <button className="hamburger-menu-btn" onClick={() => setIsMobileMenuOpen(true)}>
             <Menu size={24} />
           </button>
-          {/* Header Avatar */}
-          <img src={currentAvatar} alt="User" style={{ width: '40px', height: '40px', borderRadius: '50%', cursor: 'pointer', border: '2px solid #ffffff', boxShadow: '0 2px 4px rgba(0,0,0,0.1)', objectFit: 'cover' }} />
+          <div style={{ display: 'flex', justifyContent: 'flex-end', flex: 1 }}>
+            {/* Header Avatar */}
+            <img src={currentAvatar} alt="User" style={{ width: '40px', height: '40px', borderRadius: '50%', cursor: 'pointer', border: '2px solid #ffffff', boxShadow: '0 2px 4px rgba(0,0,0,0.1)', objectFit: 'cover' }} />
+          </div>
         </header>
 
         {/* Content Area */}

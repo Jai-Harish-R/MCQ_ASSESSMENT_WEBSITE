@@ -15,10 +15,10 @@
   --color-outline: #94a3b8;
   --color-outline-variant: #e2e8f0;
   
-  --color-primary: #f35e23; /* CodersFun Brand Orange from screenshot */
+  --color-primary: #ea580c; /* CodersFun Brand Orange */
   --color-on-primary: #ffffff;
-  --color-primary-container: #fff4eb;
-  --color-on-primary-container: #d94b15;
+  --color-primary-container: #ffedd5;
+  --color-on-primary-container: #c2410c;
   
   --color-secondary: #f97316; /* Secondary Orange */
   --color-on-secondary: #ffffff;
@@ -41,12 +41,12 @@
   --font-body: 'Atkinson Hyperlegible', sans-serif;
 
   /* Geometry & Border Radii */
-  --radius-xs: 6px;
-  --radius-sm: 10px;
-  --radius-default: 14px;
-  --radius-md: 20px;
-  --radius-lg: 28px;
-  --radius-xl: 36px;
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-default: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
   --radius-full: 9999px;
 
   /* Spacing */
@@ -109,53 +109,43 @@ h1, h2, h3, h4, h5, h6 {
   .edu-sidebar {
     position: fixed;
     top: 0;
-    left: -280px;
-    width: 260px;
+    left: 0;
     height: 100vh;
-    z-index: 999;
-    box-shadow: 4px 0 24px rgba(0,0,0,0.1);
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  
-  .edu-sidebar.mobile-open {
-    transform: translateX(280px);
+    width: 280px;
+    z-index: 200;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.1);
   }
 
-  .mobile-overlay {
+  .edu-sidebar.open {
+    transform: translateX(0);
+  }
+}
+
+.sidebar-overlay {
+  display: none;
+}
+
+@media (max-width: 1024px) {
+  .sidebar-overlay {
     display: block;
     position: fixed;
-    inset: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     background: rgba(15, 23, 42, 0.4);
     backdrop-filter: blur(2px);
-    z-index: 998;
+    z-index: 190;
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.3s ease;
   }
   
-  .mobile-overlay.mobile-open {
+  .sidebar-overlay.open {
     opacity: 1;
     pointer-events: auto;
-  }
-}
-
-.mobile-overlay {
-  display: none;
-}
-
-.hamburger-btn {
-  display: none;
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: #0f172a;
-  padding: 8px;
-  margin-right: 12px;
-}
-
-@media (max-width: 1024px) {
-  .hamburger-btn {
-    display: block;
   }
 }
 
@@ -266,6 +256,13 @@ h1, h2, h3, h4, h5, h6 {
   z-index: 100;
 }
 
+@media (max-width: 768px) {
+  .edu-header {
+    padding: 0 16px;
+    gap: 12px;
+  }
+}
+
 .header-search-container {
   display: flex;
   align-items: center;
@@ -311,7 +308,7 @@ h1, h2, h3, h4, h5, h6 {
   color: #0f172a;
 }
 
-/* Workspace Container */
+/* Workspace Container (Clean 1-Column Canvas) */
 .workspace-container {
   padding: 32px;
   max-width: 1200px;
@@ -324,34 +321,35 @@ h1, h2, h3, h4, h5, h6 {
 @media (max-width: 768px) {
   .workspace-container {
     padding: 16px;
-    gap: 16px;
+    gap: 20px;
+  }
+}
+
+.hamburger-menu-btn {
+  display: none;
+  background: none;
+  border: none;
+  color: #0f172a;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: var(--radius-sm);
+}
+
+@media (max-width: 1024px) {
+  .hamburger-menu-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 }
 
 /* Cards */
 .card {
   background-color: #ffffff;
-  border: 1px solid rgba(243, 94, 35, 0.08);
+  border: 1px solid var(--color-outline-variant);
   border-radius: var(--radius-md);
   padding: 24px;
-  box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.04);
-  transition: box-shadow 0.3s ease, transform 0.3s ease;
 }
-
-.card:hover {
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08);
-}
-
-.card-pastel-orange { background-color: #fff4eb; border-color: #ffe6d5; }
-.card-pastel-blue { background-color: #f0f7ff; border-color: #e0f2fe; }
-.card-pastel-green { background-color: #f0fdf4; border-color: #dcfce7; }
-.card-pastel-purple { background-color: #faf5ff; border-color: #f3e8ff; }
-.card-navy {
-  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-  color: #ffffff;
-  border: none;
-}
-.card-navy * { color: inherit !important; }
 
 .card-title-bar {
   display: flex;
@@ -382,15 +380,12 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--color-primary) 0%, #e85c27 100%);
+  background-color: #ea580c;
   color: #ffffff;
-  box-shadow: 0 4px 12px rgba(243, 94, 35, 0.2);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: linear-gradient(135deg, #d94b15 0%, #d94b15 100%);
-  transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(243, 94, 35, 0.3);
+  background-color: #c2410c;
 }
 
 .btn-secondary {
