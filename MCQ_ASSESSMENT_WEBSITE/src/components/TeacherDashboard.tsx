@@ -1438,31 +1438,6 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
               <div className="card">
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--color-outline-variant)', paddingBottom: '12px', marginBottom: '20px' }}>
                   <h3 style={{ fontSize: '16px', fontWeight: '600' }}>Test Configuration</h3>
-                  <div style={{ display: 'flex', gap: '12px' }}>
-                    <button
-                      type="button"
-                      onClick={downloadCSVTemplate}
-                      className="btn btn-secondary"
-                      style={{ padding: '6px 12px', fontSize: '12px' }}
-                    >
-                      <Download size={14} /> Download Template
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => fileInputRef.current?.click()}
-                      className="btn btn-primary"
-                      style={{ padding: '6px 12px', fontSize: '12px' }}
-                    >
-                      <Upload size={14} /> Import File (JSON/CSV)
-                    </button>
-                    <input
-                      type="file"
-                      ref={fileInputRef}
-                      style={{ display: 'none' }}
-                      accept=".csv,.json"
-                      onChange={handleFileImport}
-                    />
-                  </div>
                 </div>
 
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', marginBottom: '20px' }}>
@@ -1718,13 +1693,38 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--color-outline-variant)', paddingBottom: '12px', marginBottom: '24px' }}>
                   <h3 style={{ fontSize: '16px', fontWeight: '600' }}>MCQ Questions ({Math.min(questions.length, numQuestions || 1)})</h3>
                   {activeTab !== 'edit_test' && (
-                    <button 
-                      type="button" 
-                      onClick={() => { setNumQuestions(prev => (prev || 1) + 1); setQuestions([...questions, { text: '', options: ['', '', '', ''], correctIndex: 0, imageUrl: '' }]); }}
-                      style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 16px', fontSize: '13px', fontWeight: '600', color: '#ea580c', backgroundColor: 'transparent', border: '1px solid #ea580c', borderRadius: '8px', cursor: 'pointer' }}
-                    >
-                      <PlusCircle size={16} /> Add Question
-                    </button>
+                    <div style={{ display: 'flex', gap: '12px' }}>
+                      <button
+                        type="button"
+                        onClick={downloadCSVTemplate}
+                        className="btn btn-secondary"
+                        style={{ padding: '6px 12px', fontSize: '12px' }}
+                      >
+                        <Download size={14} /> Download Template
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="btn btn-primary"
+                        style={{ padding: '6px 12px', fontSize: '12px' }}
+                      >
+                        <Upload size={14} /> Import File (JSON/CSV)
+                      </button>
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        style={{ display: 'none' }}
+                        accept=".csv,.json"
+                        onChange={handleFileImport}
+                      />
+                      <button 
+                        type="button" 
+                        onClick={() => { setNumQuestions(prev => (prev || 1) + 1); setQuestions([...questions, { text: '', options: ['', '', '', ''], correctIndex: 0, imageUrl: '' }]); }}
+                        style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 16px', fontSize: '13px', fontWeight: '600', color: '#ea580c', backgroundColor: 'transparent', border: '1px solid #ea580c', borderRadius: '8px', cursor: 'pointer' }}
+                      >
+                        <PlusCircle size={16} /> Add Question
+                      </button>
+                    </div>
                   )}
                 </div>
 
