@@ -1402,8 +1402,8 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 200px', gap: '20px' }}>
-                  <div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', marginBottom: '20px' }}>
+                  <div style={{ flex: '1 1 calc(50% - 10px)', minWidth: '250px' }}>
                     <label className="input-label">Assessment Title</label>
                     <input
                       type="text"
@@ -1415,7 +1415,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                   </div>
 
                   {profession === 'College / University' && (
-                    <div>
+                    <div style={{ flex: '1 1 calc(50% - 10px)', minWidth: '250px' }}>
                       <label className="input-label">Target Year</label>
                       <select className="input-field" value={targetYear} onChange={e => setTargetYear(e.target.value)} required>
                         <option value="" disabled>Select Year</option>
@@ -1428,7 +1428,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                   )}
 
                   {profession === 'School' && (
-                    <div>
+                    <div style={{ flex: '1 1 calc(50% - 10px)', minWidth: '250px' }}>
                       <label className="input-label">Target Class</label>
                       <select className="input-field" value={targetClass} onChange={e => setTargetClass(e.target.value)} required>
                         <option value="" disabled>Select Class</option>
@@ -1440,8 +1440,10 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                       </select>
                     </div>
                   )}
+                </div>
 
-                  <div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', marginBottom: '20px' }}>
+                  <div style={{ flex: '1 1 calc(50% - 10px)', minWidth: '250px' }}>
                     <label className="input-label">Access Code PIN (Numeric)</label>
                     <input
                       type="text"
@@ -1452,7 +1454,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                       maxLength={6}
                     />
                   </div>
-                  <div>
+                  <div style={{ flex: '1 1 calc(50% - 10px)', minWidth: '250px' }}>
                     <label className="input-label">Number of Questions (Max 200 Questions)</label>
                     <input
                       type="number"
@@ -1466,7 +1468,10 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                       style={{ backgroundColor: activeTab === 'edit_test' ? '#e2e8f0' : '#fff' }}
                     />
                   </div>
-                  <div>
+                </div>
+
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', marginBottom: '20px' }}>
+                  <div style={{ flex: '1 1 calc(50% - 10px)', minWidth: '250px' }}>
                     <label className="input-label">Test Duration (Minutes)</label>
                     <input
                       type="number"
@@ -1476,7 +1481,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                       min={1}
                     />
                   </div>
-                  <div>
+                  <div style={{ flex: '1 1 calc(50% - 10px)', minWidth: '250px' }}>
                     <label className="input-label">Total Examinees</label>
                     <input
                       type="number"
@@ -1486,8 +1491,11 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                       min={1}
                     />
                   </div>
+                </div>
+
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
                   {!(activeTab === 'edit_test' && accessStart && new Date(accessStart) <= new Date()) && (
-                    <div>
+                    <div style={{ flex: '1 1 calc(50% - 10px)', minWidth: '250px' }}>
                       <label className="input-label">Access Start Time</label>
                       <input
                         type="datetime-local"
@@ -1497,7 +1505,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                       />
                     </div>
                   )}
-                  <div>
+                  <div style={{ flex: '1 1 calc(50% - 10px)', minWidth: '250px' }}>
                     <label className="input-label">Access End Time</label>
                     <input
                       type="datetime-local"
