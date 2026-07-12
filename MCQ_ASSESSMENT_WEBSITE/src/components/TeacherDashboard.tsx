@@ -1292,13 +1292,13 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                                   {new Date(currentDateString).toLocaleDateString()}
                                 </div>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                  <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1.5fr 1fr 1fr 1fr 1fr', gap: '8px', fontSize: '9px', fontWeight: '800', color: '#94a3b8', textTransform: 'uppercase', paddingBottom: '4px', borderBottom: '1px dashed #e2e8f0' }}>
+                                  <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1.5fr 1fr 1fr 2fr 1fr', gap: '8px', fontSize: '9px', fontWeight: '800', color: '#94a3b8', textTransform: 'uppercase', paddingBottom: '4px', borderBottom: '1px dashed #e2e8f0' }}>
                                     <span>Exam Name</span>
                                     <span>ID</span>
                                     <span>Code</span>
-                                    <span>Att</span>
                                     <span>Pass</span>
                                     <span>Fail</span>
+                                    <span>Total Student Completed</span>
                                     <span>Status</span>
                                   </div>
                                   {dayTests.map(t => {
@@ -1315,14 +1315,14 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                                     if (statusStr === 'Not Started') statusColor = '#f59e0b';
                                     
                                     return (
-                                      <div key={t.id} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1.5fr 1fr 1fr 1fr 1fr', gap: '8px', fontSize: '11px', textAlign: 'left', alignItems: 'center' }}>
+                                      <div key={t.id} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1.5fr 1fr 1fr 2fr 1fr', gap: '8px', fontSize: '11px', textAlign: 'left', alignItems: 'center' }}>
                                         <HoverableTestTitle title={t.title} />
                                         <span style={{ color: '#64748b' }}>{t.short_id || '-'}</span>
                                         <span style={{ color: '#0f172a', fontWeight: '600' }}>{t.access_code || '-'}</span>
-                                        <span style={{ color: '#64748b', fontWeight: '600' }}>{tAttempts.length}</span>
                                         <span style={{ color: passes > 0 ? '#16a34a' : '#64748b', fontWeight: '600' }}>{passes}</span>
                                         <span style={{ color: fails > 0 ? '#ef4444' : '#64748b', fontWeight: '600' }}>{fails}</span>
-                                        <span style={{ color: statusColor, fontWeight: '700', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={getTestStatusLabel(t)}>{getTestStatusLabel(t)}</span>
+                                        <span style={{ color: '#64748b', fontWeight: '600' }}>{tAttempts.length}</span>
+                                        <span style={{ color: statusColor, fontWeight: '700', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={statusStr}>{statusStr}</span>
                                       </div>
                                     );
                                   })}
