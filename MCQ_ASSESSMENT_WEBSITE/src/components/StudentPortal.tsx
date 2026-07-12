@@ -1478,7 +1478,12 @@ Content-Type: text/html; charset=UTF-8
                                       return <Target key={idx} size={14} color="#22c55e" />; // test/result
                                     })}
                                   </div>
-                                  <div className="calendar-hover-card">
+                                  <div className="calendar-hover-card" style={{
+                                    left: (i % 7) < 2 ? '0' : (i % 7) > 4 ? 'auto' : '50%',
+                                    right: (i % 7) > 4 ? '0' : 'auto',
+                                    transform: (i % 7) < 2 ? 'none' : (i % 7) > 4 ? 'none' : 'translateX(-50%)',
+                                    zIndex: 1000
+                                  }}>
                                     <div style={{ fontSize: '12px', fontWeight: '800', color: '#0f172a', marginBottom: '8px', paddingBottom: '4px', borderBottom: '1px solid #e2e8f0' }}>
                                       {new Date(dayAttempts[0]?.completed_at || currentDateString).toLocaleDateString()}
                                     </div>
