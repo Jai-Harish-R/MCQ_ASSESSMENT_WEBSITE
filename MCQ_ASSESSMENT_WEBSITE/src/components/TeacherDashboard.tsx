@@ -819,7 +819,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
       loadData();
       
       // Clean up and redirect back to exams list
-      setSelectedEditTestId(null);
+      setSelectedEditTestId('');
       setTestTitle('');
       setAccessCode('');
       setQuestions([{ text: '', options: ['', '', '', ''], correctIndex: 0, imageUrl: '' }]);
