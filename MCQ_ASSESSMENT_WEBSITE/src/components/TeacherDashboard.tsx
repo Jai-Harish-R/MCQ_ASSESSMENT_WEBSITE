@@ -1466,7 +1466,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
 
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', marginBottom: '20px' }}>
                   <div style={{ flex: '1 1 calc(50% - 10px)', minWidth: '250px' }}>
-                    <label className="input-label">Assessment Title</label>
+                    <label className="input-label">Assessment Title<span style={{color: '#ea580c'}}> *</span></label>
                     <input
                       type="text"
                       className="input-field"
@@ -1506,7 +1506,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
 
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', marginBottom: '20px' }}>
                   <div style={{ flex: '1 1 calc(50% - 10px)', minWidth: '250px' }}>
-                    <label className="input-label">Access Code PIN (Numeric)</label>
+                    <label className="input-label">Access Code PIN (Numeric)<span style={{color: '#ea580c'}}> *</span></label>
                     <input
                       type="text"
                       className="input-field"
@@ -1517,7 +1517,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                     />
                   </div>
                   <div style={{ flex: '1 1 calc(50% - 10px)', minWidth: '250px' }}>
-                    <label className="input-label">Number of Questions (Max 200 Questions)</label>
+                    <label className="input-label">Number of Questions (Max 200 Questions)<span style={{color: '#ea580c'}}> *</span></label>
                     <input
                       type="number"
                       className="input-field"
@@ -1534,7 +1534,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
 
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', marginBottom: '20px' }}>
                   <div style={{ flex: '1 1 calc(50% - 10px)', minWidth: '250px' }}>
-                    <label className="input-label">Test Duration (Minutes)</label>
+                    <label className="input-label">Test Duration (Minutes)<span style={{color: '#ea580c'}}> *</span></label>
                     <input
                       type="number"
                       className="input-field"
@@ -1547,7 +1547,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                     />
                   </div>
                   <div style={{ flex: '1 1 calc(50% - 10px)', minWidth: '250px' }}>
-                    <label className="input-label">Total Examinees</label>
+                    <label className="input-label">Total Examinees<span style={{color: '#ea580c'}}> *</span></label>
                     <input
                       type="number"
                       className="input-field"
@@ -1564,7 +1564,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
                   {!(activeTab === 'edit_test' && accessStart && new Date(accessStart) <= new Date()) && (
                     <div style={{ flex: '1 1 calc(50% - 10px)', minWidth: '250px' }}>
-                      <label className="input-label">Access Start Time</label>
+                      <label className="input-label">Access Start Time<span style={{color: '#ea580c'}}> *</span></label>
                       <input
                         type="datetime-local"
                         className="input-field"
@@ -1574,7 +1574,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                     </div>
                   )}
                   <div style={{ flex: '1 1 calc(50% - 10px)', minWidth: '250px' }}>
-                    <label className="input-label">Access End Time</label>
+                    <label className="input-label">Access End Time<span style={{color: '#ea580c'}}> *</span></label>
                     <input
                       type="datetime-local"
                       className="input-field"
@@ -1657,7 +1657,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
 
                 {passPercentageEnabled && (
                   <div style={{ marginBottom: '10px' }}>
-                      <label className="input-label">Set Pass Percentage (%)</label>
+                      <label className="input-label">Set Pass Percentage (%)<span style={{color: '#ea580c'}}> *</span></label>
                       <input 
                         type="number" 
                         min="1" max="100" 
@@ -1685,7 +1685,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
 
                 {maxAttemptsEnabled && (
                   <div style={{ marginBottom: '10px' }}>
-                      <label className="input-label">Set Max Attempts</label>
+                      <label className="input-label">Set Max Attempts<span style={{color: '#ea580c'}}> *</span></label>
                       <input 
                         type="number" 
                         min="1" max="10" 
@@ -1749,7 +1749,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                       </div>
 
                       <div style={{ marginBottom: '16px' }}>
-                        <label className="input-label">Question Text</label>
+                        <label className="input-label">Question Text<span style={{color: '#ea580c'}}> *</span></label>
                         <textarea
                           className="textarea-field"
                           placeholder="Type question text..."
@@ -1761,7 +1761,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                       <div className="option-input-grid">
                         {q.options.map((opt, optIdx) => (
                           <div key={optIdx} className="option-input-item">
-                            <label className="input-label">Option {String.fromCharCode(65 + optIdx)}</label>
+                            <label className="input-label">Option {String.fromCharCode(65 + optIdx)}<span style={{color: '#ea580c'}}> *</span></label>
                             <input
                               type="text"
                               className="input-field"
@@ -1775,7 +1775,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
 
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '20px', borderTop: '1px solid var(--color-outline-variant)', paddingTop: '16px' }}>
                         <div>
-                          <label className="input-label">Correct Answer</label>
+                          <label className="input-label">Correct Answer<span style={{color: '#ea580c'}}> *</span></label>
                           <div className="correct-ans-selector">
                             {['A', 'B', 'C', 'D'].map((label, optIdx) => (
                               <button
