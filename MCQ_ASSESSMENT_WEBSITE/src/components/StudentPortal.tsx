@@ -1143,7 +1143,10 @@ Content-Type: text/html; charset=UTF-8
                   return (
                     <div key={q.id} className="card" style={{ borderLeft: `5px solid ${isCorrect ? 'var(--color-success)' : 'var(--color-error)'}` }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
-                        <span style={{ fontWeight: '600', fontSize: '14px' }}>Question #{idx + 1}</span>
+                        <span style={{ fontWeight: '600', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          Question #{idx + 1}
+                          {flagged[q.id] && <Flag size={14} color="#ea580c" fill="#ea580c" title="Flagged for review" />}
+                        </span>
                         <span style={{ color: isCorrect ? 'var(--color-success)' : 'var(--color-error)', fontWeight: '600' }}>{isCorrect ? 'Correct (+1)' : 'Incorrect (+0)'}</span>
                       </div>
                       <h4 style={{ fontSize: '16px', fontWeight: '500', marginBottom: '16px' }}>{q.text}</h4>
