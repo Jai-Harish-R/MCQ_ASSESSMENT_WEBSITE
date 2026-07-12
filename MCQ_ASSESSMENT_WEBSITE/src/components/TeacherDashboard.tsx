@@ -191,6 +191,24 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
     return 'Live';
   };
 
+  const getTestStatusLabel = (t: Test) => {
+    const status = getTestStatus(t);
+    const formatDate = (dateStr: string) => {
+      const d = new Date(dateStr);
+      return `${d.toLocaleDateString('en-GB')} ${d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+    };
+    if (status === 'Not Started' && t.access_start) {
+      return `Not Started (Starts: ${formatDate(t.access_start)})`;
+    }
+    if (status === 'Ended' && t.access_end) {
+      return `Ended (Ended: ${formatDate(t.access_end)})`;
+    }
+    if (status === 'Live' && t.access_end) {
+      return `Live (Ends: ${formatDate(t.access_end)})`;
+    }
+    return status;
+  };
+
   const exportToExcel = () => {
     if (exportSelectedTests.length === 0) {
       setMsg({ type: 'error', text: 'Please select at least one test to export.' });
@@ -1234,7 +1252,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                                         <span style={{ color: '#64748b', fontWeight: '600' }}>{tAttempts.length}</span>
                                         <span style={{ color: passes > 0 ? '#16a34a' : '#64748b', fontWeight: '600' }}>{passes}</span>
                                         <span style={{ color: fails > 0 ? '#ef4444' : '#64748b', fontWeight: '600' }}>{fails}</span>
-                                        <span style={{ color: statusColor, fontWeight: '700' }}>{statusStr}</span>
+                                        <span style={{ color: statusColor, fontWeight: '700', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={getTestStatusLabel(t)}>{getTestStatusLabel(t)}</span>
                                       </div>
                                     );
                                   })}
@@ -1813,13 +1831,14 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
 
                   <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
                     {selectedReportTestId && tests.find(t => t.id === selectedReportTestId) && (() => {
-                      const status = getTestStatus(tests.find(t => t.id === selectedReportTestId)!);
+                      const testObj = tests.find(t => t.id === selectedReportTestId)!;
+                      const status = getTestStatus(testObj);
                       let bg = '#dcfce7', color = '#16a34a', dot = '🟢';
                       if (status === 'Not Started') { bg = '#fee2e2'; color = '#ef4444'; dot = '🔴'; }
                       if (status === 'Ended') { bg = '#f1f5f9'; color = '#64748b'; dot = '⚪'; }
                       return (
                         <span style={{ backgroundColor: bg, color: color, padding: '6px 14px', borderRadius: '9999px', fontSize: '12px', fontWeight: '700', letterSpacing: '0.02em', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          {dot} {status}
+                          {dot} {getTestStatusLabel(testObj)}
                         </span>
                       );
                     })()}

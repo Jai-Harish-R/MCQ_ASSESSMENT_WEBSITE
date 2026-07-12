@@ -403,6 +403,22 @@ export default function StudentPortal({ user, onLogout }: StudentPortalProps) {
     };
   }, [viewState]);
 
+  const getTestStatusLabel = (t: Test) => {
+    let status = 'Live';
+    const now = new Date().getTime();
+    if (t.access_start && now < new Date(t.access_start).getTime()) status = 'Not Started';
+    else if (t.access_end && now > new Date(t.access_end).getTime()) status = 'Ended';
+
+    const formatDate = (dateStr: string) => {
+      const d = new Date(dateStr);
+      return `${d.toLocaleDateString('en-GB')} ${d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+    };
+
+    if (status === 'Not Started' && t.access_start) return `Not Started (Starts: ${formatDate(t.access_start)})`;
+    if (status === 'Ended' && t.access_end) return `Ended (Ended: ${formatDate(t.access_end)})`;
+    if (status === 'Live' && t.access_end) return `Live (Ends: ${formatDate(t.access_end)})`;
+    return status;
+  };
   const handleExitLobby = () => {
     setActiveTest(null);
     setViewState('lobby');
@@ -2571,7 +2587,9 @@ Content-Type: text/html; charset=UTF-8
                           >
                             <option value="">-- Select a test --</option>
                             {availableTests.map(t => (
-                              <option key={t.id} value={t.id} title={`${t.title}${t.short_id ? ` - ${t.short_id}` : ''}`}>{t.title.length > 10 ? t.title.substring(0, 10) + '...' : t.title} {t.short_id ? `- ${t.short_id}` : ''}</option>
+                              <option key={t.id} value={t.id} title={`${t.title}${t.short_id ? ` - ${t.short_id}` : ''}`}>
+                                {t.title.length > 10 ? t.title.substring(0, 10) + '...' : t.title} {t.short_id ? `- ${t.short_id}` : ''} [{getTestStatusLabel(t)}]
+                              </option>
                             ))}
                           </select>
                           <ChevronDown size={16} color="#64748b" style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
