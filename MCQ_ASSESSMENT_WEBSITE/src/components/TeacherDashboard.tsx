@@ -180,6 +180,8 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
   
   const [currentName, setCurrentName] = useState(teacherDisplayName);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [isAddQuestionModalOpen, setIsAddQuestionModalOpen] = useState(false);
+  const [newQuestionData, setNewQuestionData] = useState<{text: string; options: string[]; correctIndex: number; imageUrl?: string}>({ text: '', options: ['', '', '', ''], correctIndex: 0, imageUrl: '' });
   const [currentAvatar, setCurrentAvatar] = useState(user.user_metadata?.avatar_url || animeAvatar as any);
   const [allProfiles, setAllProfiles] = useState<Profile[]>([]);
 
@@ -1719,7 +1721,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                       />
                       <button 
                         type="button" 
-                        onClick={() => { setNumQuestions(prev => (prev || 1) + 1); setQuestions([...questions, { text: '', options: ['', '', '', ''], correctIndex: 0, imageUrl: '' }]); }}
+                        onClick={() => setIsAddQuestionModalOpen(true)}
                         style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 16px', fontSize: '13px', fontWeight: '600', color: '#ea580c', backgroundColor: 'transparent', border: '1px solid #ea580c', borderRadius: '8px', cursor: 'pointer' }}
                       >
                         <PlusCircle size={16} /> Add Question
@@ -2460,6 +2462,126 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
             >
               Return to Dashboard
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Add Question Modal */}
+      {isAddQuestionModalOpen && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(15, 23, 42, 0.4)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, overflowY: 'auto', padding: '20px' }}>
+          <div style={{ width: '100%', maxWidth: '700px', backgroundColor: '#ffffff', borderRadius: '24px', padding: '32px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', position: 'relative' }}>
+            <button 
+              onClick={() => setIsAddQuestionModalOpen(false)}
+              style={{ position: 'absolute', top: '24px', right: '24px', background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', fontSize: '24px', lineHeight: '1' }}
+            >
+              &times;
+            </button>
+            <h2 style={{ fontSize: '20px', fontWeight: '800', color: '#0f172a', marginBottom: '24px' }}>Add New Question</h2>
+            
+            <div style={{ marginBottom: '16px' }}>
+              <label className="input-label">Question Text<span style={{color: '#ea580c'}}> *</span></label>
+              <textarea
+                className="textarea-field"
+                placeholder="Type question text..."
+                value={newQuestionData.text}
+                onChange={(e) => setNewQuestionData({...newQuestionData, text: e.target.value})}
+              />
+            </div>
+
+            <div className="option-input-grid">
+              {newQuestionData.options.map((opt, optIdx) => (
+                <div key={optIdx} className="option-input-item">
+                  <label className="input-label">Option {String.fromCharCode(65 + optIdx)}<span style={{color: '#ea580c'}}> *</span></label>
+                  <input
+                    type="text"
+                    className="input-field"
+                    placeholder={`Option ${String.fromCharCode(65 + optIdx)}`}
+                    value={opt}
+                    onChange={(e) => {
+                      const newOpts = [...newQuestionData.options];
+                      newOpts[optIdx] = e.target.value;
+                      setNewQuestionData({...newQuestionData, options: newOpts});
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '20px', borderTop: '1px solid var(--color-outline-variant)', paddingTop: '16px' }}>
+              <div>
+                <label className="input-label">Correct Answer<span style={{color: '#ea580c'}}> *</span></label>
+                <div className="correct-ans-selector">
+                  {['A', 'B', 'C', 'D'].map((label, optIdx) => (
+                    <button
+                      key={label}
+                      type="button"
+                      onClick={() => setNewQuestionData({...newQuestionData, correctIndex: optIdx})}
+                      className={`correct-ans-btn ${newQuestionData.correctIndex === optIdx ? 'selected' : ''}`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div style={{ minWidth: '240px', flex: 1 }}>
+                <label className="input-label">Attach Image (Optional)</label>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <input
+                    type="text"
+                    className="input-field"
+                    style={{ height: '36px', fontSize: '13px' }}
+                    placeholder="Paste URL..."
+                    value={newQuestionData.imageUrl?.startsWith('data:') ? '' : newQuestionData.imageUrl || ''}
+                    onChange={(e) => setNewQuestionData({...newQuestionData, imageUrl: e.target.value})}
+                  />
+                  <label className="btn btn-secondary" style={{ height: '36px', padding: '0 12px', fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+                    Upload File
+                    <input
+                      type="file"
+                      style={{ display: 'none' }}
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onloadend = () => setNewQuestionData(prev => ({...prev, imageUrl: reader.result as string}));
+                          reader.readAsDataURL(file);
+                        }
+                      }}
+                    />
+                  </label>
+                </div>
+                {newQuestionData.imageUrl && (
+                  <div className="image-preview-box" style={{ marginTop: '8px' }}>
+                    <img src={newQuestionData.imageUrl} className="image-preview-thumbnail" alt="" />
+                    <span className="image-preview-url">{newQuestionData.imageUrl.startsWith('data:') ? 'Local Image File' : newQuestionData.imageUrl}</span>
+                    <button type="button" onClick={() => setNewQuestionData({...newQuestionData, imageUrl: ''})} style={{ border: 'none', background: 'none', color: 'var(--color-error)', cursor: 'pointer', fontSize: '11px', fontWeight: 'bold' }}>Clear</button>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '24px', borderTop: '1px solid #e2e8f0', paddingTop: '24px' }}>
+              <button 
+                onClick={() => setIsAddQuestionModalOpen(false)}
+                style={{ padding: '10px 20px', borderRadius: '8px', border: '1px solid #e2e8f0', backgroundColor: '#ffffff', fontSize: '14px', fontWeight: '600', color: '#64748b', cursor: 'pointer' }}
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={() => {
+                  setQuestions([...questions, newQuestionData]);
+                  setNumQuestions(prev => (prev || 1) + 1);
+                  setNewQuestionData({ text: '', options: ['', '', '', ''], correctIndex: 0, imageUrl: '' });
+                  setIsAddQuestionModalOpen(false);
+                }}
+                className="btn btn-primary"
+                style={{ padding: '10px 20px', borderRadius: '8px', fontSize: '14px', fontWeight: '600' }}
+              >
+                Save & Add Question
+              </button>
+            </div>
           </div>
         </div>
       )}
