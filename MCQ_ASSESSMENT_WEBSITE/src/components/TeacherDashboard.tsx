@@ -2180,7 +2180,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                                     </div>
                                   </div>
                                   <div style={{ fontSize: '13px', fontWeight: '600', color: '#64748b' }}>
-                                    {profile?.short_id ? `ID-${String(profile.short_id).padStart(3, '0')}` : 'N/A'}
+                                    {profile?.short_id ? profile.short_id : 'N/A'}
                                   </div>
                                   <div style={{ textAlign: 'center', fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>{st.score}</div>
                                   <div style={{ textAlign: 'center', fontSize: '14px', fontWeight: '800', color: '#10b981' }}>{pct}%</div>
