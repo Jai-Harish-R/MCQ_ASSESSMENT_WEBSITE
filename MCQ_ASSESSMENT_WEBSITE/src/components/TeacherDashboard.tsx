@@ -78,7 +78,7 @@ interface Profile {
 }
 
 interface TeacherDashboardProps {
-  user: { id: string; email: string; user_metadata?: { full_name?: string; profession?: string; avatar_url?: string } };
+  user: { id: string; email: string; user_metadata?: { full_name?: string; profession?: string; avatar_url?: string; designation?: string; institution_name?: string } };
   onLogout: () => void;
 }
 
