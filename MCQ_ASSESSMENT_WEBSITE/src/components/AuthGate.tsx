@@ -427,7 +427,7 @@ if (countryCode === '+966' && cleanPhone.length !== 9) {
                     <>
                       <div>
                         <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#475569', marginBottom: '8px' }}>College Name<span style={{color: '#ea580c'}}> *</span></label>
-                        <input type="text" list="college-options" style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc', fontSize: '15px', color: '#0f172a', outline: 'none', boxSizing: 'border-box' }} placeholder="Select or search college name" value={institutionName} onChange={(e) => setInstitutionName(e.target.value)} disabled={loading} required autoComplete="off" />
+                        <input type="text" list="college-options" style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc', fontSize: '15px', color: '#0f172a', outline: 'none', boxSizing: 'border-box' }} placeholder="Select or type your college name" value={institutionName} onChange={(e) => setInstitutionName(e.target.value)} disabled={loading} required autoComplete="off" />
                         <datalist id="college-options">
                           <option value="Saveetha Engineering College" />
                           <option value="Anna University" />
@@ -519,7 +519,7 @@ if (countryCode === '+966' && cleanPhone.length !== 9) {
                     <>
                       <div>
                         <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#475569', marginBottom: '8px' }}>Company Name<span style={{color: '#ea580c'}}> *</span></label>
-                        <input type="text" list="company-options" style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc', fontSize: '15px', color: '#0f172a', outline: 'none', boxSizing: 'border-box' }} placeholder="Select or search company name" value={institutionName} onChange={(e) => setInstitutionName(e.target.value)} disabled={loading} required autoComplete="off" />
+                        <input type="text" list="company-options" style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc', fontSize: '15px', color: '#0f172a', outline: 'none', boxSizing: 'border-box' }} placeholder="Select or type your company name" value={institutionName} onChange={(e) => setInstitutionName(e.target.value)} disabled={loading} required autoComplete="off" />
                         <datalist id="company-options">
                           <option value="CodersFun" />
                           <option value="Tata Consultancy Services (TCS)" />
