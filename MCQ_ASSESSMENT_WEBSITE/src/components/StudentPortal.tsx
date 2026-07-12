@@ -1683,12 +1683,12 @@ Content-Type: text/html; charset=UTF-8
 
                       <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', padding: '16px', border: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                          <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: '#fff7ed', color: '#ea580c', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <BookOpen size={20} />
+                          <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: '#eff6ff', color: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <TrendingUp size={20} />
                           </div>
                           <div>
-                            <div style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a' }}>Resources</div>
-                            <div style={{ fontSize: '11px', color: '#64748b' }}>Notes and materials</div>
+                            <div style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a' }}>Performance Analytics</div>
+                            <div style={{ fontSize: '11px', color: '#64748b' }}>Track your progress</div>
                           </div>
                         </div>
                         <ArrowRight size={16} color="#94a3b8" />
@@ -1766,13 +1766,13 @@ Content-Type: text/html; charset=UTF-8
                         </div>
                       </div>
 
-                      <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', padding: '16px', border: '1px solid #f1f5f9', display: 'flex', gap: '12px', cursor: 'pointer' }}>
-                        <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: '#fff7ed', color: '#ea580c', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <FileText size={16} />
+                      <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', padding: '16px', border: '1px solid #f1f5f9', display: 'flex', gap: '12px', cursor: 'pointer' }} onClick={() => setIsProfileModalOpen(true)}>
+                        <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: '#eff6ff', color: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <Users size={16} />
                         </div>
                         <div>
-                          <div style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a' }}>Study Materials</div>
-                          <div style={{ fontSize: '10px', color: '#64748b', marginTop: '2px' }}>Access resources</div>
+                          <div style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a' }}>My Profile</div>
+                          <div style={{ fontSize: '10px', color: '#64748b', marginTop: '2px' }}>Manage account</div>
                         </div>
                       </div>
 
