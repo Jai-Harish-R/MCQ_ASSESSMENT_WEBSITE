@@ -578,8 +578,15 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
     setMaxAttempts(test.max_attempts || 3);
     setDuration(test.duration || 10);
     setTotalStudents(test.total_students || 50);
-    setAccessStart(test.access_start ? new Date(test.access_start).toISOString().slice(0,16) : '');
-    setAccessEnd(test.access_end ? new Date(test.access_end).toISOString().slice(0,16) : '');
+    const toLocalISOString = (dateStr: string | null | undefined) => {
+      if (!dateStr) return '';
+      const d = new Date(dateStr);
+      const pad = (n: number) => n.toString().padStart(2, '0');
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    };
+
+    setAccessStart(toLocalISOString(test.access_start));
+    setAccessEnd(toLocalISOString(test.access_end));
     setAllowedEmailsInput(test.allowed_emails ? test.allowed_emails.join(', ') : '');
     setStrictValidation(!!test.allowed_emails && test.allowed_emails.length > 0);
     setShuffleQuestions(test.shuffle_questions || false);
