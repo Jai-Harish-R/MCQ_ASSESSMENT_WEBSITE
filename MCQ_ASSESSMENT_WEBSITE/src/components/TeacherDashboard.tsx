@@ -817,6 +817,13 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
       setMsg({ type: 'success', text: `Test "${testTitle}" updated successfully!` });
       
       loadData();
+      
+      // Clean up and redirect back to exams list
+      setSelectedEditTestId(null);
+      setTestTitle('');
+      setAccessCode('');
+      setQuestions([{ text: '', options: ['', '', '', ''], correctIndex: 0, imageUrl: '' }]);
+      setActiveTab('exams');
     } catch (err: any) {
       console.error(err);
       setMsg({ type: 'error', text: err.message || 'Failed to update test.' });
