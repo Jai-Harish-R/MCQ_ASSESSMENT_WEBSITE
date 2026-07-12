@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 
 interface HoverableTestTitleProps {
   title: string;
@@ -11,18 +12,29 @@ interface HoverableTestTitleProps {
 
 export default function HoverableTestTitle({ title, shortId, questionsCount, duration, testCode, customStyle }: HoverableTestTitleProps) {
   const [isHovered, setIsHovered] = useState(false);
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
-  const [cardStyle, setCardStyle] = useState<React.CSSProperties>({ left: '0' });
+  const [cardStyle, setCardStyle] = useState<React.CSSProperties>({ visibility: 'hidden', position: 'fixed' });
 
   useEffect(() => {
-    if (isHovered && cardRef.current) {
-      const rect = cardRef.current.getBoundingClientRect();
-      const overflowRight = rect.right - window.innerWidth;
-      if (overflowRight > 0) {
-        setCardStyle({ right: '0', left: 'auto' });
+    if (isHovered && wrapperRef.current && cardRef.current) {
+      const rect = wrapperRef.current.getBoundingClientRect();
+      const cardRect = cardRef.current.getBoundingClientRect();
+      
+      let top = rect.bottom + 8;
+      let left = rect.left;
+      
+      if (top + cardRect.height > window.innerHeight) {
+        top = rect.top - cardRect.height - 8;
       }
+      
+      if (left + cardRect.width > window.innerWidth) {
+        left = window.innerWidth - cardRect.width - 16;
+      }
+      
+      setCardStyle({ position: 'fixed', top, left, visibility: 'visible', zIndex: 999999 });
     } else if (!isHovered) {
-      setCardStyle({ left: '0' });
+      setCardStyle({ visibility: 'hidden', position: 'fixed' });
     }
   }, [isHovered]);
 
@@ -31,7 +43,8 @@ export default function HoverableTestTitle({ title, shortId, questionsCount, dur
 
   return (
     <div 
-      style={{ position: 'relative', display: 'inline-block' }}
+      ref={wrapperRef}
+      style={{ display: 'inline-block' }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -39,15 +52,11 @@ export default function HoverableTestTitle({ title, shortId, questionsCount, dur
         {displayTitle}
       </span>
 
-      {isHovered && (
+      {isHovered && createPortal(
         <div 
           ref={cardRef}
           style={{ 
-            position: 'absolute', 
-            top: '100%', 
             ...cardStyle,
-            marginTop: '8px',
-            zIndex: 9999, 
             width: 'max-content',
             minWidth: '280px',
             maxWidth: '400px',
@@ -92,7 +101,8 @@ export default function HoverableTestTitle({ title, shortId, questionsCount, dur
               </div>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
