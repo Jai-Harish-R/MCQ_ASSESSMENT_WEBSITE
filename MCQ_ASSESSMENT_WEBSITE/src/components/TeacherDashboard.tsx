@@ -107,7 +107,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
   const itemsPerPage = 10;
   const [showAllTests, setShowAllTests] = useState(false);
   const [hoveredDateStr, setHoveredDateStr] = useState<string | null>(null);
-  
+  const [showUpdateSuccessCard, setShowUpdateSuccessCard] = useState(false);
   // Export Examinees State
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [exportCurrentMonth, setExportCurrentMonth] = useState(new Date());
@@ -814,16 +814,15 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
 
       if (answersErr) throw answersErr;
 
-      setMsg({ type: 'success', text: `Test "${testTitle}" updated successfully!` });
-      
       loadData();
       
-      // Clean up and redirect back to exams list
+      // Show success card and clean up
+      setShowUpdateSuccessCard(true);
       setSelectedEditTestId('');
       setTestTitle('');
       setAccessCode('');
       setQuestions([{ text: '', options: ['', '', '', ''], correctIndex: 0, imageUrl: '' }]);
-      setActiveTab('exams');
+      // We will let the success modal handle the redirect to 'exams'
     } catch (err: any) {
       console.error(err);
       setMsg({ type: 'error', text: err.message || 'Failed to update test.' });
@@ -2318,6 +2317,31 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                 <Download size={16} /> Export Selected ({exportSelectedTests.length})
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Update Test Success Modal */}
+      {showUpdateSuccessCard && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
+          <div style={{ backgroundColor: '#ffffff', borderRadius: '24px', padding: '48px 40px', width: '100%', maxWidth: '450px', textAlign: 'center', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)' }}>
+            <div style={{ width: '80px', height: '80px', borderRadius: '50%', backgroundColor: '#dcfce7', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
+              <Check size={40} color="#16a34a" strokeWidth={3} />
+            </div>
+            <h3 style={{ fontSize: '24px', fontWeight: '800', color: '#0f172a', marginBottom: '12px' }}>Test Updated!</h3>
+            <p style={{ fontSize: '15px', color: '#475569', marginBottom: '32px', lineHeight: '1.5' }}>
+              The assessment settings and questions have been successfully modified.
+            </p>
+            <button 
+              onClick={() => {
+                setShowUpdateSuccessCard(false);
+                setActiveTab('exams');
+              }}
+              className="btn btn-primary"
+              style={{ width: '100%', padding: '14px', fontSize: '16px', fontWeight: '700' }}
+            >
+              Return to Dashboard
+            </button>
           </div>
         </div>
       )}
