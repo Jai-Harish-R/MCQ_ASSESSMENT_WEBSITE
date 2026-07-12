@@ -15,12 +15,19 @@ export default function ProfileModal({ user, isOpen, onClose, onUpdate }: Profil
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [shortId, setShortId] = useState<number | null>(null);
+  const [phoneNo, setPhoneNo] = useState('');
+  const [designation, setDesignation] = useState('');
+  
+  const isTeacher = user?.user_metadata?.role === 'teacher';
+  const hasDesignation = user?.user_metadata?.designation !== undefined || (user?.user_metadata?.profession === 'College / University' || user?.user_metadata?.profession === 'Company');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (user && isOpen) {
       setName(user.user_metadata?.full_name || '');
       setAvatarData(user.user_metadata?.avatar_url || null);
+      setPhoneNo(user.user_metadata?.phone_no || '');
+      setDesignation(user.user_metadata?.designation || '');
       setErrorMsg('');
 
       const fetchProfile = async () => {
@@ -108,10 +115,15 @@ export default function ProfileModal({ user, isOpen, onClose, onUpdate }: Profil
     setErrorMsg('');
 
     try {
-      const updates = {
+      const updates: any = {
         full_name: name,
         avatar_url: avatarData || undefined
       };
+      if (isTeacher) {
+        updates.phone_no = phoneNo;
+        if (hasDesignation) updates.designation = designation;
+      }
+      
       const { error } = await supabase.auth.updateUser({
         data: updates
       });
@@ -191,6 +203,34 @@ export default function ProfileModal({ user, isOpen, onClose, onUpdate }: Profil
               style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '14px', color: '#0f172a', outline: 'none' }}
             />
           </div>
+
+          {isTeacher && (
+            <>
+              <div>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: '700', color: '#0f172a', marginBottom: '8px' }}>Phone Number</label>
+                <input 
+                  type="text" 
+                  value={phoneNo} 
+                  onChange={(e) => setPhoneNo(e.target.value)}
+                  placeholder="Enter your phone number"
+                  style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '14px', color: '#0f172a', outline: 'none' }}
+                />
+              </div>
+              
+              {hasDesignation && (
+                <div>
+                  <label style={{ display: 'block', fontSize: '13px', fontWeight: '700', color: '#0f172a', marginBottom: '8px' }}>Designation</label>
+                  <input 
+                    type="text" 
+                    value={designation} 
+                    onChange={(e) => setDesignation(e.target.value)}
+                    placeholder="Enter your designation"
+                    style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '14px', color: '#0f172a', outline: 'none' }}
+                  />
+                </div>
+              )}
+            </>
+          )}
         </div>
 
         {/* Footer */}
