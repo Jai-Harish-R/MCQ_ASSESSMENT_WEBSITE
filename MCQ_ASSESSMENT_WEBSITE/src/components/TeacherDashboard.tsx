@@ -1900,6 +1900,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                           const testDetails = tests.find(t => t.id === att.test_id);
                           const currentPassPct = testDetails?.pass_percentage || 80;
                           const currentMaxAttempts = testDetails?.max_attempts || 3;
+                          const isEnded = testDetails ? getTestStatus(testDetails) === 'Ended' : false;
                           const pct = Math.round((att.score / att.total_questions) * 100);
                           const isPassing = pct >= currentPassPct;
                           
@@ -1929,9 +1930,10 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                               <td>
                                 <button
                                   onClick={() => handleToggleRetry(att.id, att.allowed_retry)}
-                                  disabled={syncing}
+                                  disabled={syncing || isEnded}
+                                  title={isEnded ? "Test Ended" : ""}
                                   className={`btn ${att.allowed_retry ? 'btn-danger' : 'btn-outline'}`}
-                                  style={{ padding: '6px 12px', fontSize: '12px' }}
+                                  style={{ padding: '6px 12px', fontSize: '12px', opacity: isEnded ? 0.5 : 1, cursor: isEnded ? 'not-allowed' : 'pointer' }}
                                 >
                                   {att.allowed_retry ? 'Revoke Retry' : 'Allow Retry'}
                                 </button>
