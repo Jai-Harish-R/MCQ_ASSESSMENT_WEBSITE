@@ -38,7 +38,8 @@ export default function App() {
           // (fixes old database triggers that defaulted to 'student')
           if (profile && session.user.user_metadata?.role && profile.role !== session.user.user_metadata.role) {
             resolvedRole = session.user.user_metadata.role;
-            await supabase.from('profiles').update({ role: resolvedRole }).eq('id', session.user.id).catch(e => console.error("Auto-heal failed", e));
+            const { error } = await supabase.from('profiles').update({ role: resolvedRole }).eq('id', session.user.id);
+            if (error) console.error("Auto-heal failed", error);
           }
 
           if (profileErr && !profile) {
@@ -75,7 +76,8 @@ export default function App() {
           
           if (profile && session.user.user_metadata?.role && profile.role !== session.user.user_metadata.role) {
             resolvedRole = session.user.user_metadata.role;
-            await supabase.from('profiles').update({ role: resolvedRole }).eq('id', session.user.id).catch(e => console.error(e));
+            const { error } = await supabase.from('profiles').update({ role: resolvedRole }).eq('id', session.user.id);
+            if (error) console.error("Auto-heal failed", error);
           }
 
           setUser({
