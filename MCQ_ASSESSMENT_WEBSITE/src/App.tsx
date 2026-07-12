@@ -32,24 +32,25 @@ export default function App() {
             .eq('id', session.user.id)
             .single();
 
-          if (profileErr) {
-            console.warn("Could not find user profile in database. Provisioning session with metadata metadata role...");
-            // Use metadata role if profiles sync failed
-            const metadataRole = session.user.user_metadata?.role || 'student';
-            setUser({
-              id: session.user.id,
-              email: session.user.email || '',
-              role: metadataRole as 'teacher' | 'student',
-              user_metadata: session.user.user_metadata
-            });
-          } else {
-            setUser({
-              id: session.user.id,
-              email: session.user.email || '',
-              role: profile.role as 'teacher' | 'student',
-              user_metadata: session.user.user_metadata
-            });
+          let resolvedRole = profile?.role || session.user.user_metadata?.role || 'student';
+
+          // Auto-heal profile role if it doesn't match the intended metadata role 
+          // (fixes old database triggers that defaulted to 'student')
+          if (profile && session.user.user_metadata?.role && profile.role !== session.user.user_metadata.role) {
+            resolvedRole = session.user.user_metadata.role;
+            await supabase.from('profiles').update({ role: resolvedRole }).eq('id', session.user.id).catch(e => console.error("Auto-heal failed", e));
           }
+
+          if (profileErr && !profile) {
+            console.warn("Could not find user profile in database. Provisioning session with metadata role...");
+          }
+          
+          setUser({
+            id: session.user.id,
+            email: session.user.email || '',
+            role: resolvedRole as 'teacher' | 'student',
+            user_metadata: session.user.user_metadata
+          });
         }
       } catch (err) {
         console.warn("Supabase auth session sync bypassed (development mode):", err);
@@ -70,7 +71,13 @@ export default function App() {
             .eq('id', session.user.id)
             .single();
 
-          const resolvedRole = profile?.role || session.user.user_metadata?.role || 'student';
+          let resolvedRole = profile?.role || session.user.user_metadata?.role || 'student';
+          
+          if (profile && session.user.user_metadata?.role && profile.role !== session.user.user_metadata.role) {
+            resolvedRole = session.user.user_metadata.role;
+            await supabase.from('profiles').update({ role: resolvedRole }).eq('id', session.user.id).catch(e => console.error(e));
+          }
+
           setUser({
             id: session.user.id,
             email: session.user.email || '',
