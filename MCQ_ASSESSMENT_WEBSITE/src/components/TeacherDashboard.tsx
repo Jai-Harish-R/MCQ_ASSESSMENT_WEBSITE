@@ -621,6 +621,11 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
       return;
     }
 
+    if (new Date(accessEnd) < new Date()) {
+      setMsg({ type: 'error', text: 'The ending date cannot be before the current date.' });
+      return;
+    }
+
     const activeQuestions = questions.filter((q, idx) => {
       if (idx < numQuestions) return true;
       return q.text.trim() !== '';
@@ -740,6 +745,11 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
 
     if (new Date(accessStart) >= new Date(accessEnd)) {
       setMsg({ type: 'error', text: 'Access End Time must be after Access Start Time.' });
+      return;
+    }
+
+    if (new Date(accessEnd) < new Date()) {
+      setMsg({ type: 'error', text: 'The ending date cannot be before the current date.' });
       return;
     }
 
