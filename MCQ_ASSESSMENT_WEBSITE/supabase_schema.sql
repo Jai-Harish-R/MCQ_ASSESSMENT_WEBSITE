@@ -7,6 +7,13 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   email TEXT NOT NULL,
   role TEXT NOT NULL CHECK (role IN ('teacher', 'student')),
   full_name TEXT,
+  phone_no TEXT,
+  profession TEXT,
+  institution_name TEXT,
+  department TEXT,
+  class_name TEXT,
+  year TEXT,
+  designation TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
@@ -109,12 +116,19 @@ CREATE POLICY "Allow teachers and students to update attempts"
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
-  INSERT INTO public.profiles (id, email, role, full_name)
+  INSERT INTO public.profiles (id, email, role, full_name, phone_no, profession, institution_name, department, class_name, year, designation)
   VALUES (
     new.id,
     new.email,
     COALESCE(new.raw_user_meta_data->>'role', 'student'),
-    new.raw_user_meta_data->>'full_name'
+    new.raw_user_meta_data->>'full_name',
+    new.raw_user_meta_data->>'phone_no',
+    new.raw_user_meta_data->>'profession',
+    new.raw_user_meta_data->>'institution_name',
+    new.raw_user_meta_data->>'department',
+    new.raw_user_meta_data->>'class_name',
+    new.raw_user_meta_data->>'year',
+    new.raw_user_meta_data->>'designation'
   );
   RETURN NEW;
 END;
