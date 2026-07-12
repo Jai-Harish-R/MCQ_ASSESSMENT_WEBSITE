@@ -1801,7 +1801,7 @@ Content-Type: text/html; charset=UTF-8
               {/* Header */}
               <div>
                 <h1 style={{ fontSize: '32px', fontWeight: '800', color: '#0f172a', letterSpacing: '-0.02em' }}>
-                  Welcome back, {studentDisplayName || 'jhgno.official'}! 👋
+                  Take Test
                 </h1>
                 <p style={{ color: '#64748b', fontSize: '15px', marginTop: '6px', fontWeight: '500' }}>
                   Ready to test your skills? Join a test using the details below.
