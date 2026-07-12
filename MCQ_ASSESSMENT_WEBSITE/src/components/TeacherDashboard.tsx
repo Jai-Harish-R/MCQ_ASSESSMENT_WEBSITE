@@ -728,7 +728,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
       setMsg({ type: 'error', text: 'Test title is required.' });
       return;
     }
-    if (!/^\\d{6}$/.test(accessCode.trim())) {
+    if (!/^\d{6}$/.test(accessCode.trim())) {
       setMsg({ type: 'error', text: 'Access code PIN must be exactly a 6-digit number (e.g. 123456).' });
       return;
     }
