@@ -175,7 +175,7 @@ export default function StudentPortal({ user, onLogout }: StudentPortalProps) {
 
 
   // Interactive Calendar and Popover states
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date(2025, 5, 7));
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [expandedReviewTestId, setExpandedReviewTestId] = useState<string | null>(null);
   const [showPin, setShowPin] = useState(false); // Default to June 7, 2025
 
