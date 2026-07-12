@@ -120,15 +120,15 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
   const [targetClass, setTargetClass] = useState('');
   const profession = user.user_metadata?.profession;
   const [accessCode, setAccessCode] = useState('');
-  const [numQuestions, setNumQuestions] = useState<number>(1);
+  const [numQuestions, setNumQuestions] = useState<number | ''>(1);
 
   // Advanced config state
   const [passPercentageEnabled, setPassPercentageEnabled] = useState(false);
   const [maxAttemptsEnabled, setMaxAttemptsEnabled] = useState(false);
-  const [passPercentage, setPassPercentage] = useState<number>(80);
-  const [maxAttempts, setMaxAttempts] = useState<number>(3);
-  const [duration, setDuration] = useState(10);
-  const [totalStudents, setTotalStudents] = useState(50);
+  const [passPercentage, setPassPercentage] = useState<number | ''>(80);
+  const [maxAttempts, setMaxAttempts] = useState<number | ''>(3);
+  const [duration, setDuration] = useState<number | ''>(10);
+  const [totalStudents, setTotalStudents] = useState<number | ''>(50);
   const [accessStart, setAccessStart] = useState('');
   const [accessEnd, setAccessEnd] = useState('');
   const [allowedEmailsInput, setAllowedEmailsInput] = useState('');
@@ -526,6 +526,10 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
   };
 
   const handleNumQuestionsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.value === '') {
+      setNumQuestions('');
+      return;
+    }
     let count = parseInt(e.target.value);
     if (isNaN(count) || count < 1) count = 1;
     if (count > 200) count = 200; // sane limit
@@ -1477,7 +1481,10 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                       type="number"
                       className="input-field"
                       value={duration}
-                      onChange={(e) => setDuration(parseInt(e.target.value) || 10)}
+                      onChange={(e) => {
+                        if (e.target.value === '') setDuration('');
+                        else setDuration(parseInt(e.target.value) || 10);
+                      }}
                       min={1}
                     />
                   </div>
@@ -1487,7 +1494,10 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                       type="number"
                       className="input-field"
                       value={totalStudents}
-                      onChange={(e) => setTotalStudents(parseInt(e.target.value) || 50)}
+                      onChange={(e) => {
+                        if (e.target.value === '') setTotalStudents('');
+                        else setTotalStudents(parseInt(e.target.value) || 50);
+                      }}
                       min={1}
                     />
                   </div>
