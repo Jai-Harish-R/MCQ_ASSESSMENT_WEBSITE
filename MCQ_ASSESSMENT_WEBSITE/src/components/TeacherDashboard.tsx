@@ -640,6 +640,35 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
       return;
     }
 
+    if (profession === 'College / University' && !targetYear) {
+      setMsg({ type: 'error', text: 'Target Year cannot be blank.' });
+      return;
+    }
+    if (profession === 'School' && !targetClass) {
+      setMsg({ type: 'error', text: 'Target Class cannot be blank.' });
+      return;
+    }
+    if (numQuestions === '') {
+      setMsg({ type: 'error', text: 'Number of Questions cannot be blank.' });
+      return;
+    }
+    if (duration === '') {
+      setMsg({ type: 'error', text: 'Test Duration cannot be blank.' });
+      return;
+    }
+    if (totalStudents === '') {
+      setMsg({ type: 'error', text: 'Total Examinees cannot be blank.' });
+      return;
+    }
+    if (passPercentageEnabled && passPercentage === '') {
+      setMsg({ type: 'error', text: 'Pass Percentage cannot be blank when enabled.' });
+      return;
+    }
+    if (maxAttemptsEnabled && maxAttempts === '') {
+      setMsg({ type: 'error', text: 'Max Attempts cannot be blank when enabled.' });
+      return;
+    }
+
     if (!accessStart || !accessEnd) {
       setMsg({ type: 'error', text: 'Both Access Start Time and Access End Time must be provided before publishing.' });
       return;
@@ -764,6 +793,35 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
     }
     if (!/^\d{6}$/.test(accessCode.trim())) {
       setMsg({ type: 'error', text: 'Access code PIN must be exactly a 6-digit number (e.g. 123456).' });
+      return;
+    }
+
+    if (profession === 'College / University' && !targetYear) {
+      setMsg({ type: 'error', text: 'Target Year cannot be blank.' });
+      return;
+    }
+    if (profession === 'School' && !targetClass) {
+      setMsg({ type: 'error', text: 'Target Class cannot be blank.' });
+      return;
+    }
+    if (numQuestions === '') {
+      setMsg({ type: 'error', text: 'Number of Questions cannot be blank.' });
+      return;
+    }
+    if (duration === '') {
+      setMsg({ type: 'error', text: 'Test Duration cannot be blank.' });
+      return;
+    }
+    if (totalStudents === '') {
+      setMsg({ type: 'error', text: 'Total Examinees cannot be blank.' });
+      return;
+    }
+    if (passPercentageEnabled && passPercentage === '') {
+      setMsg({ type: 'error', text: 'Pass Percentage cannot be blank when enabled.' });
+      return;
+    }
+    if (maxAttemptsEnabled && maxAttempts === '') {
+      setMsg({ type: 'error', text: 'Max Attempts cannot be blank when enabled.' });
       return;
     }
 
