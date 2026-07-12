@@ -1461,15 +1461,17 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                       min={1}
                     />
                   </div>
-                  <div>
-                    <label className="input-label">Access Start Time</label>
-                    <input
-                      type="datetime-local"
-                      className="input-field"
-                      value={accessStart}
-                      onChange={(e) => setAccessStart(e.target.value)}
-                    />
-                  </div>
+                  {!(activeTab === 'edit_test' && accessStart && new Date(accessStart) <= new Date()) && (
+                    <div>
+                      <label className="input-label">Access Start Time</label>
+                      <input
+                        type="datetime-local"
+                        className="input-field"
+                        value={accessStart}
+                        onChange={(e) => setAccessStart(e.target.value)}
+                      />
+                    </div>
+                  )}
                   <div>
                     <label className="input-label">Access End Time</label>
                     <input
