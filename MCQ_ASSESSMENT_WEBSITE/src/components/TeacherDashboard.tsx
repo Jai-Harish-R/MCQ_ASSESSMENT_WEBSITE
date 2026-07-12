@@ -1472,6 +1472,18 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                   </div>
                 </div>
 
+                {accessEnd && new Date(accessEnd) < new Date() && (
+                  <div style={{ marginTop: '16px', padding: '16px', backgroundColor: '#fef2f2', borderRadius: '12px', border: '1px solid #fecaca', display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                    <AlertCircle size={20} color="#dc2626" style={{ flexShrink: 0, marginTop: '2px' }} />
+                    <div>
+                      <h4 style={{ margin: '0 0 4px 0', fontSize: '14px', fontWeight: '700', color: '#991b1b' }}>Test Expired</h4>
+                      <p style={{ margin: 0, fontSize: '13px', color: '#b91c1c' }}>
+                        The Access End Time is in the past. Examinees will not be able to start this test unless you extend the time.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
                 <div className="form-group" style={{ marginTop: '24px', paddingTop: '24px', borderTop: '1px solid #e2e8f0' }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
                     <div>

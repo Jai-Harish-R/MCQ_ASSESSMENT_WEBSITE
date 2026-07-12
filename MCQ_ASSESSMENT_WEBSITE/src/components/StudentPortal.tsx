@@ -206,7 +206,6 @@ export default function StudentPortal({ user, onLogout }: StudentPortalProps) {
   const [testIdStr, setTestIdStr] = useState('');
   const [accessCode, setAccessCode] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
-  const [expiredTest, setExpiredTest] = useState<Test | null>(null);
   const [loading, setLoading] = useState(false);
 
   // Leaderboard Access Inputs & Verified Rank State
@@ -494,7 +493,7 @@ export default function StudentPortal({ user, onLogout }: StudentPortalProps) {
         return;
       }
       if (test.access_end && now > new Date(test.access_end)) {
-        setExpiredTest(test);
+        setErrorMsg('This test has ended on ' + new Date(test.access_end).toLocaleString() + '. You can no longer write the exam.');
         setLoading(false);
         return;
       }
@@ -1794,7 +1793,6 @@ Content-Type: text/html; charset=UTF-8
               </div>
 
               {/* Main Join Layout */}
-              {!expiredTest ? (
               <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr', gap: '24px', backgroundColor: '#ffffff', borderRadius: '16px', border: '1px solid #f1f5f9', boxShadow: '0 1px 3px rgba(0,0,0,0.02)', padding: '24px' }}>
                 
                 {/* Left Column: Form & Graphic */}
@@ -2056,30 +2054,7 @@ Content-Type: text/html; charset=UTF-8
                     <ArrowRight size={16} color="#94a3b8" />
                   </div>
                 </div>
-                </div>
               </div>
-              ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '40vh' }}>
-                  <div className="mcq-card-enhanced" style={{ maxWidth: '500px', width: '100%', padding: '40px', textAlign: 'center', border: '1px solid #f1f5f9' }}>
-                    <div style={{ width: '64px', height: '64px', borderRadius: '50%', backgroundColor: '#fef2f2', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px auto' }}>
-                      <AlertCircle size={32} color="#ef4444" />
-                    </div>
-                    <h2 style={{ fontSize: '24px', fontWeight: '800', color: '#0f172a', marginBottom: '12px' }}>Assessment Ended</h2>
-                    <p style={{ color: '#64748b', fontSize: '15px', marginBottom: '24px', lineHeight: '1.6' }}>
-                      The assessment <strong>{expiredTest.title}</strong> ended on <br/>
-                      <strong>{new Date(expiredTest.access_end!).toLocaleString()}</strong><br/>
-                      and is no longer accepting submissions.
-                    </p>
-                    <button 
-                      onClick={() => { setExpiredTest(null); setAccessCode(''); setTestIdStr(''); }}
-                      className="btn btn-primary"
-                      style={{ padding: '12px 32px', fontSize: '15px', fontWeight: '600' }}
-                    >
-                      Return to Dashboard
-                    </button>
-                  </div>
-                </div>
-              )}
 
             </div>
           )}
