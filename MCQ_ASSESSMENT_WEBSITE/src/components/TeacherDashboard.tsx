@@ -1181,9 +1181,9 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                   const myProfile = allProfiles.find(p => p.id === user.id);
                   const teacherName = myProfile?.full_name || user.user_metadata?.full_name || user.email.split('@')[0] || 'Teacher';
                   
-                  const roleTxt = myProfile?.designation || user.user_metadata?.designation || 'Examiner';
-                  const deptTxt = myProfile?.department || user.user_metadata?.department || '';
-                  const instTxt = myProfile?.institution_name || user.user_metadata?.institution_name || 'a Organization';
+                  const roleTxt = myProfile?.designation || (user.user_metadata as any)?.designation || 'Examiner';
+                  const deptTxt = myProfile?.department || (user.user_metadata as any)?.department || '';
+                  const instTxt = myProfile?.institution_name || (user.user_metadata as any)?.institution_name || 'a Organization';
                   const subtitleText = deptTxt ? `${roleTxt}, ${deptTxt} in ${instTxt}` : `${roleTxt} in ${instTxt}`;
 
                   return (
