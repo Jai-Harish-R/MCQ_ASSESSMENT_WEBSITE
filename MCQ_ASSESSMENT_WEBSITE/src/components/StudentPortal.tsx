@@ -1648,21 +1648,21 @@ Content-Type: text/html; charset=UTF-8
                             <FileText size={20} />
                           </div>
                           <div>
-                            <div style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a' }}>Take Assessment</div>
+                            <div style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a' }}>Take Test</div>
                             <div style={{ fontSize: '11px', color: '#64748b' }}>Start a new test</div>
                           </div>
                         </div>
                         <ArrowRight size={16} color="#94a3b8" />
                       </div>
 
-                      <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', padding: '16px', border: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }} onClick={() => setActiveTab('review_attempts')}>
+                      <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', padding: '16px', border: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }} onClick={() => setActiveTab('leaderboard')}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                          <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: '#dcfce7', color: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <BarChart3 size={20} />
+                          <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: '#fff7ed', color: '#ea580c', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Trophy size={20} />
                           </div>
                           <div>
-                            <div style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a' }}>View Results</div>
-                            <div style={{ fontSize: '11px', color: '#64748b' }}>Check your performance</div>
+                            <div style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a' }}>Leaderboard</div>
+                            <div style={{ fontSize: '11px', color: '#64748b' }}>Check your rank</div>
                           </div>
                         </div>
                         <ArrowRight size={16} color="#94a3b8" />
@@ -1674,21 +1674,21 @@ Content-Type: text/html; charset=UTF-8
                             <Clock3 size={20} />
                           </div>
                           <div>
-                            <div style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a' }}>Past Submissions</div>
-                            <div style={{ fontSize: '11px', color: '#64748b' }}>Review your attempts</div>
+                            <div style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a' }}>Review Attempts</div>
+                            <div style={{ fontSize: '11px', color: '#64748b' }}>Review your past tests</div>
                           </div>
                         </div>
                         <ArrowRight size={16} color="#94a3b8" />
                       </div>
 
-                      <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', padding: '16px', border: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }} onClick={() => setActiveTab('leaderboard')}>
+                      <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', padding: '16px', border: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }} onClick={() => setActiveTab('dashboard')}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                          <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: '#eff6ff', color: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <TrendingUp size={20} />
+                          <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: '#dcfce7', color: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <LayoutDashboard size={20} />
                           </div>
                           <div>
-                            <div style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a' }}>Performance Analytics</div>
-                            <div style={{ fontSize: '11px', color: '#64748b' }}>Track your progress</div>
+                            <div style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a' }}>Dashboard</div>
+                            <div style={{ fontSize: '11px', color: '#64748b' }}>Return to home</div>
                           </div>
                         </div>
                         <ArrowRight size={16} color="#94a3b8" />
