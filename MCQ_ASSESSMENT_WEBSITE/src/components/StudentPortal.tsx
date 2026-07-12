@@ -1070,9 +1070,9 @@ Content-Type: text/html; charset=UTF-8
                       const isAnswered = answers[q.id] !== undefined;
                       const isFlagged = flagged[q.id];
                       
-                      let bgColor = isAnswered ? 'rgba(59, 130, 246, 0.15)' : 'rgba(239, 68, 68, 0.15)';
-                      let borderColor = isAnswered ? '#93c5fd' : '#fca5a5';
-                      let textColor = isAnswered ? '#1d4ed8' : '#b91c1c';
+                      const bgColor = isAnswered ? 'rgba(59, 130, 246, 0.15)' : 'rgba(239, 68, 68, 0.15)';
+                      const borderColor = isAnswered ? '#93c5fd' : '#fca5a5';
+                      const textColor = isAnswered ? '#1d4ed8' : '#b91c1c';
 
                       return (
                         <div key={idx} style={{ 
@@ -1171,7 +1171,7 @@ Content-Type: text/html; charset=UTF-8
                         {q.options.map((opt, optIdx) => {
                           const isStudentSelected = studentAnsIdx === optIdx;
                           const isCorrectOpt = correctAnsIdx === optIdx;
-                          let optionStyle: React.CSSProperties = { padding: '8px 12px', border: '1px solid #e2e8f0', borderRadius: '4px', display: 'flex', justifyContent: 'space-between' };
+                          const optionStyle: React.CSSProperties = { padding: '8px 12px', border: '1px solid #e2e8f0', borderRadius: '4px', display: 'flex', justifyContent: 'space-between' };
                           if (isStudentSelected) { optionStyle.border = '2px solid var(--color-error)'; optionStyle.backgroundColor = 'var(--color-error-container)'; }
                           if (isCorrectOpt) { optionStyle.border = '2px solid var(--color-success)'; optionStyle.backgroundColor = 'var(--color-success-container)'; }
                           return (
@@ -1496,7 +1496,7 @@ Content-Type: text/html; charset=UTF-8
                                         const attemptNum = getAttemptNumber(att);
                                         return (
                                           <div key={att.id} style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr 1.2fr', gap: '8px', fontSize: '11px', alignItems: 'center' }}>
-                                            <div style={{ fontWeight: '700', color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}><HoverableTestTitle title={testD?.title || att.test_title?.replace(/\s*-.*$/, '') || 'Assessment'} /></div>
+                                            <div style={{ fontWeight: '700', color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}><HoverableTestTitle title={testD?.title || att.test_title?.replace(/\s*-.*$/, '') || 'Assessment'} questionsCount={att.total_questions} correctQuestions={att.score} isPassing={Math.round((att.score / (att.total_questions || 1)) * 100) >= (testD?.pass_percentage || 80)} /></div>
                                             <div style={{ color: '#64748b' }}>{testD?.short_id || '-'}</div>
                                             <div style={{ color: '#64748b' }}>{attemptNum}</div>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -1721,15 +1721,15 @@ Content-Type: text/html; charset=UTF-8
                           const pct = (attempt.score / attempt.total_questions) * 100;
                           const isPassed = pct >= (testD?.pass_percentage || 80);
                           
-                          let fg = isPassed ? '#16a34a' : '#ea580c';
-                          let Icon = isPassed ? CheckCircle2 : AlertCircle;
+                          const fg = isPassed ? '#16a34a' : '#ea580c';
+                          const Icon = isPassed ? CheckCircle2 : AlertCircle;
                           
                           return (
                             <div key={attempt.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                 <Icon size={16} color={fg} />
                                 <span style={{ fontSize: '13px', fontWeight: '600', color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '180px' }}>
-                                  <HoverableTestTitle title={testD?.title || attempt.test_title?.replace(/\s*-.*$/, '') || 'Assessment'} shortId={testD?.short_id} /> submitted
+                                  <HoverableTestTitle title={testD?.title || attempt.test_title?.replace(/\s*-.*$/, '') || 'Assessment'} shortId={testD?.short_id} questionsCount={attempt.total_questions} correctQuestions={attempt.score} isPassing={Math.round((attempt.score / (attempt.total_questions || 1)) * 100) >= (testD?.pass_percentage || 80)} /> submitted
                                 </span>
                               </div>
                               <span style={{ fontSize: '12px', color: '#94a3b8', fontWeight: '500', whiteSpace: 'nowrap' }}>
@@ -2189,7 +2189,7 @@ Content-Type: text/html; charset=UTF-8
                                     const attemptNum = getAttemptNumber(att);
                                     return (
                                       <div key={att.id} style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr 1.2fr', gap: '8px', fontSize: '11px', alignItems: 'center' }}>
-                                        <div style={{ fontWeight: '700', color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}><HoverableTestTitle title={testD?.title || att.test_title?.replace(/\s*-.*$/, '') || 'Assessment'} /></div>
+                                        <div style={{ fontWeight: '700', color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}><HoverableTestTitle title={testD?.title || att.test_title?.replace(/\s*-.*$/, '') || 'Assessment'} questionsCount={att.total_questions} correctQuestions={att.score} isPassing={Math.round((att.score / (att.total_questions || 1)) * 100) >= (testD?.pass_percentage || 80)} /></div>
                                         <div style={{ color: '#64748b' }}>{testD?.short_id || '-'}</div>
                                         <div style={{ color: '#64748b' }}>{attemptNum}</div>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -2346,7 +2346,7 @@ Content-Type: text/html; charset=UTF-8
                       if (attempt.test_type === 'live_exam') { color = '#ef4444'; bg = '#fef2f2'; Icon = Target; typeName = 'Live Exam'; }
                       if (attempt.test_type === 'result') { color = '#16a34a'; bg = '#dcfce7'; Icon = BarChart3; typeName = 'Result'; }
                       
-                      let scoreColor = isPassed ? '#16a34a' : '#ef4444';
+                      const scoreColor = isPassed ? '#16a34a' : '#ef4444';
 
                       return (
                         <div key={attempt.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 24px', backgroundColor: '#ffffff', borderRadius: '16px', border: '1px solid #f1f5f9', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
@@ -2358,7 +2358,7 @@ Content-Type: text/html; charset=UTF-8
                             </div>
                             <div>
                               <h4 style={{ fontSize: '15px', fontWeight: '700', color: '#0f172a', margin: '0 0 4px 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '250px' }}>
-                                <HoverableTestTitle title={attempt.test_title?.replace(/\s*-.*$/, '') || 'Assessment'} shortId={attempt.short_id} />
+                                <HoverableTestTitle title={attempt.test_title?.replace(/\s*-.*$/, '') || 'Assessment'} shortId={attempt.short_id} questionsCount={attempt.total_questions} correctQuestions={attempt.score} isPassing={isPassed} />
                               </h4>
                               <div style={{ fontSize: '12px', color: '#64748b', fontWeight: '500' }}>
                                 {typeName} • {attempt.total_questions} Questions

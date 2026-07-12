@@ -8,9 +8,11 @@ interface HoverableTestTitleProps {
   duration?: number;
   testCode?: string;
   customStyle?: React.CSSProperties;
+  correctQuestions?: number;
+  isPassing?: boolean;
 }
 
-export default function HoverableTestTitle({ title, shortId, questionsCount, duration, testCode, customStyle }: HoverableTestTitleProps) {
+export default function HoverableTestTitle({ title, shortId, questionsCount, duration, testCode, customStyle, correctQuestions, isPassing }: HoverableTestTitleProps) {
   const [isHovered, setIsHovered] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -25,7 +27,7 @@ export default function HoverableTestTitle({ title, shortId, questionsCount, dur
       let left = rect.left;
       
       if (top + cardRect.height > window.innerHeight) {
-        top = rect.top - cardRect.height - 8;
+        top = Math.max(16, window.innerHeight - cardRect.height - 16);
       }
       
       if (left + cardRect.width > window.innerWidth) {
@@ -94,10 +96,22 @@ export default function HoverableTestTitle({ title, shortId, questionsCount, dur
                 <span style={{ fontSize: '14px', color: '#0f172a', fontWeight: '700' }}>{questionsCount}</span>
               </div>
             )}
+            {correctQuestions !== undefined && (
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '700', textTransform: 'uppercase' }}>Correct</span>
+                <span style={{ fontSize: '14px', color: '#0f172a', fontWeight: '700' }}>{correctQuestions}</span>
+              </div>
+            )}
             {duration !== undefined && (
               <div style={{ display: 'flex', flexDirection: 'column' }}>
                 <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '700', textTransform: 'uppercase' }}>Duration</span>
                 <span style={{ fontSize: '14px', color: '#0f172a', fontWeight: '700' }}>{duration} mins</span>
+              </div>
+            )}
+            {isPassing !== undefined && (
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '700', textTransform: 'uppercase' }}>Result</span>
+                <span style={{ fontSize: '14px', color: isPassing ? '#16a34a' : '#dc2626', fontWeight: '900' }}>{isPassing ? 'PASS' : 'FAIL'}</span>
               </div>
             )}
           </div>
