@@ -7,7 +7,7 @@ import { Bell, ChevronDown, Clock3,
    ClipboardEdit, Target, TrendingUp, CalendarDays,
    BarChart3,  FileText, Trophy, ShieldCheck,
    Lock, Calendar
-, Users, Mail} from 'lucide-react';
+, Users, Mail, Menu, X} from 'lucide-react';
 import studentAvatar from '../assets/student_avatar.png';
 import ProfileModal from './ProfileModal';
 import HoverableTestTitle from './HoverableTestTitle';
@@ -82,6 +82,7 @@ interface StudentPortalProps {
 export default function StudentPortal({ user, onLogout }: StudentPortalProps) {
   // Navigation tabs: 'dashboard' | 'lobby' | 'review_attempts' | 'leaderboard'
   const [activeTab, setActiveTab] = useState<'dashboard' | 'lobby' | 'review_attempts' | 'leaderboard'>('dashboard');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [viewState, setViewState] = useState<'lobby' | 'exam' | 'result'>('lobby');
 
   // Attempts and tests states (for dashboard and leaderboard verification)
@@ -1170,8 +1171,14 @@ Content-Type: text/html; charset=UTF-8
   return (
     <div className="edu-app-frame" style={{ backgroundColor: '#fafafa' }}>
       
+      {/* Mobile Drawer Overlay */}
+      <div 
+        className={`mobile-overlay ${isMobileMenuOpen ? 'mobile-open' : ''}`}
+        onClick={() => setIsMobileMenuOpen(false)}
+      />
+
       {/* Sidebar matching the image exactly */}
-      <aside className="edu-sidebar" style={{ backgroundColor: '#ffffff', borderRight: '1px solid #f1f5f9', padding: '24px 20px', display: 'flex', flexDirection: 'column', width: '260px' }}>
+      <aside className={`edu-sidebar ${isMobileMenuOpen ? 'mobile-open' : ''}`} style={{ backgroundColor: '#ffffff', borderRight: '1px solid #f1f5f9', padding: '24px 20px', display: 'flex', flexDirection: 'column', width: '260px' }}>
         
         {/* Brand Logo */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '24px', padding: '0 8px' }}>
@@ -1289,9 +1296,17 @@ Content-Type: text/html; charset=UTF-8
         
         {/* Top Header Bar */}
         <header style={{ 
-          display: 'flex', alignItems: 'center', justifyContent: 'flex-end', 
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between', 
           padding: '24px 40px', gap: '24px', backgroundColor: 'transparent'
         }}>
+          <button 
+            className="hamburger-btn" 
+            onClick={() => setIsMobileMenuOpen(true)}
+            aria-label="Open Menu"
+            style={{ padding: 0 }}
+          >
+            <Menu size={24} />
+          </button>
           {/* Header Avatar */}
           <img src={currentAvatar} alt="User" style={{ width: '40px', height: '40px', borderRadius: '50%', cursor: 'pointer', border: '2px solid #ffffff', boxShadow: '0 2px 4px rgba(0,0,0,0.1)', objectFit: 'cover' }} />
         </header>

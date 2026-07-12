@@ -5,7 +5,7 @@ import {
   Trash2, Users, Award, AlertCircle, BookOpen, ChevronLeft, ChevronRight, Calendar, FileText, 
   Check, Send, GraduationCap, RefreshCw,
   Upload, Download, Image, ClipboardList,
-  Trophy, ClipboardEdit, ChevronDown, BarChart3, ShieldCheck, Clock
+  Trophy, ClipboardEdit, ChevronDown, BarChart3, ShieldCheck, Clock, Menu, X
 } from 'lucide-react';
 import animeAvatar from '../assets/anime_avatar.png';
 import studentAvatar from '../assets/student_avatar.png';
@@ -85,6 +85,7 @@ interface TeacherDashboardProps {
 export default function TeacherDashboard({ user, onLogout }: TeacherDashboardProps) {
   // Navigation tabs: 'dashboard' | 'exams' | 'students' | 'leaderboard' | 'edit_test'
   const [activeTab, setActiveTab] = useState<'dashboard' | 'exams' | 'students' | 'leaderboard' | 'edit_test'>('exams');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   // Data states
   const [tests, setTests] = useState<Test[]>([]);
@@ -893,8 +894,14 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
   return (
     <div className="edu-app-frame">
       
+      {/* Mobile Drawer Overlay */}
+      <div 
+        className={`mobile-overlay ${isMobileMenuOpen ? 'mobile-open' : ''}`}
+        onClick={() => setIsMobileMenuOpen(false)}
+      />
+
       {/* Teacher Sidebar Navigation */}
-      <aside className="edu-sidebar">
+      <aside className={`edu-sidebar ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
         <div>
           {/* Logo Frame */}
           <div className="sidebar-logo" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '0 8px' }}>
@@ -996,7 +1003,14 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
         
         {/* Simple Top Bar */}
         <header className="edu-header">
-          <div className="header-title-row">
+          <div className="header-title-row" style={{ display: 'flex', alignItems: 'center' }}>
+            <button 
+              className="hamburger-btn" 
+              onClick={() => setIsMobileMenuOpen(true)}
+              aria-label="Open Menu"
+            >
+              <Menu size={24} />
+            </button>
             <span style={{ fontSize: '15px', fontWeight: '800', color: '#0f172a', letterSpacing: '0.02em', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '8px' }}>
             </span>
           </div>
@@ -1083,39 +1097,39 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
 
               {/* Stats overview boxes */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '24px' }}>
-                <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                  <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: 'var(--color-success-container)', color: 'var(--color-success)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div className="card card-pastel-green" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: '#ffffff', color: '#166534', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 6px -1px rgba(22, 101, 52, 0.1)' }}>
                     <BookOpen size={20} />
                   </div>
                   <div>
-                    <span style={{ fontSize: '11px', color: 'var(--color-on-surface-variant)', fontWeight: '600', textTransform: 'uppercase' }}>Active Tests</span>
-                    <h3 style={{ fontSize: '24px', fontWeight: '700', marginTop: '2px' }}>{activeTestsCount}</h3>
+                    <span style={{ fontSize: '11px', color: '#166534', fontWeight: '700', textTransform: 'uppercase' }}>Active Tests</span>
+                    <h3 style={{ fontSize: '24px', fontWeight: '800', marginTop: '2px', color: '#14532d' }}>{activeTestsCount}</h3>
                   </div>
                 </div>
 
-                <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                  <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: 'var(--color-error-container)', color: 'var(--color-error)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div className="card card-pastel-orange" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: '#ffffff', color: '#c2410c', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 6px -1px rgba(194, 65, 12, 0.1)' }}>
                     <AlertCircle size={20} />
                   </div>
                   <div>
-                    <span style={{ fontSize: '11px', color: 'var(--color-on-surface-variant)', fontWeight: '600', textTransform: 'uppercase' }}>Inactive Tests</span>
-                    <h3 style={{ fontSize: '24px', fontWeight: '700', marginTop: '2px' }}>{inactiveTestsCount}</h3>
+                    <span style={{ fontSize: '11px', color: '#c2410c', fontWeight: '700', textTransform: 'uppercase' }}>Inactive Tests</span>
+                    <h3 style={{ fontSize: '24px', fontWeight: '800', marginTop: '2px', color: '#9a3412' }}>{inactiveTestsCount}</h3>
                   </div>
                 </div>
                 
-                <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                  <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: 'var(--color-surface-variant)', color: 'var(--color-on-surface-variant)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div className="card card-pastel-purple" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: '#ffffff', color: '#6b21a8', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 6px -1px rgba(107, 33, 168, 0.1)' }}>
                     <Clock size={20} />
                   </div>
                   <div>
-                    <span style={{ fontSize: '11px', color: 'var(--color-on-surface-variant)', fontWeight: '600', textTransform: 'uppercase' }}>Not Started</span>
-                    <h3 style={{ fontSize: '24px', fontWeight: '700', marginTop: '2px' }}>{notStartedTestsCount}</h3>
+                    <span style={{ fontSize: '11px', color: '#6b21a8', fontWeight: '700', textTransform: 'uppercase' }}>Not Started</span>
+                    <h3 style={{ fontSize: '24px', fontWeight: '800', marginTop: '2px', color: '#581c87' }}>{notStartedTestsCount}</h3>
                   </div>
                 </div>
               </div>
 
               {/* Monthly Calendar */}
-              <div className="card" style={{ padding: '24px', display: 'flex', flexDirection: 'column' }}>
+              <div className="card card-pastel-blue" style={{ padding: '24px', display: 'flex', flexDirection: 'column' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
                   <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#0f172a', margin: 0 }}>{currentMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}</h3>
                   <div style={{ display: 'flex', gap: '8px' }}>

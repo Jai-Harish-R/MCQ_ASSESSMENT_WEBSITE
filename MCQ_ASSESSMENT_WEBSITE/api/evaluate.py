@@ -29,7 +29,7 @@ class handler(BaseHTTPRequestHandler):
             # Using a placeholder SMTP setup for now.
             smtp_server = "smtp.gmail.com"
             smtp_port = 587
-            smtp_username = "your_email@gmail.com"  # REPLACE THIS
+            smtp_username = "story.sphere.ceo@gmail.com"
             smtp_password = "your_app_password"     # REPLACE THIS
             sender_email = "your_email@gmail.com"   # REPLACE THIS
             
