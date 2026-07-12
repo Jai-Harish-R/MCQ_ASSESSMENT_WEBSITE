@@ -1711,9 +1711,9 @@ Content-Type: text/html; charset=UTF-8
                   <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', padding: '24px', boxShadow: '0 1px 3px rgba(0,0,0,0.02)', border: '1px solid #f1f5f9' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                       <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#0f172a', margin: 0 }}>Recent Activity</h3>
-                      {myAttempts.length > 8 && (
+                      {myAttempts.length > 10 && (
                         <span onClick={() => setShowAllRecentActivity(!showAllRecentActivity)} style={{ fontSize: '13px', fontWeight: '600', color: '#ea580c', cursor: 'pointer' }}>
-                          {showAllRecentActivity ? 'Show Less' : 'View All'}
+                          {showAllRecentActivity ? 'Show Less' : 'View More'}
                         </span>
                       )}
                     </div>
@@ -1722,7 +1722,7 @@ Content-Type: text/html; charset=UTF-8
                       {myAttempts.length === 0 ? (
                         <div style={{ fontSize: '13px', color: '#64748b', textAlign: 'center', padding: '20px' }}>No recent activity found.</div>
                       ) : (
-                        myAttempts.slice(0, showAllRecentActivity ? myAttempts.length : 8).map(attempt => {
+                        myAttempts.slice(0, showAllRecentActivity ? myAttempts.length : 10).map(attempt => {
                           const testD = availableTests.find(t => t.id === attempt.test_id);
                           const pct = (attempt.score / attempt.total_questions) * 100;
                           const isPassed = pct >= (testD?.pass_percentage || 80);
@@ -1748,51 +1748,7 @@ Content-Type: text/html; charset=UTF-8
                     </div>
                   </div>
 
-                  {/* Quick Access */}
-                  <div>
-                    <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#0f172a', margin: '0 0 16px 0' }}>Quick Access</h3>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                      <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', padding: '16px', border: '1px solid #f1f5f9', display: 'flex', gap: '12px', cursor: 'pointer' }}>
-                        <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: '#e0f2fe', color: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <BookOpen size={16} />
-                        </div>
-                        <div>
-                          <div style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a' }}>My Submissions</div>
-                          <div style={{ fontSize: '10px', color: '#64748b', marginTop: '2px' }}>View your attempts</div>
-                        </div>
-                      </div>
 
-                      <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', padding: '16px', border: '1px solid #f1f5f9', display: 'flex', gap: '12px', cursor: 'pointer' }}>
-                        <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: '#dcfce7', color: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <BarChart3 size={16} />
-                        </div>
-                        <div>
-                          <div style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a' }}>Results History</div>
-                          <div style={{ fontSize: '10px', color: '#64748b', marginTop: '2px' }}>Check your scores</div>
-                        </div>
-                      </div>
-
-                      <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', padding: '16px', border: '1px solid #f1f5f9', display: 'flex', gap: '12px', cursor: 'pointer' }} onClick={() => setIsProfileModalOpen(true)}>
-                        <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: '#eff6ff', color: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <Users size={16} />
-                        </div>
-                        <div>
-                          <div style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a' }}>My Profile</div>
-                          <div style={{ fontSize: '10px', color: '#64748b', marginTop: '2px' }}>Manage account</div>
-                        </div>
-                      </div>
-
-                      <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', padding: '16px', border: '1px solid #f1f5f9', display: 'flex', gap: '12px', cursor: 'pointer' }}>
-                        <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: '#f3e8ff', color: '#a855f7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <Target size={16} />
-                        </div>
-                        <div>
-                          <div style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a' }}>Download Reports</div>
-                          <div style={{ fontSize: '10px', color: '#64748b', marginTop: '2px' }}>Export your data</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
 
                 </div>
               </div>
