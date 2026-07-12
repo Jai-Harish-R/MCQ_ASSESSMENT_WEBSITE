@@ -549,21 +549,39 @@ export default function StudentPortal({ user, onLogout }: StudentPortalProps) {
     try {
       
         const timeTakenSeconds = ((activeTest.duration || 10) * 60) - secondsLeft;
-        const { data, error } = await supabase.rpc('submit_test_attempt', {
+        let rpcData, rpcError;
+        
+        // Try the updated RPC signature first
+        const result1 = await supabase.rpc('submit_test_attempt', {
           p_test_id: activeTest.id,
           p_student_id: user.id,
           p_student_email: user.email,
           p_answers: answers,
           p_time_taken_seconds: timeTakenSeconds
         });
+        
+        rpcData = result1.data;
+        rpcError = result1.error;
 
-        if (error) throw error;
+        // If it fails because the DB signature hasn't been updated yet, fallback to the old signature
+        if (rpcError && rpcError.message && (rpcError.message.includes('could not find the function') || rpcError.message.includes('does not exist'))) {
+          const result2 = await supabase.rpc('submit_test_attempt', {
+            p_test_id: activeTest.id,
+            p_student_id: user.id,
+            p_student_email: user.email,
+            p_answers: answers
+          });
+          rpcData = result2.data;
+          rpcError = result2.error;
+        }
 
-        setScore(data.score);
-        setTotalQuestions(data.total_questions);
-        setCorrectAnswers(data.correct_answers);
+        if (rpcError) throw rpcError;
+
+        setScore(rpcData.score);
+        setTotalQuestions(rpcData.total_questions);
+        setCorrectAnswers(rpcData.correct_answers);
         setViewState('result');
-        dispatchEmailNotification(data.score, data.total_questions, data.correct_answers, activeTest);
+        dispatchEmailNotification(rpcData.score, rpcData.total_questions, rpcData.correct_answers, activeTest);
       
     } catch (err: any) {
       console.error(err);
@@ -886,14 +904,14 @@ Content-Type: text/html; charset=UTF-8
             <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#ffffff', border: '1px solid var(--color-outline-variant)', borderRadius: 'var(--radius-default)', padding: '16px 24px' }}>
                 <div>
-                  <span style={{ fontSize: '11px', color: 'var(--color-on-surface-variant)', fontWeight: '600', textTransform: 'uppercase' }}>Active Exam</span>
+                  <div style={{ fontSize: '11px', color: 'var(--color-on-surface-variant)', fontWeight: '600', textTransform: 'uppercase', marginBottom: '4px' }}>Active Exam</div>
                   <HoverableTestTitle 
                     title={activeTest.title}
                     shortId={activeTest.short_id}
                     questionsCount={activeTest.questions?.length || 0}
                     duration={activeTest.duration}
                     testCode={activeTest.access_code}
-                    customStyle={{ fontSize: '18px', fontWeight: '700', color: 'var(--color-primary)', marginTop: '2px' }}
+                    customStyle={{ fontSize: '18px', fontWeight: '700', color: 'var(--color-primary)' }}
                   />
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: secondsLeft < 60 ? 'var(--color-error-container)' : 'var(--color-surface-container)', color: secondsLeft < 60 ? 'var(--color-on-error-container)' : 'var(--color-on-surface)', padding: '8px 16px', borderRadius: 'var(--radius-sm)', fontWeight: '700', fontFamily: 'monospace', fontSize: '16px' }}>
@@ -902,12 +920,12 @@ Content-Type: text/html; charset=UTF-8
                 </div>
               </div>
 
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--color-on-surface-variant)', marginBottom: '6px' }}>
+              <div style={{ padding: '0 8px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--color-on-surface-variant)', marginBottom: '8px', fontWeight: '500' }}>
                   <span>Answer Progress</span>
                   <span>{Object.keys(answers).length} of {activeTest.questions.length} Answered</span>
                 </div>
-                <div className="progress-bar-container" style={{ height: '8px', backgroundColor: '#cbd5e1', borderRadius: '4px', overflow: 'hidden' }}>
+                <div className="progress-bar-container" style={{ height: '6px', backgroundColor: '#e2e8f0', borderRadius: '3px', overflow: 'hidden' }}>
                   <div style={{ width: `${(Object.keys(answers).length / activeTest.questions.length) * 100}%`, height: '100%', backgroundColor: secondsLeft < 60 ? 'var(--color-error)' : '#1c4e80', transition: 'width 0.3s ease' }} />
                 </div>
               </div>
@@ -2129,7 +2147,12 @@ Content-Type: text/html; charset=UTF-8
                                   return <div key={idx} style={{ width: '8px', height: '8px', borderRadius: '2px', backgroundColor: color }}></div>;
                                 })}
                               </div>
-                              <div className="calendar-hover-card">
+                              <div className="calendar-hover-card" style={{
+                                left: (i % 7) < 2 ? '0' : (i % 7) > 4 ? 'auto' : '50%',
+                                right: (i % 7) > 4 ? '0' : 'auto',
+                                transform: (i % 7) < 2 ? 'none' : (i % 7) > 4 ? 'none' : 'translateX(-50%)',
+                                zIndex: 1000
+                              }}>
                                 <div style={{ fontSize: '12px', fontWeight: '800', color: '#0f172a', marginBottom: '8px', paddingBottom: '4px', borderBottom: '1px solid #e2e8f0' }}>
                                   {new Date(currentDateString).toLocaleDateString()}
                                 </div>

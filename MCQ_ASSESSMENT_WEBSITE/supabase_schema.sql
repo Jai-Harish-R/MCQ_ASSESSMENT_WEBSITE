@@ -145,7 +145,8 @@ CREATE OR REPLACE FUNCTION public.submit_test_attempt(
   p_test_id UUID,
   p_student_id UUID,
   p_student_email TEXT,
-  p_answers JSONB
+  p_answers JSONB,
+  p_time_taken_seconds INT DEFAULT NULL
 ) RETURNS JSONB AS $$
 DECLARE
   v_correct_answers JSONB;
@@ -190,13 +191,14 @@ BEGIN
       answers = p_answers,
       score = v_score,
       total_questions = v_total,
+      time_taken_seconds = COALESCE(p_time_taken_seconds, time_taken_seconds),
       completed_at = NOW(),
       allowed_retry = FALSE
     WHERE id = v_attempt_id;
   ELSE
     -- Insert new attempt
-    INSERT INTO public.test_attempts (test_id, student_id, student_email, answers, score, total_questions, completed_at, allowed_retry)
-    VALUES (p_test_id, p_student_id, p_student_email, p_answers, v_score, v_total, NOW(), FALSE)
+    INSERT INTO public.test_attempts (test_id, student_id, student_email, answers, score, total_questions, time_taken_seconds, completed_at, allowed_retry)
+    VALUES (p_test_id, p_student_id, p_student_email, p_answers, v_score, v_total, p_time_taken_seconds, NOW(), FALSE)
     RETURNING id INTO v_attempt_id;
   END IF;
 
