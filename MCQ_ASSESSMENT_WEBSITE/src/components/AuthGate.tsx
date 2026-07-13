@@ -1,4 +1,3 @@
-import SearchableSelect from './SearchableSelect';
 import React, { useState } from 'react';
 import { supabase } from '../utils/supabase';
 import { Mail, Lock, AlertCircle, ArrowRight, User, CheckCircle2, GraduationCap, School, ShieldCheck } from 'lucide-react';

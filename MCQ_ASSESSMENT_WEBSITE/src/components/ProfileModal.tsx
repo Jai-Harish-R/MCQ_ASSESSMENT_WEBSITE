@@ -1,4 +1,3 @@
-import SearchableSelect from './SearchableSelect';
 import React, { useState, useRef, useEffect } from 'react';
 import { supabase } from '../utils/supabase';
 import { Camera, X, Check, Loader2 } from 'lucide-react';
