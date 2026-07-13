@@ -1,66 +1,46 @@
-import "jsr:@supabase/functions-js/edge-runtime.d.ts"
-import { createClient } from "npm:@supabase/supabase-js@2"
-import nodemailer from "npm:nodemailer"
+// Follow this setup guide to integrate the Deno language server with your editor:
+// https://deno.land/manual/getting_started/setup_your_environment
+// This enables autocomplete, go to definition, etc.
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+// Setup type definitions for built-in Supabase Runtime APIs
+import "@supabase/functions-js/edge-runtime.d.ts";
+import { withSupabase } from "@supabase/server";
 
-Deno.serve(async (req: any) => {
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
-  }
+console.log("Hello from Functions!");
 
-  try {
-    const supabaseAdmin = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    )
+// This endpoint uses 'publishable' | 'secret' access, apiKey is required.
+// Use publishable for Client-facing, key-validated endpoints
+// Use secret for Server-to-server, internal calls
+export default {
+  fetch: withSupabase({ auth: ["publishable", "secret"] }, async (req, ctx) => {
+    // Called by another service with a secret key
+    // ctx.supabaseAdmin bypasses RLS — use for privileged operations
+    /*
+    if (ctx.authMode === "secret") {
+      const { user_id } = await req.json();
+      const { data } = await ctx.supabaseAdmin.auth.admin.getUserById(user_id);
 
-    const { data: smtpData, error: smtpError } = await supabaseAdmin
-      .from('smtp_settings')
-      .select('*')
-      .limit(1)
-      .single()
-
-    if (smtpError || !smtpData) {
-      throw new Error('SMTP credentials not found in database. Make sure you have created the smtp_settings table and inserted your email/password.')
+      return Response.json({
+        email: data?.user?.email,
+      });
     }
+    */
 
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: smtpData.email,
-        pass: smtpData.password,
-      },
-    })
+    const { name } = await req.json();
 
-    const payload = await req.json()
-    const { toEmail, subject, htmlContent } = payload
+    return Response.json({
+      message: `Hello ${name}!`,
+    });
+  }),
+};
 
-    if (!toEmail || !htmlContent) {
-      throw new Error('Missing toEmail or htmlContent in request body')
-    }
+/* To invoke locally:
 
-    const mailOptions = {
-      from: smtpData.email,
-      to: toEmail,
-      subject: subject || 'Your Assessment Results',
-      html: htmlContent,
-    }
+  1. Run `supabase start` (see: https://supabase.com/docs/reference/cli/supabase-start)
+  2. Make an HTTP request:
 
-    const info = await transporter.sendMail(mailOptions)
+  curl -i --location --request POST 'http://127.0.0.1:54321/functions/v1/send-email' \
+    --header 'apiKey: sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH' \
+    --data '{"name":"Functions"}'
 
-    return new Response(JSON.stringify({ success: true, messageId: info.messageId }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 200,
-    })
-  } catch (error: any) {
-    console.error("Email sending error:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 500,
-    })
-  }
-})
+*/

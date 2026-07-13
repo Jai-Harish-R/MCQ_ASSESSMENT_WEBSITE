@@ -30,7 +30,7 @@ class handler(BaseHTTPRequestHandler):
             smtp_server = "smtp.gmail.com"
             smtp_port = 587
             smtp_username = "story.sphere.ceo@gmail.com"
-            smtp_password = "your_app_password"     # REPLACE THIS
+            smtp_password = "JAIHARISH23"     # REPLACE THIS
             sender_email = "your_email@gmail.com"   # REPLACE THIS
             
             # Construct Email
