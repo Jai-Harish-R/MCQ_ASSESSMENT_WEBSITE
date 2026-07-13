@@ -2537,16 +2537,13 @@ Content-Type: text/html; charset=UTF-8
                       <div>
                         <label style={{ display: 'block', fontSize: '13px', fontWeight: '700', color: '#0f172a', marginBottom: '6px' }}>Test</label>
                         <div style={{ position: 'relative' }}>
-                          <div style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', width: '24px', height: '24px', backgroundColor: '#3b82f6', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
-                            <ClipboardEdit size={14} />
-                          </div>
                           <select 
                             value={leaderboardSelectedTestId}
                             onChange={(e) => {
-                      setLeaderboardSelectedTestId(e.target.value);
-                      setLeaderboardPage(1);
-                    }}
-                            style={{ width: '100%', padding: '10px 12px 10px 44px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '13px', color: '#0f172a', appearance: 'none', outline: 'none', height: '44px', backgroundColor: '#fff' }}
+                              setLeaderboardSelectedTestId(e.target.value);
+                              setLeaderboardPage(1);
+                            }}
+                            style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '13px', color: '#0f172a', outline: 'none', height: '44px', backgroundColor: '#fff', cursor: 'pointer' }}
                           >
                             <option value="">-- Select a test --</option>
                             {availableTests.map(t => (
@@ -2555,7 +2552,6 @@ Content-Type: text/html; charset=UTF-8
                               </option>
                             ))}
                           </select>
-                          <ChevronDown size={16} color="#64748b" style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
                         </div>
                       </div>
 
