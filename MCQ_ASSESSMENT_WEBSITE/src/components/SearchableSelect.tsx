@@ -9,9 +9,10 @@ interface SearchableSelectProps {
   style?: React.CSSProperties;
   className?: string;
   required?: boolean;
+  disabled?: boolean;
 }
 
-export default function SearchableSelect({ value, onChange, children, style, className }: SearchableSelectProps) {
+export default function SearchableSelect({ value, onChange, children, style, className, disabled }: SearchableSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
   const wrapperRef = useRef<HTMLDivElement>(null);
