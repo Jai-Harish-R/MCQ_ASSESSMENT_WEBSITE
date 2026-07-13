@@ -1,3 +1,4 @@
+import SearchableSelect from './SearchableSelect';
 import React, { useState } from 'react';
 import { supabase } from '../utils/supabase';
 import { Mail, Lock, AlertCircle, ArrowRight, User, CheckCircle2, GraduationCap, School, ShieldCheck } from 'lucide-react';
@@ -354,7 +355,7 @@ if (countryCode === '+966' && cleanPhone.length !== 9) {
                       }}
                       placeholder="e.g. Harish Kumar"
                       value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
+                      onChange={(e: any) => setFullName(e.target.value)}
                       disabled={loading}
                       required
                     />
@@ -367,12 +368,12 @@ if (countryCode === '+966' && cleanPhone.length !== 9) {
                   <div>
                     <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#475569', marginBottom: '8px' }}>Phone No<span style={{color: '#ea580c'}}> *</span></label>
                     <div style={{ display: 'flex', alignItems: 'center', border: '1px solid #e2e8f0', borderRadius: '12px', backgroundColor: '#f8fafc', overflow: 'hidden', boxSizing: 'border-box', transition: 'border-color 0.2s' }}>
-                      <select
+                      <SearchableSelect
                         style={{
                           padding: '14px 8px 14px 16px', border: 'none', backgroundColor: 'transparent', fontSize: '15px', color: '#475569', outline: 'none', cursor: 'pointer', appearance: 'none', fontWeight: '600'
                         }}
                         value={countryCode}
-                        onChange={(e) => setCountryCode(e.target.value)}
+                        onChange={(e: any) => setCountryCode(e.target.value)}
                         disabled={loading}
                       >
                         <option value="+91">IND +91</option>
@@ -385,7 +386,7 @@ if (countryCode === '+966' && cleanPhone.length !== 9) {
                         <option value="+60">MYS +60</option>
                         <option value="+81">JPN +81</option>
                         <option value="+966">KSA +966</option>
-                      </select>
+                      </SearchableSelect>
                       <div style={{ width: '1px', height: '24px', backgroundColor: '#cbd5e1', margin: '0 8px' }}></div>
                       <input
                         type="tel"
@@ -394,7 +395,7 @@ if (countryCode === '+966' && cleanPhone.length !== 9) {
                         }}
                         placeholder="8248598758"
                         value={phoneNo}
-                        onChange={(e) => setPhoneNo(e.target.value)}
+                        onChange={(e: any) => setPhoneNo(e.target.value)}
                         disabled={loading}
                         required
                       />
@@ -403,7 +404,7 @@ if (countryCode === '+966' && cleanPhone.length !== 9) {
 
                   <div>
                     <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#475569', marginBottom: '8px' }}>Select Organization Type<span style={{color: '#ea580c'}}> *</span></label>
-                    <select
+                    <SearchableSelect
                       style={{ 
                         width: '100%', padding: '14px 16px', borderRadius: '12px', 
                         border: '1px solid #e2e8f0', backgroundColor: '#f8fafc', fontSize: '15px', color: '#0f172a',
@@ -411,7 +412,7 @@ if (countryCode === '+966' && cleanPhone.length !== 9) {
                         appearance: 'none', backgroundImage: 'url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3A%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3A%22292.4%22%20height%3A%22292.4%22%3E%3Cpath%20fill%3A%22%23475569%22%20d%3A%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 16px top 50%', backgroundSize: '12px auto'
                       }}
                       value={profession}
-                      onChange={(e) => setProfession(e.target.value)}
+                      onChange={(e: any) => setProfession(e.target.value)}
                       disabled={loading}
                       required
                     >
@@ -420,14 +421,14 @@ if (countryCode === '+966' && cleanPhone.length !== 9) {
                       <option value="College / University">🎓 College / University</option>
                       <option value="Company">🏢 Company</option>
                       <option value="Other">✨ Other</option>
-                    </select>
+                    </SearchableSelect>
                   </div>
 
                   {profession === 'College / University' && (
                     <>
                       <div>
                         <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#475569', marginBottom: '8px' }}>College Name<span style={{color: '#ea580c'}}> *</span></label>
-                        <input type="text" list="college-options" style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc', fontSize: '15px', color: '#0f172a', outline: 'none', boxSizing: 'border-box' }} placeholder="Select or type your college name" value={institutionName} onChange={(e) => setInstitutionName(e.target.value)} disabled={loading} required autoComplete="off" />
+                        <input type="text" list="college-options" style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc', fontSize: '15px', color: '#0f172a', outline: 'none', boxSizing: 'border-box' }} placeholder="Select or type your college name" value={institutionName} onChange={(e: any) => setInstitutionName(e.target.value)} disabled={loading} required autoComplete="off" />
                         <datalist id="college-options">
                           <option value="Saveetha Engineering College" />
                           <option value="Anna University" />
@@ -484,11 +485,11 @@ if (countryCode === '+966' && cleanPhone.length !== 9) {
                       </div>
                       <div>
                         <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#475569', marginBottom: '8px' }}>Department<span style={{color: '#ea580c'}}> *</span></label>
-                        <input type="text" style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc', fontSize: '15px', color: '#0f172a', outline: 'none', boxSizing: 'border-box' }} placeholder="Enter department" value={department} onChange={(e) => setDepartment(e.target.value)} disabled={loading} required />
+                        <input type="text" style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc', fontSize: '15px', color: '#0f172a', outline: 'none', boxSizing: 'border-box' }} placeholder="Enter department" value={department} onChange={(e: any) => setDepartment(e.target.value)} disabled={loading} required />
                       </div>
                       <div>
                         <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#475569', marginBottom: '8px' }}>Designation<span style={{color: '#ea580c'}}> *</span></label>
-                        <select
+                        <SearchableSelect
                           style={{ 
                             width: '100%', padding: '14px 16px', borderRadius: '12px', 
                             border: '1px solid #e2e8f0', backgroundColor: '#f8fafc', fontSize: '15px', color: '#0f172a',
@@ -496,7 +497,7 @@ if (countryCode === '+966' && cleanPhone.length !== 9) {
                             appearance: 'none', backgroundImage: 'url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3A%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3A%22292.4%22%20height%3A%22292.4%22%3E%3Cpath%20fill%3A%22%23475569%22%20d%3A%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 16px top 50%', backgroundSize: '12px auto'
                           }}
                           value={designation}
-                          onChange={(e) => setDesignation(e.target.value)}
+                          onChange={(e: any) => setDesignation(e.target.value)}
                           disabled={loading}
                           required
                         >
@@ -510,7 +511,7 @@ if (countryCode === '+966' && cleanPhone.length !== 9) {
                           <option value="Dean">Dean</option>
                           <option value="Course Coordinator">Course Coordinator</option>
                           <option value="Teaching Assistant">Teaching Assistant</option>
-                        </select>
+                        </SearchableSelect>
                       </div>
                     </>
                   )}
@@ -519,7 +520,7 @@ if (countryCode === '+966' && cleanPhone.length !== 9) {
                     <>
                       <div>
                         <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#475569', marginBottom: '8px' }}>Company Name<span style={{color: '#ea580c'}}> *</span></label>
-                        <input type="text" list="company-options" style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc', fontSize: '15px', color: '#0f172a', outline: 'none', boxSizing: 'border-box' }} placeholder="Select or type your company name" value={institutionName} onChange={(e) => setInstitutionName(e.target.value)} disabled={loading} required autoComplete="off" />
+                        <input type="text" list="company-options" style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc', fontSize: '15px', color: '#0f172a', outline: 'none', boxSizing: 'border-box' }} placeholder="Select or type your company name" value={institutionName} onChange={(e: any) => setInstitutionName(e.target.value)} disabled={loading} required autoComplete="off" />
                         <datalist id="company-options">
                           <option value="CodersFun" />
                           <option value="Tata Consultancy Services (TCS)" />
@@ -577,7 +578,7 @@ if (countryCode === '+966' && cleanPhone.length !== 9) {
 
                       <div>
                         <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#475569', marginBottom: '8px' }}>Designation<span style={{color: '#ea580c'}}> *</span></label>
-                        <select
+                        <SearchableSelect
                           style={{ 
                             width: '100%', padding: '14px 16px', borderRadius: '12px', 
                             border: '1px solid #e2e8f0', backgroundColor: '#f8fafc', fontSize: '15px', color: '#0f172a',
@@ -585,7 +586,7 @@ if (countryCode === '+966' && cleanPhone.length !== 9) {
                             appearance: 'none', backgroundImage: 'url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3A%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3A%22292.4%22%20height%3A%22292.4%22%3E%3Cpath%20fill%3A%22%23475569%22%20d%3A%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 16px top 50%', backgroundSize: '12px auto'
                           }}
                           value={designation}
-                          onChange={(e) => setDesignation(e.target.value)}
+                          onChange={(e: any) => setDesignation(e.target.value)}
                           disabled={loading}
                           required
                         >
@@ -596,7 +597,7 @@ if (countryCode === '+966' && cleanPhone.length !== 9) {
                           <option value="Team Lead">Team Lead</option>
                           <option value="Supervisor">Supervisor</option>
                           <option value="Recruiter">Recruiter</option>
-                        </select>
+                        </SearchableSelect>
                       </div>
                     </>
                   )}
@@ -605,7 +606,7 @@ if (countryCode === '+966' && cleanPhone.length !== 9) {
                     <>
                       <div>
                         <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#475569', marginBottom: '8px' }}>School Name<span style={{color: '#ea580c'}}> *</span></label>
-                        <input type="text" style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc', fontSize: '15px', color: '#0f172a', outline: 'none', boxSizing: 'border-box' }} placeholder="Enter school name" value={institutionName} onChange={(e) => setInstitutionName(e.target.value)} disabled={loading} required />
+                        <input type="text" style={{ width: '100%', padding: '14px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc', fontSize: '15px', color: '#0f172a', outline: 'none', boxSizing: 'border-box' }} placeholder="Enter school name" value={institutionName} onChange={(e: any) => setInstitutionName(e.target.value)} disabled={loading} required />
                       </div>
                     </>
                   )}
@@ -625,7 +626,7 @@ if (countryCode === '+966' && cleanPhone.length !== 9) {
                     }}
                     placeholder="you@example.com"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(e: any) => setEmail(e.target.value)}
                     disabled={loading}
                     required
                   />
@@ -645,7 +646,7 @@ if (countryCode === '+966' && cleanPhone.length !== 9) {
                     }}
                     placeholder="••••••"
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={(e: any) => setPassword(e.target.value)}
                     disabled={loading}
                     required
                   />

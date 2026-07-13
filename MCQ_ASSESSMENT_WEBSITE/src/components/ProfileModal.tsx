@@ -1,3 +1,4 @@
+import SearchableSelect from './SearchableSelect';
 import React, { useState, useRef, useEffect } from 'react';
 import { supabase } from '../utils/supabase';
 import { Camera, X, Check, Loader2 } from 'lucide-react';
@@ -198,7 +199,7 @@ export default function ProfileModal({ user, isOpen, onClose, onUpdate }: Profil
             <input 
               type="text" 
               value={name} 
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e: any) => setName(e.target.value)}
               placeholder="Enter your full name"
               style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '14px', color: '#0f172a', outline: 'none' }}
             />
@@ -211,7 +212,7 @@ export default function ProfileModal({ user, isOpen, onClose, onUpdate }: Profil
                 <input 
                   type="text" 
                   value={phoneNo} 
-                  onChange={(e) => setPhoneNo(e.target.value)}
+                  onChange={(e: any) => setPhoneNo(e.target.value)}
                   placeholder="Enter your phone number"
                   style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '14px', color: '#0f172a', outline: 'none' }}
                 />
@@ -220,9 +221,9 @@ export default function ProfileModal({ user, isOpen, onClose, onUpdate }: Profil
               {hasDesignation && (
                 <div>
                   <label style={{ display: 'block', fontSize: '13px', fontWeight: '700', color: '#0f172a', marginBottom: '8px' }}>Designation</label>
-                  <select 
+                  <SearchableSelect 
                     value={designation} 
-                    onChange={(e) => setDesignation(e.target.value)}
+                    onChange={(e: any) => setDesignation(e.target.value)}
                     style={{ 
                       width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', 
                       fontSize: '14px', color: '#0f172a', outline: 'none', appearance: 'none', backgroundColor: '#fff',
@@ -253,7 +254,7 @@ export default function ProfileModal({ user, isOpen, onClose, onUpdate }: Profil
                         <option value="Teaching Assistant">Teaching Assistant</option>
                       </>
                     )}
-                  </select>
+                  </SearchableSelect>
                 </div>
               )}
             </>

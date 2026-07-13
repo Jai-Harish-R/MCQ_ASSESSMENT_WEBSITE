@@ -1,3 +1,4 @@
+import SearchableSelect from './SearchableSelect';
 import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../utils/supabase';
 import { 
@@ -1414,10 +1415,10 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
               {activeTab === 'edit_test' && (
                 <div className="card" style={{ marginBottom: '0px' }}>
                   <label className="input-label">Select Test to Edit</label>
-                  <select
+                  <SearchableSelect
                     className="input-field"
                     value={selectedEditTestId}
-                    onChange={(e) => {
+                    onChange={(e: any) => {
                       const id = e.target.value;
                       setSelectedEditTestId(id);
                       if (id) {
@@ -1432,7 +1433,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                     {tests.filter(t => getTestStatus(t) !== 'Ended').map(t => (
                       <option key={t.id} value={t.id} title={`${t.title}${t.short_id ? ` - ${t.short_id}` : ''}`}>{t.title.length > 10 ? t.title.substring(0, 10) + '...' : t.title} {t.short_id ? `- ${t.short_id}` : ''}</option>
                     ))}
-                  </select>
+                  </SearchableSelect>
                 </div>
               )}
 
@@ -1450,34 +1451,34 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                       className="input-field"
                       placeholder="e.g. Physics Quiz 1"
                       value={testTitle}
-                      onChange={(e) => setTestTitle(e.target.value)}
+                      onChange={(e: any) => setTestTitle(e.target.value)}
                     />
                   </div>
 
                   {profession === 'College / University' && (
                     <div style={{ flex: '1 1 calc(50% - 10px)', minWidth: '250px' }}>
                       <label className="input-label">Target Year</label>
-                      <select className="input-field" value={targetYear} onChange={e => setTargetYear(e.target.value)} required>
+                      <SearchableSelect className="input-field" value={targetYear} onChange={(e: any) => setTargetYear(e.target.value)} required>
                         <option value="" disabled>Select Year</option>
                         <option value="1st Year">1st Year</option>
                         <option value="2nd Year">2nd Year</option>
                         <option value="3rd Year">3rd Year</option>
                         <option value="4th Year">4th Year</option>
-                      </select>
+                      </SearchableSelect>
                     </div>
                   )}
 
                   {profession === 'School' && (
                     <div style={{ flex: '1 1 calc(50% - 10px)', minWidth: '250px' }}>
                       <label className="input-label">Target Class</label>
-                      <select className="input-field" value={targetClass} onChange={e => setTargetClass(e.target.value)} required>
+                      <SearchableSelect className="input-field" value={targetClass} onChange={(e: any) => setTargetClass(e.target.value)} required>
                         <option value="" disabled>Select Class</option>
                         <option value="Class 8">Class 8</option>
                         <option value="Class 9">Class 9</option>
                         <option value="Class 10">Class 10</option>
                         <option value="Class 11">Class 11</option>
                         <option value="Class 12">Class 12</option>
-                      </select>
+                      </SearchableSelect>
                     </div>
                   )}
                 </div>
@@ -1490,7 +1491,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                       className="input-field"
                       placeholder="e.g. 123456"
                       value={accessCode}
-                      onChange={(e) => setAccessCode(e.target.value)}
+                      onChange={(e: any) => setAccessCode(e.target.value)}
                       maxLength={6}
                     />
                   </div>
@@ -1517,7 +1518,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                       type="number"
                       className="input-field"
                       value={duration}
-                      onChange={(e) => {
+                      onChange={(e: any) => {
                         if (e.target.value === '') setDuration('');
                         else setDuration(parseInt(e.target.value) || 10);
                       }}
@@ -1530,7 +1531,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                       type="number"
                       className="input-field"
                       value={totalStudents}
-                      onChange={(e) => {
+                      onChange={(e: any) => {
                         if (e.target.value === '') setTotalStudents('');
                         else setTotalStudents(parseInt(e.target.value) || 50);
                       }}
@@ -1547,7 +1548,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                         type="datetime-local"
                         className="input-field"
                         value={accessStart}
-                        onChange={(e) => setAccessStart(e.target.value)}
+                        onChange={(e: any) => setAccessStart(e.target.value)}
                       />
                     </div>
                   )}
@@ -1557,7 +1558,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                       type="datetime-local"
                       className="input-field"
                       value={accessEnd}
-                      onChange={(e) => setAccessEnd(e.target.value)}
+                      onChange={(e: any) => setAccessEnd(e.target.value)}
                     />
                   </div>
                 </div>
@@ -1611,7 +1612,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                         className="input-field"
                         placeholder="examinee@example.com, examinee2@example.com"
                         value={allowedEmailsInput}
-                        onChange={(e) => setAllowedEmailsInput(e.target.value)}
+                        onChange={(e: any) => setAllowedEmailsInput(e.target.value)}
                         style={{ minHeight: '100px', width: '100%', padding: '12px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '14px', resize: 'vertical' }}
                       />
                     </div>
@@ -1641,7 +1642,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                         min="1" max="100" 
                         className="input-field" 
                         value={passPercentage} 
-                        onChange={(e) => setPassPercentage(parseInt(e.target.value) || 80)} 
+                        onChange={(e: any) => setPassPercentage(parseInt(e.target.value) || 80)} 
                         placeholder="e.g. 80" 
                       />
                   </div>
@@ -1669,7 +1670,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                         min="1" max="10" 
                         className="input-field" 
                         value={maxAttempts} 
-                        onChange={(e) => setMaxAttempts(parseInt(e.target.value) || 3)} 
+                        onChange={(e: any) => setMaxAttempts(parseInt(e.target.value) || 3)} 
                         placeholder="e.g. 3" 
                       />
                   </div>
@@ -1757,7 +1758,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                           className="textarea-field"
                           placeholder="Type question text..."
                           value={q.text}
-                          onChange={(e) => updateQuestionText(qIdx, e.target.value)}
+                          onChange={(e: any) => updateQuestionText(qIdx, e.target.value)}
                         />
                       </div>
 
@@ -1770,7 +1771,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                               className="input-field"
                               placeholder={`Option ${String.fromCharCode(65 + optIdx)}`}
                               value={opt}
-                              onChange={(e) => updateOptionText(qIdx, optIdx, e.target.value)}
+                              onChange={(e: any) => updateOptionText(qIdx, optIdx, e.target.value)}
                             />
                           </div>
                         ))}
@@ -1802,7 +1803,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                               style={{ height: '36px', fontSize: '13px' }}
                               placeholder="Paste URL..."
                               value={q.imageUrl?.startsWith('data:') ? '' : q.imageUrl || ''}
-                              onChange={(e) => updateImageUrl(qIdx, e.target.value)}
+                              onChange={(e: any) => updateImageUrl(qIdx, e.target.value)}
                             />
                             <label className="btn btn-secondary" style={{ height: '36px', padding: '0 12px', fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
                               <Image size={14} /> Upload File
@@ -1810,7 +1811,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                                 type="file"
                                 style={{ display: 'none' }}
                                 accept="image/*"
-                                onChange={(e) => handleImageUpload(qIdx, e.target.files?.[0] || null)}
+                                onChange={(e: any) => handleImageUpload(qIdx, e.target.files?.[0] || null)}
                               />
                             </label>
                           </div>
@@ -1932,9 +1933,9 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                   </div>
 
                   {/* Hidden Native Select overlays the entire container */}
-                  <select 
+                  <SearchableSelect 
                     value={selectedReportTestId}
-                    onChange={(e) => {
+                    onChange={(e: any) => {
                       setSelectedReportTestId(e.target.value);
                       setLeaderboardPage(1);
                     }}
@@ -1944,7 +1945,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                     {tests.map(t => (
                       <option key={t.id} value={t.id} title={`${t.title}${t.short_id ? ` - ${t.short_id}` : ''}`}>{t.title.length > 10 ? t.title.substring(0, 10) + '...' : t.title} {t.short_id ? `- ${t.short_id}` : ''}</option>
                     ))}
-                  </select>
+                  </SearchableSelect>
                 </div>
                 </div>
 
@@ -1961,9 +1962,9 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                        'Default (Date)'}
                     </span>
                     <ChevronDown size={20} color="#0f172a" style={{ opacity: 0.6 }} />
-                    <select 
+                    <SearchableSelect 
                       value={sortConfig}
-                      onChange={(e) => setSortConfig(e.target.value as any)}
+                      onChange={(e: any) => setSortConfig(e.target.value as any)}
                       style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer', appearance: 'none' }}
                     >
                       <option value="">Default (Date)</option>
@@ -1971,7 +1972,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                       <option value="name_desc">Student Name (Z-A)</option>
                       <option value="mark_asc">Mark (Low-High)</option>
                       <option value="mark_desc">Mark (High-Low)</option>
-                    </select>
+                    </SearchableSelect>
                   </div>
                 </div>
 
@@ -2250,16 +2251,16 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                           <div style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', width: '24px', height: '24px', backgroundColor: '#3b82f6', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
                             <ClipboardEdit size={14} />
                           </div>
-                          <select 
+                          <SearchableSelect 
                             value={selectedLeaderboardTestId}
-                            onChange={(e) => setSelectedLeaderboardTestId(e.target.value)}
+                            onChange={(e: any) => setSelectedLeaderboardTestId(e.target.value)}
                             style={{ width: '100%', padding: '10px 12px 10px 44px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '13px', color: '#0f172a', appearance: 'none', outline: 'none', height: '44px', backgroundColor: '#fff' }}
                           >
                             <option value="">-- Choose a test --</option>
                             {tests.map(t => (
                               <option key={t.id} value={t.id} title={`${t.title}${t.short_id ? ` - ${t.short_id}` : ''}`}>{t.title.length > 10 ? t.title.substring(0, 10) + '...' : t.title} {t.short_id ? `- ${t.short_id}` : ''}</option>
                             ))}
-                          </select>
+                          </SearchableSelect>
                           <ChevronDown size={16} color="#64748b" style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
                         </div>
                       </div>
@@ -2398,7 +2399,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                                       <input 
                                         type="checkbox" 
                                         checked={exportSelectedTests.includes(t.id)}
-                                        onChange={(e) => {
+                                        onChange={(e: any) => {
                                           if (e.target.checked) {
                                             setExportSelectedTests([...exportSelectedTests, t.id]);
                                           } else {
@@ -2484,7 +2485,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                 className="textarea-field"
                 placeholder="Type question text..."
                 value={newQuestionData.text}
-                onChange={(e) => setNewQuestionData({...newQuestionData, text: e.target.value})}
+                onChange={(e: any) => setNewQuestionData({...newQuestionData, text: e.target.value})}
               />
             </div>
 
@@ -2497,7 +2498,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                     className="input-field"
                     placeholder={`Option ${String.fromCharCode(65 + optIdx)}`}
                     value={opt}
-                    onChange={(e) => {
+                    onChange={(e: any) => {
                       const newOpts = [...newQuestionData.options];
                       newOpts[optIdx] = e.target.value;
                       setNewQuestionData({...newQuestionData, options: newOpts});
@@ -2533,7 +2534,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                     style={{ height: '36px', fontSize: '13px' }}
                     placeholder="Paste URL..."
                     value={newQuestionData.imageUrl?.startsWith('data:') ? '' : newQuestionData.imageUrl || ''}
-                    onChange={(e) => setNewQuestionData({...newQuestionData, imageUrl: e.target.value})}
+                    onChange={(e: any) => setNewQuestionData({...newQuestionData, imageUrl: e.target.value})}
                   />
                   <label className="btn btn-secondary" style={{ height: '36px', padding: '0 12px', fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
                     Upload File
@@ -2541,7 +2542,7 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                       type="file"
                       style={{ display: 'none' }}
                       accept="image/*"
-                      onChange={(e) => {
+                      onChange={(e: any) => {
                         const file = e.target.files?.[0];
                         if (file) {
                           const reader = new FileReader();
@@ -2579,7 +2580,18 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                 className="btn btn-primary"
                 style={{ padding: '10px 20px', borderRadius: '8px', fontSize: '14px', fontWeight: '600' }}
               >
-                Save & Add Question
+                Save
+              </button>
+              <button 
+                onClick={() => {
+                  setQuestions([...questions, newQuestionData]);
+                  setNumQuestions(prev => (prev || 1) + 1);
+                  setNewQuestionData({ text: '', options: ['', '', '', ''], correctIndex: 0, imageUrl: '' });
+                }}
+                className="btn btn-secondary"
+                style={{ padding: '10px 20px', borderRadius: '8px', fontSize: '14px', fontWeight: '600', backgroundColor: '#e2e8f0', color: '#0f172a', border: 'none' }}
+              >
+                Save and Add Another Question
               </button>
             </div>
           </div>

@@ -1,3 +1,4 @@
+import SearchableSelect from './SearchableSelect';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '../utils/supabase';
 import { Bell, ChevronDown, Clock3,
@@ -1559,9 +1560,9 @@ Content-Type: text/html; charset=UTF-8
                           <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#0f172a', margin: '0 0 4px 0' }}>Performance Trend</h3>
                           <p style={{ fontSize: '13px', color: '#64748b', margin: '0 0 24px 0' }}>Your average score over time</p>
                         </div>
-                        <select 
+                        <SearchableSelect 
                           value={dashboardTimeFilter}
-                          onChange={(e) => setDashboardTimeFilter(e.target.value)}
+                          onChange={(e: any) => setDashboardTimeFilter(e.target.value)}
                           style={{ padding: '6px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc', fontSize: '12px', fontWeight: '600', color: '#475569', outline: 'none' }}
                         >
                           <option value="All Time">All Time</option>
@@ -1569,7 +1570,7 @@ Content-Type: text/html; charset=UTF-8
                           <option value="Last 6 Months">Last 6 Months</option>
                           <option value="This Month">This Month</option>
                           <option value="This Week">This Week</option>
-                        </select>
+                        </SearchableSelect>
                       </div>
                       
                       {/* Dynamic Line Chart SVG */}
@@ -1822,7 +1823,7 @@ Content-Type: text/html; charset=UTF-8
                             type="text"
                             placeholder="Enter the test ID"
                             value={testIdStr}
-                            onChange={(e) => setTestIdStr(e.target.value)}
+                            onChange={(e: any) => setTestIdStr(e.target.value)}
                             required
                             style={{
                               width: '100%', padding: '12px 16px 12px 42px', borderRadius: '12px', border: '1px solid #e2e8f0',
@@ -1840,7 +1841,7 @@ Content-Type: text/html; charset=UTF-8
                             type={showPin ? 'text' : 'password'}
                             placeholder="Enter 6-digit PIN"
                             value={accessCode}
-                            onChange={(e) => setAccessCode(e.target.value)}
+                            onChange={(e: any) => setAccessCode(e.target.value)}
                             required
                             maxLength={6}
                             style={{
@@ -2540,9 +2541,9 @@ Content-Type: text/html; charset=UTF-8
                           <div style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', width: '24px', height: '24px', backgroundColor: '#3b82f6', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
                             <ClipboardEdit size={14} />
                           </div>
-                          <select 
+                          <SearchableSelect 
                             value={leaderboardSelectedTestId}
-                            onChange={(e) => {
+                            onChange={(e: any) => {
                       setLeaderboardSelectedTestId(e.target.value);
                       setLeaderboardPage(1);
                     }}
@@ -2554,7 +2555,7 @@ Content-Type: text/html; charset=UTF-8
                                 {t.title.length > 10 ? t.title.substring(0, 10) + '...' : t.title} {t.short_id ? `- ${t.short_id}` : ''}
                               </option>
                             ))}
-                          </select>
+                          </SearchableSelect>
                           <ChevronDown size={16} color="#64748b" style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
                         </div>
                       </div>
