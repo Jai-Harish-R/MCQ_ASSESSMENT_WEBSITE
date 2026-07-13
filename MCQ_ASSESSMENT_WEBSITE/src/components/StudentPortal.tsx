@@ -633,20 +633,46 @@ export default function StudentPortal({ user, onLogout }: StudentPortalProps) {
     };
 
     try {
-      
-      const response = await fetch('/api/evaluate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(mailPayload)
+      const htmlContent = `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
+          <h2 style="color: #0f172a; border-bottom: 2px solid #ea580c; padding-bottom: 10px;">Test Results: ${testInfo.title}</h2>
+          <p><strong>Student:</strong> ${user.email}</p>
+          <p><strong>Score:</strong> ${finalScore} / ${total} (${Math.round((finalScore / (total || 1)) * 100)}%)</p>
+          
+          <h3 style="margin-top: 24px; color: #0f172a;">Detailed Review</h3>
+          ${mailPayload.questions.map((q, index) => {
+            const isCorrect = q.selectedOption === q.correctOption;
+            return `
+              <div style="margin-bottom: 20px; padding: 16px; border: 1px solid #e2e8f0; border-radius: 8px; background-color: ${isCorrect ? '#f0fdf4' : '#fef2f2'};">
+                <p style="font-weight: bold; margin-top: 0;">Q${index + 1}: ${q.text}</p>
+                <p style="margin: 4px 0; color: ${isCorrect ? '#16a34a' : '#dc2626'}">
+                  <strong>Your Answer:</strong> ${q.selectedOption}
+                </p>
+                ${!isCorrect ? `
+                  <p style="margin: 4px 0; color: #16a34a">
+                    <strong>Correct Answer:</strong> ${q.correctOption}
+                  </p>
+                ` : ''}
+              </div>
+            `;
+          }).join('')}
+          <p style="margin-top: 32px; font-size: 12px; color: #64748b; text-align: center;">
+            Sent securely via CodersFun Assessment Platform
+          </p>
+        </div>
+      `;
+
+      const response = await supabase.functions.invoke('send-email', {
+        body: {
+          toEmail: user.email,
+          subject: `Results Review: ${testInfo.title} (Score: ${finalScore}/${total})`,
+          htmlContent: htmlContent
+        }
       });
 
-      if (response.ok) {
-        setEmailStatus('sent');
-      } else {
-        throw new Error('Serverless Email API returned error code: ' + response.status);
-      }
+      if (response.error) throw response.error;
+
+      setEmailStatus('sent');
     } catch (err: any) {
       console.warn("Email API offline, launching Local Mail Sandbox simulator. Details:", err.message);
       setEmailStatus('fallback');
