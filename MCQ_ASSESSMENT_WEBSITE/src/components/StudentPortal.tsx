@@ -12,6 +12,7 @@ import { Bell, ChevronDown, Clock3,
 import studentAvatar from '../assets/student_avatar.png';
 import ProfileModal from './ProfileModal';
 import HoverableTestTitle from './HoverableTestTitle';
+import Select from 'react-select';
 
 interface Question {
   id: string;
@@ -1108,20 +1109,88 @@ Content-Type: text/html; charset=UTF-8
           {/* EXAM SUBMISSION GRADE RESULT */}
           {viewState === 'result' && activeTest && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-              <div className="mcq-card-enhanced" style={{ minHeight: '300px', textAlign: 'center', padding: '40px', border: '2px solid #1c4e80' }}>
-                <CheckCircle2 size={48} style={{ color: 'var(--color-success)', margin: '0 auto 16px' }} />
-                <h2 style={{ fontSize: '24px', fontWeight: '700' }}>Exam Submitted!</h2>
-                <p style={{ color: 'var(--color-on-surface-variant)', fontSize: '14px', marginTop: '4px' }}>Your results have been verified and graded.</p>
-                <div style={{ margin: '24px auto', maxWidth: '200px' }}>
-                  <span style={{ fontSize: '11px', color: 'var(--color-outline)', fontWeight: '600', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>Marks Secured</span>
-                  <div style={{ fontSize: '42px', fontWeight: '800', color: '#1c4e80' }}>
-                    {score} <span style={{ fontSize: '20px', color: 'var(--color-on-surface-variant)', fontWeight: '500' }}>/ {totalQuestions}</span>
+              {/* Premium Result Banner */}
+              <div style={{
+                background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
+                borderRadius: '16px',
+                padding: '32px',
+                color: '#ffffff',
+                boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1)',
+                position: 'relative',
+                overflow: 'hidden'
+              }}>
+                <div style={{ position: 'relative', zIndex: 1 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '24px' }}>
+                    
+                    {/* Left: Test Details */}
+                    <div style={{ flex: '1 1 300px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                        <span style={{ backgroundColor: 'rgba(255,255,255,0.1)', padding: '6px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: '700', letterSpacing: '0.05em' }}>
+                          ID: {activeTest.short_id || 'N/A'}
+                        </span>
+                        <span style={{ backgroundColor: 'rgba(255,255,255,0.1)', padding: '6px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: '700', letterSpacing: '0.05em' }}>
+                          DATE: {new Date().toLocaleDateString('en-GB')} {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      </div>
+                      <h2 style={{ fontSize: '28px', fontWeight: '800', margin: '0 0 16px 0', letterSpacing: '-0.02em', lineHeight: '1.2' }}>
+                        {activeTest.title}
+                      </h2>
+                      <div style={{ fontSize: '14px', color: '#94a3b8', fontWeight: '500' }}>
+                        Review your answers and performance below
+                      </div>
+                    </div>
+
+                    {/* Right: Grade & Status */}
+                    <div style={{ display: 'flex', gap: '24px', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.2)', padding: '20px 32px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                      <div style={{ textAlign: 'center' }}>
+                        <div style={{ fontSize: '12px', color: '#94a3b8', fontWeight: '600', textTransform: 'uppercase', marginBottom: '8px' }}>Grade</div>
+                        <div style={{ fontSize: '36px', fontWeight: '800', lineHeight: '1' }}>
+                          {Math.round((score! / (totalQuestions || 1)) * 100)}%
+                        </div>
+                        <div style={{ fontSize: '13px', color: '#94a3b8', marginTop: '6px', fontWeight: '500' }}>{score} / {totalQuestions} Correct</div>
+                      </div>
+                      
+                      <div style={{ width: '1px', height: '60px', backgroundColor: 'rgba(255,255,255,0.1)' }}></div>
+                      
+                      <div style={{ textAlign: 'center' }}>
+                        <div style={{ fontSize: '12px', color: '#94a3b8', fontWeight: '600', textTransform: 'uppercase', marginBottom: '12px' }}>Status</div>
+                        {(() => {
+                          const isPass = Math.round((score! / (totalQuestions || 1)) * 100) >= (activeTest.pass_percentage || 80);
+                          return (
+                            <div style={{ 
+                              backgroundColor: isPass ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)',
+                              color: isPass ? '#34d399' : '#f87171',
+                              border: `1px solid ${isPass ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`,
+                              padding: '8px 20px',
+                              borderRadius: '24px',
+                              fontWeight: '800',
+                              fontSize: '15px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              boxShadow: isPass ? '0 0 15px rgba(16,185,129,0.1)' : '0 0 15px rgba(239,68,68,0.1)'
+                            }}>
+                              {isPass ? <CheckCircle2 size={18} /> : <AlertTriangle size={18} />}
+                              {isPass ? 'PASS' : 'FAIL'}
+                            </div>
+                          );
+                        })()}
+                      </div>
+                    </div>
                   </div>
-                  <span className="chip chip-success" style={{ marginTop: '8px', fontSize: '13px' }}>{Math.round((score! / totalQuestions) * 100)}% Grade</span>
                 </div>
-                {emailStatus === 'sending' && <div style={{ fontSize: '13px', color: 'var(--color-outline)' }}>Sending report to email...</div>}
-                {emailStatus === 'sent' && <div style={{ color: 'var(--color-success)', fontSize: '13px', fontWeight: '500' }}>Official receipt sent to: {user.email}</div>}
-                {emailStatus === 'fallback' && <div style={{ color: 'var(--color-warning)', fontSize: '13px', fontWeight: '500' }}>Email API offline. Sandbox report rendered below.</div>}
+                
+                {/* Decorative background elements */}
+                <div style={{ position: 'absolute', top: '-80px', right: '-80px', width: '250px', height: '250px', borderRadius: '50%', background: 'linear-gradient(135deg, rgba(59,130,246,0.15) 0%, rgba(139,92,246,0.15) 100%)', filter: 'blur(30px)' }}></div>
+                <div style={{ position: 'absolute', bottom: '-80px', left: '-80px', width: '200px', height: '200px', borderRadius: '50%', background: 'linear-gradient(135deg, rgba(16,185,129,0.1) 0%, rgba(52,211,153,0.1) 100%)', filter: 'blur(30px)' }}></div>
+                
+                {/* Status messages mapped from below */}
+                <div style={{ position: 'relative', zIndex: 1, marginTop: '24px', paddingTop: '16px', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+                  {emailStatus === 'sending' && <div style={{ fontSize: '13px', color: '#94a3b8' }}>Sending report to email...</div>}
+                  {emailStatus === 'sent' && <div style={{ color: '#34d399', fontSize: '13px', fontWeight: '500' }}>Official receipt sent to: {user.email}</div>}
+                  {emailStatus === 'fallback' && <div style={{ color: '#fbbf24', fontSize: '13px', fontWeight: '500' }}>Email API offline. Sandbox report rendered below.</div>}
+                  {emailStatus === 'idle' && <div style={{ color: '#94a3b8', fontSize: '13px', fontWeight: '500' }}>Submission confirmed.</div>}
+                </div>
               </div>
 
               {emailStatus === 'fallback' && (
@@ -2541,22 +2610,31 @@ Content-Type: text/html; charset=UTF-8
                           <div style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', width: '24px', height: '24px', backgroundColor: '#3b82f6', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
                             <ClipboardEdit size={14} />
                           </div>
-                          <SearchableSelect 
-                            value={leaderboardSelectedTestId}
-                            onChange={(e: any) => {
-                      setLeaderboardSelectedTestId(e.target.value);
-                      setLeaderboardPage(1);
-                    }}
-                            style={{ width: '100%', padding: '10px 12px 10px 44px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '13px', color: '#0f172a', appearance: 'none', outline: 'none', height: '44px', backgroundColor: '#fff' }}
-                          >
-                            <option value="">-- Select a test --</option>
-                            {availableTests.map(t => (
-                              <option key={t.id} value={t.id} title={`${t.title}${t.short_id ? ` - ${t.short_id}` : ''}`}>
-                                {t.title.length > 10 ? t.title.substring(0, 10) + '...' : t.title} {t.short_id ? `- ${t.short_id}` : ''}
-                              </option>
-                            ))}
-                          </SearchableSelect>
-                          <ChevronDown size={16} color="#64748b" style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+                          <Select
+                            value={availableTests.map(t => ({ value: t.id, label: `${t.title.length > 10 ? t.title.substring(0, 10) + '...' : t.title} ${t.short_id ? `- ${t.short_id}` : ''}` })).find(o => o.value === leaderboardSelectedTestId) || null}
+                            onChange={(option: any) => {
+                              setLeaderboardSelectedTestId(option ? option.value : '');
+                              setLeaderboardPage(1);
+                            }}
+                            options={availableTests.map(t => ({ value: t.id, label: `${t.title.length > 10 ? t.title.substring(0, 10) + '...' : t.title} ${t.short_id ? `- ${t.short_id}` : ''}` }))}
+                            placeholder="-- Select a test --"
+                            isSearchable={true}
+                            styles={{
+                              control: (base) => ({
+                                ...base,
+                                paddingLeft: '36px',
+                                height: '44px',
+                                minHeight: '44px',
+                                borderRadius: '8px',
+                                border: '1px solid #e2e8f0',
+                                fontSize: '13px',
+                                boxShadow: 'none',
+                                '&:hover': { border: '1px solid #e2e8f0' }
+                              }),
+                              valueContainer: (base) => ({ ...base, padding: '0 8px' }),
+                              menu: (base) => ({ ...base, zIndex: 100 })
+                            }}
+                          />
                         </div>
                       </div>
 
