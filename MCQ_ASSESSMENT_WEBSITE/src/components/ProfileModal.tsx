@@ -220,7 +220,7 @@ export default function ProfileModal({ user, isOpen, onClose, onUpdate }: Profil
               {hasDesignation && (
                 <div>
                   <label style={{ display: 'block', fontSize: '13px', fontWeight: '700', color: '#0f172a', marginBottom: '8px' }}>Designation</label>
-                  <SearchableSelect 
+                  <select 
                     value={designation} 
                     onChange={(e: any) => setDesignation(e.target.value)}
                     style={{ 
@@ -253,7 +253,7 @@ export default function ProfileModal({ user, isOpen, onClose, onUpdate }: Profil
                         <option value="Teaching Assistant">Teaching Assistant</option>
                       </>
                     )}
-                  </SearchableSelect>
+                  </select>
                 </div>
               )}
             </>

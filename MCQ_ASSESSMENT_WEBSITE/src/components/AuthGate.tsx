@@ -367,7 +367,7 @@ if (countryCode === '+966' && cleanPhone.length !== 9) {
                   <div>
                     <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#475569', marginBottom: '8px' }}>Phone No<span style={{color: '#ea580c'}}> *</span></label>
                     <div style={{ display: 'flex', alignItems: 'center', border: '1px solid #e2e8f0', borderRadius: '12px', backgroundColor: '#f8fafc', overflow: 'hidden', boxSizing: 'border-box', transition: 'border-color 0.2s' }}>
-                      <SearchableSelect
+                      <select
                         style={{
                           padding: '14px 8px 14px 16px', border: 'none', backgroundColor: 'transparent', fontSize: '15px', color: '#475569', outline: 'none', cursor: 'pointer', appearance: 'none', fontWeight: '600'
                         }}
@@ -385,7 +385,7 @@ if (countryCode === '+966' && cleanPhone.length !== 9) {
                         <option value="+60">MYS +60</option>
                         <option value="+81">JPN +81</option>
                         <option value="+966">KSA +966</option>
-                      </SearchableSelect>
+                      </select>
                       <div style={{ width: '1px', height: '24px', backgroundColor: '#cbd5e1', margin: '0 8px' }}></div>
                       <input
                         type="tel"
@@ -403,7 +403,7 @@ if (countryCode === '+966' && cleanPhone.length !== 9) {
 
                   <div>
                     <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#475569', marginBottom: '8px' }}>Select Organization Type<span style={{color: '#ea580c'}}> *</span></label>
-                    <SearchableSelect
+                    <select
                       style={{ 
                         width: '100%', padding: '14px 16px', borderRadius: '12px', 
                         border: '1px solid #e2e8f0', backgroundColor: '#f8fafc', fontSize: '15px', color: '#0f172a',
@@ -420,7 +420,7 @@ if (countryCode === '+966' && cleanPhone.length !== 9) {
                       <option value="College / University">🎓 College / University</option>
                       <option value="Company">🏢 Company</option>
                       <option value="Other">✨ Other</option>
-                    </SearchableSelect>
+                    </select>
                   </div>
 
                   {profession === 'College / University' && (
@@ -488,7 +488,7 @@ if (countryCode === '+966' && cleanPhone.length !== 9) {
                       </div>
                       <div>
                         <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#475569', marginBottom: '8px' }}>Designation<span style={{color: '#ea580c'}}> *</span></label>
-                        <SearchableSelect
+                        <select
                           style={{ 
                             width: '100%', padding: '14px 16px', borderRadius: '12px', 
                             border: '1px solid #e2e8f0', backgroundColor: '#f8fafc', fontSize: '15px', color: '#0f172a',
@@ -510,7 +510,7 @@ if (countryCode === '+966' && cleanPhone.length !== 9) {
                           <option value="Dean">Dean</option>
                           <option value="Course Coordinator">Course Coordinator</option>
                           <option value="Teaching Assistant">Teaching Assistant</option>
-                        </SearchableSelect>
+                        </select>
                       </div>
                     </>
                   )}
@@ -577,7 +577,7 @@ if (countryCode === '+966' && cleanPhone.length !== 9) {
 
                       <div>
                         <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#475569', marginBottom: '8px' }}>Designation<span style={{color: '#ea580c'}}> *</span></label>
-                        <SearchableSelect
+                        <select
                           style={{ 
                             width: '100%', padding: '14px 16px', borderRadius: '12px', 
                             border: '1px solid #e2e8f0', backgroundColor: '#f8fafc', fontSize: '15px', color: '#0f172a',
@@ -596,7 +596,7 @@ if (countryCode === '+966' && cleanPhone.length !== 9) {
                           <option value="Team Lead">Team Lead</option>
                           <option value="Supervisor">Supervisor</option>
                           <option value="Recruiter">Recruiter</option>
-                        </SearchableSelect>
+                        </select>
                       </div>
                     </>
                   )}

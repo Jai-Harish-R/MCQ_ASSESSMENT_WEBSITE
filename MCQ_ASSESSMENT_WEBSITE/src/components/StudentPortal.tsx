@@ -1628,7 +1628,7 @@ Content-Type: text/html; charset=UTF-8
                           <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#0f172a', margin: '0 0 4px 0' }}>Performance Trend</h3>
                           <p style={{ fontSize: '13px', color: '#64748b', margin: '0 0 24px 0' }}>Your average score over time</p>
                         </div>
-                        <SearchableSelect 
+                        <select 
                           value={dashboardTimeFilter}
                           onChange={(e: any) => setDashboardTimeFilter(e.target.value)}
                           style={{ padding: '6px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc', fontSize: '12px', fontWeight: '600', color: '#475569', outline: 'none' }}
@@ -1638,7 +1638,7 @@ Content-Type: text/html; charset=UTF-8
                           <option value="Last 6 Months">Last 6 Months</option>
                           <option value="This Month">This Month</option>
                           <option value="This Week">This Week</option>
-                        </SearchableSelect>
+                        </select>
                       </div>
                       
                       {/* Dynamic Line Chart SVG */}
