@@ -1982,7 +1982,11 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                 const testObj = tests.find(t => t.id === selectedReportTestId)!;
                 const totalStudents = attempts.filter(att => att.test_id === selectedReportTestId).length;
                 return (
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '24px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '16px', marginBottom: '24px' }}>
+                    <div className="card" style={{ padding: '20px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      <div style={{ fontSize: '13px', color: '#64748b', fontWeight: '600', textTransform: 'uppercase' }}>Test ID</div>
+                      <div style={{ fontSize: '24px', fontWeight: '800', color: '#0f172a' }}>{testObj.short_id || '--'}</div>
+                    </div>
                     <div className="card" style={{ padding: '20px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                       <div style={{ fontSize: '13px', color: '#64748b', fontWeight: '600', textTransform: 'uppercase' }}>Test Code</div>
                       <div style={{ fontSize: '24px', fontWeight: '800', color: '#0f172a' }}>{testObj.access_code}</div>
