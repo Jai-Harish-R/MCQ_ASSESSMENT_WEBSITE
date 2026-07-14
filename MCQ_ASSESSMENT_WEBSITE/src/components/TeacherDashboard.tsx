@@ -2179,7 +2179,9 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
                                       <img src={displayAvatar} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                     </div>
                                     <div>
-                                      <div style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>{displayName}</div>
+                                        <div title={displayName} style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>
+                                          {displayName.length > 6 ? displayName.substring(0, 6) + '...' : displayName}
+                                        </div>
                                     </div>
                                   </div>
                                   <div style={{ fontSize: '13px', fontWeight: '600', color: '#64748b' }}>

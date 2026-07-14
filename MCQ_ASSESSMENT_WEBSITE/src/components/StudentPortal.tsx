@@ -2539,7 +2539,9 @@ Content-Type: text/html; charset=UTF-8
                                       <img src={displayAvatar} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                     </div>
                                     <div>
-                                      <div style={{ fontSize: '14px', fontWeight: isMe ? '800' : '700', color: isMe ? '#8b5cf6' : '#0f172a' }}>{displayName} {isMe ? '(You)' : ''}</div>
+                                      <div title={displayName} style={{ fontSize: '14px', fontWeight: isMe ? '800' : '700', color: isMe ? '#8b5cf6' : '#0f172a' }}>
+                                        {displayName.length > 6 ? displayName.substring(0, 6) + '...' : displayName} {isMe ? '(You)' : ''}
+                                      </div>
                                       <div style={{ fontSize: '11px', color: '#64748b' }}>{st.short_id !== undefined ? `ID: ${st.short_id}` : (profile?.short_id !== undefined ? `ID: ${profile.short_id}` : 'LOADING...')}</div>
                                     </div>
                                   </div>
