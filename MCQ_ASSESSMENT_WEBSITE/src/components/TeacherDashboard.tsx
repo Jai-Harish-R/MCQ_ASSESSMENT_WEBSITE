@@ -1978,6 +1978,32 @@ export default function TeacherDashboard({ user, onLogout }: TeacherDashboardPro
 
               </div>
 
+              {selectedReportTestId && tests.find(t => t.id === selectedReportTestId) && (() => {
+                const testObj = tests.find(t => t.id === selectedReportTestId)!;
+                const totalStudents = attempts.filter(att => att.test_id === selectedReportTestId).length;
+                return (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '24px' }}>
+                    <div className="card" style={{ padding: '20px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      <div style={{ fontSize: '13px', color: '#64748b', fontWeight: '600', textTransform: 'uppercase' }}>Test Code</div>
+                      <div style={{ fontSize: '24px', fontWeight: '800', color: '#0f172a' }}>{testObj.access_code}</div>
+                    </div>
+                    <div className="card" style={{ padding: '20px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      <div style={{ fontSize: '13px', color: '#64748b', fontWeight: '600', textTransform: 'uppercase' }}>Duration</div>
+                      <div style={{ fontSize: '24px', fontWeight: '800', color: '#0f172a' }}>{testObj.duration || '--'} <span style={{ fontSize: '14px', color: '#64748b' }}>Mins</span></div>
+                    </div>
+                    <div className="card" style={{ padding: '20px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      <div style={{ fontSize: '13px', color: '#64748b', fontWeight: '600', textTransform: 'uppercase' }}>Total Questions</div>
+                      <div style={{ fontSize: '24px', fontWeight: '800', color: '#0f172a' }}>{testObj.questions?.length || 0}</div>
+                    </div>
+                    <div className="card" style={{ padding: '20px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      <div style={{ fontSize: '13px', color: '#64748b', fontWeight: '600', textTransform: 'uppercase' }}>Total Participants</div>
+                      <div style={{ fontSize: '24px', fontWeight: '800', color: '#0f172a' }}>{totalStudents}</div>
+                    </div>
+                  </div>
+                );
+              })()}
+
+
               <div className="card" style={{ }}>
                 {!selectedReportTestId ? (
                   <div style={{ textAlign: 'center', padding: '32px', color: 'var(--color-on-surface-variant)' }}>
