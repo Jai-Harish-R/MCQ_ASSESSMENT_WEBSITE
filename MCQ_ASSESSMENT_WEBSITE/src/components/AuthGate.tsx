@@ -45,7 +45,6 @@ export default function AuthGate({ onAuthSuccess }: AuthGateProps) {
       setLoading(false);
       return;
     }
-
     if (isSignUp && activeTab === 'teacher') {
       const cleanPhone = phoneNo.replace(/\D/g, '');
       if (countryCode === '+91' && cleanPhone.length !== 10) {

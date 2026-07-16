@@ -112,10 +112,9 @@ export default function StudentPortal({ user, onLogout }: StudentPortalProps) {
     setLeaderboardLoading(true);
     try {
       
+        // Use the secure RPC function to fetch leaderboard data (bypasses RLS strictly for marks, hides answers)
         const { data, error } = await supabase
-          .from('test_attempts')
-          .select('*, profiles(short_id)')
-          .eq('test_id', testId);
+          .rpc('get_test_leaderboard', { p_test_id: testId });
         
         if (error) throw error;
         
