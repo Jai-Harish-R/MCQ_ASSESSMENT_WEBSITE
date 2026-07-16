@@ -1136,7 +1136,7 @@ Content-Type: text/html; charset=UTF-8
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '24px' }}>
                     
                     {/* Left: Test Details */}
-                    <div style={{ flex: '1 1 300px' }}>
+                    <div style={{ flex: '1 1 300px', minWidth: 0 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
                         <span style={{ backgroundColor: '#ffffff', color: '#0f172a', padding: '6px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: '800', letterSpacing: '0.05em', border: '1px solid #fed7aa' }}>
                           ID: {activeTest.short_id || 'N/A'}
@@ -1145,7 +1145,19 @@ Content-Type: text/html; charset=UTF-8
                           DATE: {new Date().toLocaleDateString('en-GB')} {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </span>
                       </div>
-                      <h2 style={{ fontSize: '28px', fontWeight: '900', margin: '0 0 16px 0', letterSpacing: '-0.02em', lineHeight: '1.2' }}>
+                      <h2 
+                        title={activeTest.title}
+                        style={{ 
+                          fontSize: '28px', 
+                          fontWeight: '900', 
+                          margin: '0 0 16px 0', 
+                          letterSpacing: '-0.02em', 
+                          lineHeight: '1.2',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis'
+                        }}
+                      >
                         {activeTest.title}
                       </h2>
                       <div style={{ fontSize: '14px', color: '#475569', fontWeight: '600' }}>
