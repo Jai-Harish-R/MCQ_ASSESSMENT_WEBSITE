@@ -1123,76 +1123,73 @@ Content-Type: text/html; charset=UTF-8
             <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
               {/* Premium Result Banner */}
               <div style={{
-                background: 'linear-gradient(135deg, #4f46e5 0%, #ec4899 100%)',
+                background: 'linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)',
                 borderRadius: '16px',
                 padding: '32px',
-                color: '#ffffff',
-                boxShadow: '0 15px 35px -10px rgba(236, 72, 153, 0.5)',
+                color: '#0f172a',
+                boxShadow: '0 10px 25px -5px rgba(249, 115, 22, 0.1), 0 8px 10px -6px rgba(249, 115, 22, 0.1)',
                 position: 'relative',
-                overflow: 'hidden'
+                overflow: 'hidden',
+                border: '1px solid #fed7aa'
               }}>
-                {/* Decorative background circles */}
-                <div style={{ position: 'absolute', top: '-50%', left: '-20%', width: '400px', height: '400px', background: 'radial-gradient(circle, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 70%)', borderRadius: '50%' }}></div>
-                <div style={{ position: 'absolute', bottom: '-50%', right: '-10%', width: '500px', height: '500px', background: 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%)', borderRadius: '50%' }}></div>
-                
                 <div style={{ position: 'relative', zIndex: 1 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '24px' }}>
                     
                     {/* Left: Test Details */}
                     <div style={{ flex: '1 1 300px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-                        <span style={{ backgroundColor: 'rgba(255,255,255,0.1)', padding: '6px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: '700', letterSpacing: '0.05em' }}>
+                        <span style={{ backgroundColor: '#ffffff', color: '#0f172a', padding: '6px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: '800', letterSpacing: '0.05em', border: '1px solid #fed7aa' }}>
                           ID: {activeTest.short_id || 'N/A'}
                         </span>
-                        <span style={{ backgroundColor: 'rgba(255,255,255,0.1)', padding: '6px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: '700', letterSpacing: '0.05em' }}>
+                        <span style={{ backgroundColor: '#ffffff', color: '#0f172a', padding: '6px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: '800', letterSpacing: '0.05em', border: '1px solid #fed7aa' }}>
                           DATE: {new Date().toLocaleDateString('en-GB')} {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </span>
                       </div>
-                      <h2 style={{ fontSize: '28px', fontWeight: '800', margin: '0 0 16px 0', letterSpacing: '-0.02em', lineHeight: '1.2' }}>
+                      <h2 style={{ fontSize: '28px', fontWeight: '900', margin: '0 0 16px 0', letterSpacing: '-0.02em', lineHeight: '1.2' }}>
                         {activeTest.title}
                       </h2>
-                      <div style={{ fontSize: '14px', color: '#94a3b8', fontWeight: '500' }}>
+                      <div style={{ fontSize: '14px', color: '#475569', fontWeight: '600' }}>
                         Review your answers and performance below
                       </div>
                     </div>
 
                     {/* Right: Grade & Status */}
-                    <div style={{ display: 'flex', gap: '24px', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.2)', padding: '20px 32px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                      <div style={{ textAlign: 'center' }}>
-                        <div style={{ fontSize: '12px', color: '#94a3b8', fontWeight: '600', textTransform: 'uppercase', marginBottom: '8px' }}>Grade</div>
-                        <div style={{ fontSize: '36px', fontWeight: '800', lineHeight: '1' }}>
-                          {Math.round((score! / (totalQuestions || 1)) * 100)}%
-                        </div>
-                        <div style={{ fontSize: '13px', color: '#94a3b8', marginTop: '6px', fontWeight: '500' }}>{score} / {totalQuestions} Correct</div>
-                      </div>
-                      
-                      <div style={{ width: '1px', height: '60px', backgroundColor: 'rgba(255,255,255,0.1)' }}></div>
-                      
-                      <div style={{ textAlign: 'center' }}>
-                        <div style={{ fontSize: '12px', color: '#94a3b8', fontWeight: '600', textTransform: 'uppercase', marginBottom: '12px' }}>Status</div>
-                        {(() => {
-                          const isPass = Math.round((score! / (totalQuestions || 1)) * 100) >= (activeTest.pass_percentage || 80);
-                          return (
+                    {(() => {
+                      const isPass = Math.round((score! / (totalQuestions || 1)) * 100) >= (activeTest.pass_percentage || 80);
+                      return (
+                        <div style={{ display: 'flex', gap: '24px', alignItems: 'center', backgroundColor: '#ffffff', padding: '20px 32px', borderRadius: '12px', border: '1px solid #fed7aa', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}>
+                          <div style={{ textAlign: 'center' }}>
+                            <div style={{ fontSize: '12px', color: '#475569', fontWeight: '700', textTransform: 'uppercase', marginBottom: '8px' }}>Grade</div>
+                            <div style={{ fontSize: '36px', fontWeight: '900', lineHeight: '1', color: isPass ? '#10b981' : '#ef4444' }}>
+                              {Math.round((score! / (totalQuestions || 1)) * 100)}%
+                            </div>
+                            <div style={{ fontSize: '13px', color: '#475569', marginTop: '6px', fontWeight: '600' }}>{score} / {totalQuestions} Correct</div>
+                          </div>
+                          
+                          <div style={{ width: '1px', height: '60px', backgroundColor: '#fed7aa' }}></div>
+                          
+                          <div style={{ textAlign: 'center' }}>
+                            <div style={{ fontSize: '12px', color: '#475569', fontWeight: '700', textTransform: 'uppercase', marginBottom: '12px' }}>Status</div>
                             <div style={{ 
                               backgroundColor: isPass ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)',
-                              color: isPass ? '#34d399' : '#f87171',
-                              border: `1px solid ${isPass ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`,
+                              color: isPass ? '#059669' : '#dc2626',
+                              border: `2px solid ${isPass ? 'rgba(16, 185, 129, 0.4)' : 'rgba(239, 68, 68, 0.4)'}`,
                               padding: '8px 20px',
                               borderRadius: '24px',
-                              fontWeight: '800',
+                              fontWeight: '900',
                               fontSize: '15px',
                               display: 'flex',
                               alignItems: 'center',
                               gap: '6px',
-                              boxShadow: isPass ? '0 0 15px rgba(16,185,129,0.1)' : '0 0 15px rgba(239,68,68,0.1)'
+                              boxShadow: isPass ? '0 0 15px rgba(16,185,129,0.15)' : '0 0 15px rgba(239,68,68,0.15)'
                             }}>
-                              {isPass ? <CheckCircle2 size={18} /> : <AlertTriangle size={18} />}
+                              {isPass ? <CheckCircle2 size={18} strokeWidth={3} /> : <AlertTriangle size={18} strokeWidth={3} />}
                               {isPass ? 'PASS' : 'FAIL'}
                             </div>
-                          );
-                        })()}
-                      </div>
-                    </div>
+                          </div>
+                        </div>
+                      );
+                    })()}
                   </div>
                 </div>
                 
