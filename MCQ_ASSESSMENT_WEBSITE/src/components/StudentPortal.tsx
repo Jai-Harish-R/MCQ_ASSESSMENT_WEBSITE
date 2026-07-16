@@ -1123,14 +1123,18 @@ Content-Type: text/html; charset=UTF-8
             <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
               {/* Premium Result Banner */}
               <div style={{
-                background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
+                background: 'linear-gradient(135deg, #4f46e5 0%, #ec4899 100%)',
                 borderRadius: '16px',
                 padding: '32px',
                 color: '#ffffff',
-                boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1)',
+                boxShadow: '0 15px 35px -10px rgba(236, 72, 153, 0.5)',
                 position: 'relative',
                 overflow: 'hidden'
               }}>
+                {/* Decorative background circles */}
+                <div style={{ position: 'absolute', top: '-50%', left: '-20%', width: '400px', height: '400px', background: 'radial-gradient(circle, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 70%)', borderRadius: '50%' }}></div>
+                <div style={{ position: 'absolute', bottom: '-50%', right: '-10%', width: '500px', height: '500px', background: 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%)', borderRadius: '50%' }}></div>
+                
                 <div style={{ position: 'relative', zIndex: 1 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '24px' }}>
                     
