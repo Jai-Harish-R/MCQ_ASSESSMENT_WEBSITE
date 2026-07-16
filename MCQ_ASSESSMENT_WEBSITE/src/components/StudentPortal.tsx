@@ -352,7 +352,7 @@ export default function StudentPortal({ user, onLogout }: StudentPortalProps) {
     
   }, []);
 
-  const handleReviewPastAttempt = (attempt: Attempt) => {
+  const handleReviewPastAttempt = async (attempt: Attempt) => {
     let test: Test | null = null;
     
       test = availableTests.find(t => t.id === attempt.test_id) || null;
@@ -369,10 +369,23 @@ export default function StudentPortal({ user, onLogout }: StudentPortalProps) {
     setScore(attempt.score);
     setTotalQuestions(attempt.total_questions);
     
-    // Set correct answers key
-    
+    // Fetch correct answers so the review UI can highlight correct/incorrect choices
+    try {
+      const { data, error } = await supabase
+        .from('test_answers')
+        .select('correct_answers')
+        .eq('test_id', attempt.test_id)
+        .single();
+        
+      if (data && data.correct_answers) {
+        setCorrectAnswers(data.correct_answers);
+      } else {
+        setCorrectAnswers({});
+      }
+    } catch (e) {
+      console.error(e);
       setCorrectAnswers({});
-    
+    }
     
     setViewState('result');
   };
@@ -1256,8 +1269,28 @@ Content-Type: text/html; charset=UTF-8
                 })}
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'center' }}>
-                <button onClick={handleExitLobby} className="btn btn-primary" style={{ padding: '12px 32px' }}>
+              <div style={{ display: 'flex', justifyContent: 'center', marginTop: '32px' }}>
+                <button 
+                  onClick={handleExitLobby} 
+                  style={{ 
+                    padding: '14px 40px', 
+                    borderRadius: '9999px',
+                    background: 'linear-gradient(135deg, #0ea5e9, #2563eb)',
+                    color: '#ffffff',
+                    fontSize: '16px',
+                    fontWeight: '700',
+                    border: 'none',
+                    cursor: 'pointer',
+                    boxShadow: '0 10px 25px -5px rgba(37, 99, 235, 0.4)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    transition: 'transform 0.2s, box-shadow 0.2s'
+                  }}
+                  onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 15px 35px -5px rgba(37, 99, 235, 0.5)'; }}
+                  onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 10px 25px -5px rgba(37, 99, 235, 0.4)'; }}
+                >
+                  <ArrowLeft size={20} strokeWidth={2.5} />
                   Return to Dashboard
                 </button>
               </div>
