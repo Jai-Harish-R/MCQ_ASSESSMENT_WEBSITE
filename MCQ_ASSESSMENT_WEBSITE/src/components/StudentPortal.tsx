@@ -113,10 +113,26 @@ export default function StudentPortal({ user, onLogout }: StudentPortalProps) {
     try {
       
         // Use the secure RPC function to fetch leaderboard data (bypasses RLS strictly for marks, hides answers)
-        const { data, error } = await supabase
-          .rpc('get_test_leaderboard', { p_test_id: testId });
+        let data, error;
+        const rpcRes = await supabase.rpc('get_test_leaderboard', { p_test_id: testId });
+        data = rpcRes.data;
+        error = rpcRes.error;
         
-        if (error) throw error;
+        // If RPC fails (e.g. user hasn't run the SQL script yet), fallback to the direct table query
+        if (error) {
+          console.error("Leaderboard RPC failed, falling back to direct table query:", error.message);
+          const fallbackRes = await supabase
+            .from('test_attempts')
+            .select('*, profiles(short_id)')
+            .eq('test_id', testId);
+          data = fallbackRes.data;
+          error = fallbackRes.error;
+        }
+        
+        if (error) {
+          console.error("Leaderboard final fetch error:", error);
+          throw error;
+        }
         
         const latestFirst = (data || []).sort((a: any, b: any) => new Date(b.completed_at).getTime() - new Date(a.completed_at).getTime());
         
