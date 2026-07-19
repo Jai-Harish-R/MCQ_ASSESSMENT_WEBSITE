@@ -411,6 +411,22 @@ export default function StudentPortal({ user, onLogout }: StudentPortalProps) {
       loadPortalData();
     }
   }, [activeTab, loadPortalData]);
+  // Anti-cheat: auto submit if user leaves the tab
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden' && viewState === 'exam') {
+        alert("Warning: You left the exam tab. Your exam has been automatically submitted.");
+        handleSubmitExam(true);
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [viewState]);
 
   // Start timer during exam
   useEffect(() => {
