@@ -2573,7 +2573,6 @@ Content-Type: text/html; charset=UTF-8
                             <div style={{ fontSize: '15px', fontWeight: '800', color: '#0f172a', marginTop: '2px' }}>{leaderboardAttempts.length}</div>
                           </div>
                         </div>
-                        </div>
                       </div>
                       
                       <div style={{ marginBottom: '16px' }}>
@@ -2695,7 +2694,7 @@ Content-Type: text/html; charset=UTF-8
                               </div>
                             )}
                           </>
-                        )}
+                        })()}
                       </div>
                     </>
                   ) : (
