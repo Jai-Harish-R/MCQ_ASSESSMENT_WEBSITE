@@ -2594,9 +2594,10 @@ Content-Type: text/html; charset=UTF-8
 
                       {/* Leaderboard Table */}
                       <div style={{ width: '100%' }}>
-                        <div style={{ display: 'grid', gridTemplateColumns: '60px 2fr 1fr 1fr 1fr 1fr', padding: '16px', borderBottom: '1px solid #e2e8f0', fontSize: '12px', fontWeight: '700', color: '#64748b', alignItems: 'center' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '60px 100px 2fr 1fr 1fr 1fr 1fr', padding: '16px', borderBottom: '1px solid #e2e8f0', fontSize: '12px', fontWeight: '700', color: '#64748b', alignItems: 'center' }}>
                           <div style={{ textAlign: 'center' }}>Rank</div>
-                          <div>ID / Student</div>
+                          <div>ID</div>
+                          <div>Student</div>
                           <div style={{ textAlign: 'center' }}>Marks Obtained</div>
                           <div style={{ textAlign: 'center' }}>Percentage</div>
                           <div style={{ textAlign: 'center' }}>Status</div>
@@ -2637,19 +2638,19 @@ Content-Type: text/html; charset=UTF-8
                               const isPassing = pct >= (selectedTest?.pass_percentage || 80);
                                 
                               return (
-                                <div key={st.id} style={{ display: 'grid', gridTemplateColumns: '60px 2fr 1fr 1fr 1fr 1fr', padding: '16px', borderBottom: '1px solid #f1f5f9', backgroundColor: isMe ? '#f5f3ff' : 'transparent', borderLeft: isMe ? '4px solid #8b5cf6' : '4px solid transparent', alignItems: 'center', transition: 'background-color 0.2s', margin: isMe ? '4px 0' : '0' }}>
+                                <div key={st.id} style={{ display: 'grid', gridTemplateColumns: '60px 100px 2fr 1fr 1fr 1fr 1fr', padding: '16px', borderBottom: '1px solid #f1f5f9', backgroundColor: isMe ? '#f5f3ff' : 'transparent', borderLeft: isMe ? '4px solid #8b5cf6' : '4px solid transparent', alignItems: 'center', transition: 'background-color 0.2s', margin: isMe ? '4px 0' : '0' }}>
                                   <div style={{ textAlign: 'center', fontSize: medal ? '20px' : '14px', fontWeight: '700', color: medal ? 'inherit' : (isMe ? '#8b5cf6' : '#0f172a') }}>
                                     {medal || rank}
+                                  </div>
+                                  <div style={{ fontSize: '14px', fontWeight: isMe ? '800' : '700', color: isMe ? '#8b5cf6' : '#0f172a' }}>
+                                    {st.short_id !== undefined ? st.short_id : (profile?.short_id !== undefined ? profile.short_id : 'N/A')}
                                   </div>
                                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                     <div style={{ width: '36px', height: '36px', borderRadius: '50%', backgroundColor: '#e2e8f0', overflow: 'hidden' }}>
                                       <img src={displayAvatar} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                     </div>
                                     <div>
-                                      <div style={{ fontSize: '14px', fontWeight: isMe ? '800' : '700', color: isMe ? '#8b5cf6' : '#0f172a' }}>
-                                        {st.short_id !== undefined ? `ID: ${st.short_id}` : (profile?.short_id !== undefined ? `ID: ${profile.short_id}` : 'ID: N/A')}
-                                      </div>
-                                      <div title={displayName} style={{ fontSize: '11px', color: '#64748b' }}>
+                                      <div title={displayName} style={{ fontSize: '14px', fontWeight: isMe ? '800' : '700', color: isMe ? '#8b5cf6' : '#0f172a' }}>
                                         {displayName.length > 15 ? displayName.substring(0, 15) + '...' : displayName} {isMe ? '(You)' : ''}
                                       </div>
                                     </div>
