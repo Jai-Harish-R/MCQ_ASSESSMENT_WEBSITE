@@ -102,6 +102,7 @@ export default function StudentPortal({ user, onLogout }: StudentPortalProps) {
   const [leaderboardPage, setLeaderboardPage] = useState(1);
   const itemsPerPage = 10;
   const [leaderboardAttempts, setLeaderboardAttempts] = useState<Attempt[]>([]);
+  const [leaderboardSearchTerm, setLeaderboardSearchTerm] = useState('');
   const [leaderboardLoading, setLeaderboardLoading] = useState(false);
 
   const fetchLeaderboardForTest = useCallback(async (testId: string) => {
@@ -2572,13 +2573,31 @@ Content-Type: text/html; charset=UTF-8
                             <div style={{ fontSize: '15px', fontWeight: '800', color: '#0f172a', marginTop: '2px' }}>{leaderboardAttempts.length}</div>
                           </div>
                         </div>
+                        </div>
+                      </div>
+                      
+                      <div style={{ marginBottom: '16px' }}>
+                        <input
+                          type="text"
+                          placeholder="Search by ID or Name..."
+                          value={leaderboardSearchTerm}
+                          onChange={(e) => setLeaderboardSearchTerm(e.target.value)}
+                          style={{
+                            width: '100%',
+                            padding: '10px 16px',
+                            borderRadius: '8px',
+                            border: '1px solid #e2e8f0',
+                            fontSize: '14px',
+                            outline: 'none'
+                          }}
+                        />
                       </div>
 
                       {/* Leaderboard Table */}
                       <div style={{ width: '100%' }}>
                         <div style={{ display: 'grid', gridTemplateColumns: '60px 2fr 1fr 1fr 1fr 1fr', padding: '16px', borderBottom: '1px solid #e2e8f0', fontSize: '12px', fontWeight: '700', color: '#64748b', alignItems: 'center' }}>
                           <div style={{ textAlign: 'center' }}>Rank</div>
-                          <div>Student / ID</div>
+                          <div>ID / Student</div>
                           <div style={{ textAlign: 'center' }}>Marks Obtained</div>
                           <div style={{ textAlign: 'center' }}>Percentage</div>
                           <div style={{ textAlign: 'center' }}>Status</div>
@@ -2587,11 +2606,23 @@ Content-Type: text/html; charset=UTF-8
 
                         {leaderboardLoading ? (
                            <div style={{ padding: '32px', textAlign: 'center', color: '#64748b' }}>Loading leaderboard...</div>
-                        ) : leaderboardAttempts.length === 0 ? (
-                           <div style={{ padding: '32px', textAlign: 'center', color: '#64748b' }}>No attempts yet.</div>
-                        ) : (
+                        ) : (() => {
+                          const filteredLeaderboardAttempts = leaderboardAttempts.filter(st => {
+                            if (!leaderboardSearchTerm) return true;
+                            const profile = allProfiles.find(p => p.email === st.student_email);
+                            const displayName = profile?.full_name || st.student_name || st.student_email.split('@')[0];
+                            const shortIdStr = (st.short_id !== undefined ? st.short_id : (profile?.short_id !== undefined ? profile.short_id : '')).toString();
+                            const searchLower = leaderboardSearchTerm.toLowerCase();
+                            return displayName.toLowerCase().includes(searchLower) || shortIdStr.includes(searchLower);
+                          });
+                          
+                          if (filteredLeaderboardAttempts.length === 0) {
+                            return <div style={{ padding: '32px', textAlign: 'center', color: '#64748b' }}>No attempts found.</div>;
+                          }
+                          
+                          return (
                           <>
-                            {leaderboardAttempts.slice((leaderboardPage - 1) * itemsPerPage, leaderboardPage * itemsPerPage).map((st, i) => {
+                            {filteredLeaderboardAttempts.slice((leaderboardPage - 1) * itemsPerPage, leaderboardPage * itemsPerPage).map((st, i) => {
                               const rank = (leaderboardPage - 1) * itemsPerPage + i + 1;
                               const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : null;
                               const isMe = st.student_email === user.email;
@@ -2600,7 +2631,7 @@ Content-Type: text/html; charset=UTF-8
                               const displayName = profile?.full_name || st.student_name || st.student_email.split('@')[0];
                               const displayAvatar = profile?.avatar_url || currentAvatar;
                               
-                              const pct = Math.round((st.score / st.total_questions) * 100);
+                              const pct = Math.round((st.score / (st.total_questions || 1)) * 100);
                               const durationText = st.time_taken_seconds
                                 ? `${Math.floor(st.time_taken_seconds / 60)}m ${st.time_taken_seconds % 60}s`
                                 : 'N/A';
@@ -2616,10 +2647,12 @@ Content-Type: text/html; charset=UTF-8
                                       <img src={displayAvatar} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                     </div>
                                     <div>
-                                      <div title={displayName} style={{ fontSize: '14px', fontWeight: isMe ? '800' : '700', color: isMe ? '#8b5cf6' : '#0f172a' }}>
-                                        {displayName.length > 6 ? displayName.substring(0, 6) + '...' : displayName} {isMe ? '(You)' : ''}
+                                      <div style={{ fontSize: '14px', fontWeight: isMe ? '800' : '700', color: isMe ? '#8b5cf6' : '#0f172a' }}>
+                                        {st.short_id !== undefined ? `ID: ${st.short_id}` : (profile?.short_id !== undefined ? `ID: ${profile.short_id}` : 'ID: N/A')}
                                       </div>
-                                      <div style={{ fontSize: '11px', color: '#64748b' }}>{st.short_id !== undefined ? `ID: ${st.short_id}` : (profile?.short_id !== undefined ? `ID: ${profile.short_id}` : 'LOADING...')}</div>
+                                      <div title={displayName} style={{ fontSize: '11px', color: '#64748b' }}>
+                                        {displayName.length > 15 ? displayName.substring(0, 15) + '...' : displayName} {isMe ? '(You)' : ''}
+                                      </div>
                                     </div>
                                   </div>
                                   <div style={{ textAlign: 'center', fontSize: '14px', fontWeight: isMe ? '800' : '700', color: isMe ? '#8b5cf6' : '#0f172a' }}>{st.score}</div>
